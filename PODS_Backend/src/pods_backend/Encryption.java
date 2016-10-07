@@ -12,13 +12,17 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 /**
- * @author JavaDigest
+ * @author Josua Frank
  *
  */
 public class Encryption {
 
-    public static void main(String[] args) throws Exception {
-        //Main Class for Testing purposes ONLY
+    /**
+     * Main Method for testing purposes ONLY
+     *
+     * @param args does not accept arguments
+     */
+    public static void main(String[] args) {
         //Generate KeyPair (PublicKey AND PrivateKey)
         KeyPair keyPair = generateKeyPair();
 
@@ -53,6 +57,7 @@ public class Encryption {
 
     /**
      * Encryptes text with a public key
+     *
      * @param text The text as String to encrypt
      * @param publicKey The public key from the KeyPair to encrypt with
      * @return The result of the encryption as byte-array
@@ -73,6 +78,7 @@ public class Encryption {
 
     /**
      * Decryptes a byte-array with a private key
+     *
      * @param toDecrypt The byte-array to decrypt
      * @param privateKey The private Key from the KeyPait to decrypt with
      * @return The result of the decryption as String

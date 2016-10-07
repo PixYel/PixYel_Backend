@@ -30,6 +30,7 @@ public class XML {
     private final Element e;//Element only for this XML-Type(Element)
     private Document doc;//Document only for this XML-File(test.xml)
     private static LinkedHashMap<Element, XML> LIST = new LinkedHashMap<>();
+    private boolean autosave = false;//Saves the file after EVERY change
 
     //DIENEN NUR DAMIT MAN SIE NICHT IN JEDER METHODE NEU DEKLARIEREN MUSS, KEINE INHALTSABLAGE
     private NodeList ch;//Children
@@ -71,7 +72,7 @@ public class XML {
         }
         e = createXML(file, rootname);
         LIST.put(e, this);
-        if (e != null) {
+        if (e != null && autosave) {
             reloadFile();
         }
     }
@@ -147,7 +148,9 @@ public class XML {
 
     /**
      * Checks wether this node has attributes or not
-     * @return true if the node has attributes, false if the node has no attributes
+     *
+     * @return true if the node has attributes, false if the node has no
+     * attributes
      */
     public boolean hasAttributes() {
         return e.hasAttributes();
@@ -155,7 +158,9 @@ public class XML {
 
     /**
      * Checks wether this node has text-content or not
-     * @return true if the node has text content, false if the content has no text content
+     *
+     * @return true if the node has text content, false if the content has no
+     * text content
      */
     public boolean hasContent() {
         if (e.hasChildNodes()) {
@@ -170,7 +175,9 @@ public class XML {
 
     /**
      * Checks if this node has child nodes
-     * @return true, if this node has at least one child node, false if it has no child nodes
+     *
+     * @return true, if this node has at least one child node, false if it has
+     * no child nodes
      */
     public boolean hasChildren() {
         if (!e.hasChildNodes()) {
@@ -186,7 +193,9 @@ public class XML {
 
     /**
      * Checks wether this node has parent or not
-     * @return true, if this node has a parent, false if this node is the first node in the xml tree
+     *
+     * @return true, if this node has a parent, false if this node is the first
+     * node in the xml tree
      */
     public boolean hasParent() {
         return !isRoot();
@@ -195,6 +204,7 @@ public class XML {
 
     /**
      * Returns the name of the node
+     *
      * @return The name of the node
      */
     public String getName() {
@@ -203,7 +213,9 @@ public class XML {
 
     /**
      * Returns the attributes as a linked hashmap
-     * @return The attributes a a linked hashmap (key = attributename, value = attributevalue)
+     *
+     * @return The attributes a a linked hashmap (key = attributename, value =
+     * attributevalue)
      */
     public LinkedHashMap<String, String> getAttributes() {
         LinkedHashMap<String, String> r = new LinkedHashMap<>();
@@ -215,6 +227,7 @@ public class XML {
 
     /**
      * Returns the requested attribute of this node
+     *
      * @param name The name of the requested attribute
      * @return The requested attribute
      */
@@ -224,6 +237,7 @@ public class XML {
 
     /**
      * Returns the text content of this node
+     *
      * @return The text content of this node
      */
     public String getContent() {
@@ -242,6 +256,7 @@ public class XML {
 
     /**
      * Returns the first child of this node
+     *
      * @return The first child of this node as XML-object
      */
     public XML getFirstChild() {
@@ -255,6 +270,7 @@ public class XML {
 
     /**
      * Returns the last child of this node
+     *
      * @return The last child of this node as XML-object
      */
     public XML getLastChild() {
@@ -269,6 +285,7 @@ public class XML {
 
     /**
      * Returns all children of this node
+     *
      * @return All children of this node as ArrayList
      */
     public ArrayList<XML> getChildren() {
@@ -285,6 +302,7 @@ public class XML {
 
     /**
      * Returns the requested child, children or null if the child doesnt exist
+     *
      * @param name The name of the requested child or the requested children
      * @return A ArrayList with zero, one or more children matching this name
      */
@@ -301,6 +319,7 @@ public class XML {
 
     /**
      * Returns the first child with the requested name
+     *
      * @param name The requested name of the wanted child
      * @return The first child whose name matches your requested name
      */
@@ -315,7 +334,9 @@ public class XML {
 
     /**
      * Returns the parent of this node
-     * @return The parent of this node or an empty XML-object if this node has no parent
+     *
+     * @return The parent of this node or an empty XML-object if this node has
+     * no parent
      */
     public XML getParent() {
         if (!isRoot()) {
@@ -326,25 +347,31 @@ public class XML {
 
     /**
      * Adds an attribute to this node
+     *
      * @param name The name of this attribute
      * @param value The value of this attribute
      * @return This node (for convenience reasons)
      */
     public XML addAttribute(String name, String value) {
         e.setAttribute(name, value);
-        reloadFile();
+        if (autosave) {
+            reloadFile();
+        }
         return this;
     }
 
     /**
      * Sets the content of this node
+     *
      * @param content The content to be set on this node
      * @return This node (for convenience reasons)
      */
     public XML setContent(String content) {
         doc = getDoc();
         e.appendChild(doc.createTextNode(content));
-        reloadFile();
+        if (autosave) {
+            reloadFile();
+        }
         return this;
     }
 
@@ -352,6 +379,7 @@ public class XML {
 
     /**
      * Adds child nodes to this node
+     *
      * @param children zero, one or more child nodes as XML-object to add
      * @return This node (for convenience reasons)
      */
@@ -366,20 +394,21 @@ public class XML {
                 }
                 alreadyAppended.add(child);
             } else//bla
-            {
-                if (doc.equals(child.e.getOwnerDocument())) {
+             if (doc.equals(child.e.getOwnerDocument())) {
                     e.appendChild(child.e.cloneNode(true));
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
-            }
         }
-        reloadFile();
+        if (autosave) {
+            reloadFile();
+        }
         return this;
     }
 
     /**
      * Adds new children to this node
+     *
      * @param children The zero, one or more names of the new children
      * @return This node (for convenience reasons)
      */
@@ -396,32 +425,37 @@ public class XML {
                 }
                 alreadyAppended.add(child);
             } else//
-            {
-                if (doc.equals(child.e.getOwnerDocument())) {
+             if (doc.equals(child.e.getOwnerDocument())) {
                     e.appendChild(child.e.cloneNode(true));
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
-            }
         }
-        reloadFile();
+        if (autosave) {
+            reloadFile();
+        }
         return this;
     }
 
     /**
      * Deletes a attribute of this node
+     *
      * @param name The name of the attribute to be deleted
      * @return This node (for convenience reasons)
      */
     public XML deleteAttribute(String name) {
         e.removeAttribute(name);
-        reloadFile();
+        if (autosave) {
+            reloadFile();
+        }
         return this;
     }
 
     /**
      * Deletes ALL attributes matching the specified value
-     * @param value The specified name after which the all attributes equaling this value will be deleted
+     *
+     * @param value The specified name after which the all attributes equaling
+     * this value will be deleted
      * @return This node (for convenience reasons)
      */
     public XML deleteAttributesByValue(String value) {
@@ -430,20 +464,26 @@ public class XML {
                 e.removeAttribute(a.item(i).getNodeName());
             }
         }
-        reloadFile();
+        if (autosave) {
+            reloadFile();
+        }
         return this;
     }
 
     /**
      * Deletes the FIRST attributes matching the specified value
-     * @param value The specified name after which the first attribute equaling this value will be deleted
+     *
+     * @param value The specified name after which the first attribute equaling
+     * this value will be deleted
      * @return This node (for convenience reasons)
      */
     public XML deleteFirstAttributeByValue(String value) {
         for (int i = 0; i < (a = e.getAttributes()).getLength(); i++) {
             if (a.item(i).getNodeValue().equals(value)) {
                 e.removeAttribute(a.item(i).getNodeName());
-                reloadFile();
+                if (autosave) {
+                    reloadFile();
+                }
                 return this;
             }
         }
@@ -452,18 +492,22 @@ public class XML {
 
     /**
      * Deletes ALL attributes of this node
+     *
      * @return This node (for convenience reasons)
      */
     public XML clearAttributes() {
         for (int i = 0; i < (a = e.getAttributes()).getLength(); i++) {
             e.removeAttribute(a.item(i).getNodeName());
         }
-        reloadFile();
+        if (autosave) {
+            reloadFile();
+        }
         return this;
     }
 
     /**
      * Deletes the text-content of this node
+     *
      * @return This node (for convenience reasons)
      */
     public XML clearContent() {
@@ -473,13 +517,16 @@ public class XML {
                     e.removeChild(chi);
                 }
             }
-            reloadFile();
+            if (autosave) {
+                reloadFile();
+            }
         }
         return this;
     }
 
     /**
      * Deletes a child specified by its name
+     *
      * @param name The name of the to be deleted child
      * @return This node (for convenience reasons)
      */
@@ -489,30 +536,38 @@ public class XML {
                 e.removeChild(chi);
             }
         }
-        reloadFile();
+        if (autosave) {
+            reloadFile();
+        }
         return this;
     }
 
     /**
      * Deletes a child specified by its XML-object
+     *
      * @param child The XML-object of the child to be deleted
      * @return This node (for convenience reasons)
      */
     public XML deleteChild(XML child) {
         e.removeChild(child.e);
-        reloadFile();
+        if (autosave) {
+            reloadFile();
+        }
         return this;
     }
 
     /**
      * Deletes ALL children of this node
+     *
      * @return This node (for convenience reasons)
      */
     public XML clearChildren() {
         for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
             e.removeChild(ch.item(i));
         }
-        reloadFile();
+        if (autosave) {
+            reloadFile();
+        }
         return this;
     }
 
@@ -522,12 +577,15 @@ public class XML {
     public void delete() {
         if (hasParent()) {
             (chi = e.getParentNode()).removeChild(e);
-            getXMLByElement((Element) chi).reloadFile();
+            if (autosave) {
+                getXMLByElement((Element) chi).reloadFile();
+            }
         }
     }
 
     /**
      * Sets the file in which this XML-object is going to be stored in
+     *
      * @param file The file in which this XML-object is going to be stored in
      */
     public void setFileToSaveIn(File file) {
@@ -554,8 +612,11 @@ public class XML {
     }
 
     /**
-     * Saves this XML-object in the specified filen \nDoes NOT change the standard file to save in, use @link setFileToSaveIn() for this
-     * @param toSaveIn The file in which this XML-object is going to be stored in
+     * Saves this XML-object in the specified filen \nDoes NOT change the
+     * standard file to save in, use @link setFileToSaveIn() for this
+     *
+     * @param toSaveIn The file in which this XML-object is going to be stored
+     * in
      */
     public void saveTo(File toSaveIn) {
         if (hasParent()) {
@@ -616,7 +677,9 @@ public class XML {
 
     /**
      * Returns wether this node is the last child or not
-     * @return true if this node is the last child of its parents, false if it is not the last child of its parents
+     *
+     * @return true if this node is the last child of its parents, false if it
+     * is not the last child of its parents
      */
     public boolean isLastChild() {
         if (!isRoot()) {
@@ -641,6 +704,7 @@ public class XML {
 
     /**
      * Returns a fancy string representation of this XML-object
+     *
      * @return A String representation of this XML-object
      */
     @Override

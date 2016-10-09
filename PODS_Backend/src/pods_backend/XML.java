@@ -2,11 +2,13 @@ package pods_backend;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -394,11 +396,13 @@ public class XML {
                 }
                 alreadyAppended.add(child);
             } else//bla
-             if (doc.equals(child.e.getOwnerDocument())) {
+            {
+                if (doc.equals(child.e.getOwnerDocument())) {
                     e.appendChild(child.e.cloneNode(true));
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
+            }
         }
         if (autosave) {
             reloadFile();
@@ -425,11 +429,13 @@ public class XML {
                 }
                 alreadyAppended.add(child);
             } else//
-             if (doc.equals(child.e.getOwnerDocument())) {
+            {
+                if (doc.equals(child.e.getOwnerDocument())) {
                     e.appendChild(child.e.cloneNode(true));
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
+            }
         }
         if (autosave) {
             reloadFile();
@@ -694,12 +700,51 @@ public class XML {
     }
 
     private boolean isRoot() {
+        if (e == null) {
+            return true;
+        }
         p = e.getParentNode();
         short t = 0;
         if (p != null) {
             t = p.getNodeType();
         }
         return p == null || (t != Node.ELEMENT_NODE && t != Node.TEXT_NODE);
+    }
+
+    public String toXMLString() {
+        return toXMLString(true);
+    }
+
+    /**
+     * Returns the content of the current node
+     *
+     * @param inline Wether the output should be in one line or formatted
+     * @return The content of the current node as String in XML language
+     */
+    public String toXMLString(boolean inline) {
+        try {
+            // write the content into xml file
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();            
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");//removes this stuff: <?xml version='1.0' ?>
+
+            if (inline) {
+                transformer.setOutputProperty(OutputKeys.INDENT, "no");
+                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "0");
+            } else {
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+            }
+
+            StreamResult streamResult = new StreamResult(new StringWriter());
+            transformer.transform(new DOMSource(e), streamResult);
+            String result = streamResult.getWriter().toString();
+            return result;
+
+        } catch (TransformerException ex) {
+            System.err.println("Fehler: " + ex);
+        }
+        return "";
     }
 
     /**

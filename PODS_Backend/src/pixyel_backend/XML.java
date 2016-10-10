@@ -1,4 +1,4 @@
-package pods_backend;
+package pixyel_backend;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import pods_backend.XML.XMLException;
+import pixyel_backend.XML.XMLException;
 
 /**
  *

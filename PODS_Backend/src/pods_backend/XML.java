@@ -166,6 +166,7 @@ public class XML {
      */
     public boolean hasContent() {
         if (e.hasChildNodes()) {
+            
             for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
                 if ((chi = ch.item(i)).getNodeType() == Node.TEXT_NODE) {
                     return !chi.getTextContent().matches("[\\s]*");//not only whitespaces
@@ -173,6 +174,10 @@ public class XML {
             }
         }
         return false;
+    }
+    
+    public void test(){
+        System.out.println(e.getTextContent());
     }
 
     /**

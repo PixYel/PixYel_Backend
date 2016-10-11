@@ -5,6 +5,8 @@
  */
 package pixyel_backend;
 
+import pixyel_backend.xml.XML;
+
 /**
  *
  * @author Josua Frank

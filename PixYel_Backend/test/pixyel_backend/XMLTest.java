@@ -5,6 +5,7 @@
  */
 package pixyel_backend;
 
+import pixyel_backend.xml.XML;
 import java.util.LinkedHashMap;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -133,7 +134,7 @@ public class XMLTest {
     public void testGetFirstChild_0args() {
         toTest.addChildren("B");
         toTest.addChildren("A");
-        assertEquals("Should be equal", new XML("B").getName(), toTest.getFirstChild().getName());
+        assertEquals("Should be equal", new XML("A").getName(), toTest.getFirstChild().getName());
         toTest.deleteChildren("A");
         toTest.deleteChildren("B");
         assertFalse("Cannot restore original XML", toTest.hasChildren());
@@ -146,7 +147,7 @@ public class XMLTest {
     public void testGetLastChild() {//Sorts the children
         toTest.addChildren("B");
         toTest.addChildren("A");
-        assertEquals("Should be equal", new XML("B").getName(), toTest.getFirstChild().getName());
+        assertEquals("Should be equal", new XML("B").getName(), toTest.getLastChild().getName());
         toTest.deleteChildren("A");
         toTest.deleteChildren("B");
         assertFalse("Cannot restore original XML", toTest.hasChildren());
@@ -190,8 +191,11 @@ public class XMLTest {
      */
     @Test
     public void testGetParent() {
-        //assertFalse("Shouldnt have a Parent", toTest.getParent());
-        
+        assertNull("Shouldnt have a Parent", toTest.getParent());
+        toTest.addChildren("child");
+        assertEquals("Should have the same name", rootname, toTest.getFirstChild().getParent().getName());
+        toTest.deleteChildren("child");
+        assertFalse("Could not restore the original XML", toTest.hasChildren());
     }
 
     /**
@@ -199,7 +203,11 @@ public class XMLTest {
      */
     @Test
     public void testAddAttribute() {
-
+        assertFalse("Shouldnt have a Attribute", toTest.hasAttributes());
+        toTest.addAttribute("test", "test");
+        assertTrue("Should have a Attribute", toTest.hasAttributes());
+        toTest.deleteAttribute("test");
+        assertFalse("Could not recover the original XML", toTest.hasAttributes());
     }
 
     /**
@@ -207,7 +215,11 @@ public class XMLTest {
      */
     @Test
     public void testSetContent() {
-
+        assertEquals("Shouldnt have a content", "", toTest.getContent());
+        toTest.setContent("testcontent");
+        assertEquals("Should have the same content", toTest.getContent(), "testcontent");
+        toTest.deleteContent();
+        assertEquals("Shouldnt have a content", "", toTest.getContent());
     }
 
     /**
@@ -215,7 +227,12 @@ public class XMLTest {
      */
     @Test
     public void testAddChildren_XMLArr() {
-        
+        assertFalse("Should have no children", toTest.hasChildren());
+        XML child = new XML("child");
+        toTest.addChildren(child);
+        assertTrue("Should have a child", toTest.hasChildren());
+        toTest.deleteChildren("child");
+        assertFalse("Should have no children", toTest.hasChildren());
     }
 
     /**

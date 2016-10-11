@@ -1,4 +1,4 @@
-package pixyel_backend;
+package pixyel_backend.xml;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import pixyel_backend.XML.XMLException;
+import pixyel_backend.xml.XML.XMLException;
 
 /**
  *
@@ -33,6 +33,7 @@ public class XML {
     private Document doc;//Document only for this XML-File(test.xml)
     private static LinkedHashMap<Element, XML> LIST = new LinkedHashMap<>();
     private boolean autosave = false;//Saves the file after EVERY change
+    private static final String EMPTYKEYWORD = "EMPTY";
 
     //DIENEN NUR DAMIT MAN SIE NICHT IN JEDER METHODE NEU DEKLARIEREN MUSS, KEINE INHALTSABLAGE
     private NodeList ch;//Children
@@ -47,6 +48,9 @@ public class XML {
      */
     public XML(String name) {
         doc = getDoc();
+        if (name.equals("")) {
+            name = EMPTYKEYWORD;
+        }
         e = doc.createElement(name);
         LIST.put(e, this);
     }
@@ -166,8 +170,8 @@ public class XML {
      */
     public boolean hasContent() {
         if (e.hasChildNodes()) {
-            for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
-                if ((chi = ch.item(i)).getNodeType() == Node.TEXT_NODE) {
+            for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
+                if ((chi = ch.item(i - 1)).getNodeType() == Node.TEXT_NODE) {
                     return !chi.getTextContent().matches("[\\s]*");//not only whitespaces
                 }
             }
@@ -189,8 +193,8 @@ public class XML {
         if (!e.hasChildNodes()) {
             return false;
         }
-        for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
-            if (ch.item(i).getNodeType() == Node.ELEMENT_NODE) {
+        for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
+            if (ch.item(i - 1).getNodeType() == Node.ELEMENT_NODE) {
                 return true;
             }
         }
@@ -225,8 +229,8 @@ public class XML {
      */
     public LinkedHashMap<String, String> getAttributes() {
         LinkedHashMap<String, String> r = new LinkedHashMap<>();
-        for (int i = 0; i < (a = e.getAttributes()).getLength(); i++) {
-            r.put(a.item(i).getNodeName(), a.item(i).getNodeValue());
+        for (int i = (a = e.getAttributes()).getLength(); i > 0; i--) {
+            r.put(a.item(i - 1).getNodeName(), a.item(i - 1).getNodeValue());
         }
         return r;
     }
@@ -244,12 +248,13 @@ public class XML {
     /**
      * Returns the text content of this node
      *
-     * @return The text content of this node
+     * @return The text content of this node, if theres no content, then it
+     * returns "" (empty String)
      */
     public String getContent() {
         if (e.hasChildNodes()) {
-            for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
-                if ((chi = ch.item(i)).getNodeType() == Node.TEXT_NODE) {
+            for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
+                if ((chi = ch.item(i - 1)).getNodeType() == Node.TEXT_NODE) {
                     if (!chi.getTextContent().matches("[\\s]*")) {//Not only whitepaces
                         return chi.getTextContent();
                     }
@@ -263,15 +268,16 @@ public class XML {
     /**
      * Returns the first child of this node
      *
-     * @return The first child of this node as XML-object
+     * @return The first child of this node as XML-object or null if there isnt
+     * a first child
      */
     public XML getFirstChild() {
-        for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
-            if ((chi = ch.item(i)).getNodeType() == Node.ELEMENT_NODE) {
+        for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
+            if ((chi = ch.item(i - 1)).getNodeType() == Node.ELEMENT_NODE) {
                 return getXMLByElement((Element) chi);
             }
         }
-        return new XML("");
+        return null;
     }
 
     /**
@@ -281,9 +287,9 @@ public class XML {
      */
     public XML getLastChild() {
         chi = null;
-        for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
-            if (ch.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                chi = ch.item(i);
+        for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
+            if (ch.item(i - 1).getNodeType() == Node.ELEMENT_NODE) {
+                chi = ch.item(i - 1);
             }
         }
         return getXMLByElement((Element) chi);
@@ -296,11 +302,11 @@ public class XML {
      */
     public ArrayList<XML> getChildren() {
         ArrayList<XML> r = new ArrayList<>();
-        for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
-            if ((chi = ch.item(i)).getNodeName() == null || chi.getNodeName().matches("[\\s]*")) {
+        for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
+            if ((chi = ch.item(i - 1)).getNodeName() == null || chi.getNodeName().matches("[\\s]*")) {
                 e.removeChild(chi);
             } else if (chi.getNodeType() == Node.ELEMENT_NODE) {
-                r.add(getXMLByElement((Element) ch.item(i)));
+                r.add(getXMLByElement((Element) ch.item(i - 1)));
             }
         }
         return r;
@@ -314,8 +320,8 @@ public class XML {
      */
     public ArrayList<XML> getChild(String name) {
         ArrayList<XML> r = new ArrayList<>();
-        for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
-            chi = ch.item(i);
+        for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
+            chi = ch.item(i - 1);
             if (chi.getNodeType() == Node.ELEMENT_NODE && chi.getNodeName().equals(name)) {
                 r.add(getXMLByElement((Element) chi));
             }
@@ -327,28 +333,28 @@ public class XML {
      * Returns the first child with the requested name
      *
      * @param name The requested name of the wanted child
-     * @return The first child whose name matches your requested name
+     * @return The first child whose name matches your requested name or null if
+     * there isnt a first child
      */
     public XML getFirstChild(String name) {
-        for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
-            if ((chi = ch.item(i)).getNodeType() == Node.ELEMENT_NODE && chi.getNodeName().equals(name)) {
+        for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
+            if ((chi = ch.item(i - 1)).getNodeType() == Node.ELEMENT_NODE && chi.getNodeName().equals(name)) {
                 return getXMLByElement((Element) chi);
             }
         }
-        return new XML("");
+        return null;
     }
 
     /**
      * Returns the parent of this node
      *
-     * @return The parent of this node or an empty XML-object if this node has
-     * no parent
+     * @return The parent of this node or null if this node has no parent
      */
     public XML getParent() {
         if (!isRoot()) {
             return getXMLByElement((Element) e.getParentNode());
         }
-        return new XML("");
+        return null;
     }
 
     /**
@@ -388,8 +394,8 @@ public class XML {
      */
     public XML deleteContent() {
         if (hasContent()) {
-            for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
-                if ((chi = ch.item(i)).getNodeType() == Node.TEXT_NODE) {
+            for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
+                if ((chi = ch.item(i - 1)).getNodeType() == Node.TEXT_NODE) {
                     e.removeChild(chi);
                 }
             }
@@ -409,18 +415,20 @@ public class XML {
         doc = getDoc();
         for (XML child : children) {
             if (!alreadyAppended.contains(child)) {
-                if (child.e.getOwnerDocument().getBaseURI().equals(doc.getBaseURI())) {
+                if (child.e.getOwnerDocument().equals(doc)) {
                     e.appendChild(child.e);
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e));
                 }
-                alreadyAppended.add(child);
             } else//bla
-             if (doc.equals(child.e.getOwnerDocument())) {
+            {
+                if (doc.equals(child.e.getOwnerDocument())) {
                     e.appendChild(child.e.cloneNode(true));
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
+            }
+            alreadyAppended.add(child);
         }
         if (autosave) {
             reloadFile();
@@ -447,11 +455,13 @@ public class XML {
                 }
                 alreadyAppended.add(child);
             } else//
-             if (doc.equals(child.e.getOwnerDocument())) {
+            {
+                if (doc.equals(child.e.getOwnerDocument())) {
                     e.appendChild(child.e.cloneNode(true));
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
+            }
         }
         if (autosave) {
             reloadFile();
@@ -481,9 +491,9 @@ public class XML {
      * @return This node (for convenience reasons)
      */
     public XML deleteAttributesByValue(String value) {
-        for (int i = 0; i < (a = e.getAttributes()).getLength(); i++) {
-            if (a.item(i).getNodeValue().equals(value)) {
-                e.removeAttribute(a.item(i).getNodeName());
+        for (int i = (a = e.getAttributes()).getLength(); i > 0; i--) {
+            if (a.item(i - 1).getNodeValue().equals(value)) {
+                e.removeAttribute(a.item(i - 1).getNodeName());
             }
         }
         if (autosave) {
@@ -500,9 +510,9 @@ public class XML {
      * @return This node (for convenience reasons)
      */
     public XML deleteFirstAttributeByValue(String value) {
-        for (int i = 0; i < (a = e.getAttributes()).getLength(); i++) {
-            if (a.item(i).getNodeValue().equals(value)) {
-                e.removeAttribute(a.item(i).getNodeName());
+        for (int i = (a = e.getAttributes()).getLength(); i > 0; i--) {
+            if (a.item(i - 1).getNodeValue().equals(value)) {
+                e.removeAttribute(a.item(i - 1).getNodeName());
                 if (autosave) {
                     reloadFile();
                 }
@@ -518,8 +528,8 @@ public class XML {
      * @return This node (for convenience reasons)
      */
     public XML clearAttributes() {
-        for (int i = 0; i < (a = e.getAttributes()).getLength(); i++) {
-            e.removeAttribute(a.item(i).getNodeName());
+        for (int i = (a = e.getAttributes()).getLength(); i > 0; i--) {
+            e.removeAttribute(a.item(i - 1).getNodeName());
         }
         if (autosave) {
             reloadFile();
@@ -534,8 +544,8 @@ public class XML {
      */
     public XML clearContent() {
         if (e.hasChildNodes()) {
-            for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
-                if ((chi = ch.item(i)).getNodeType() == Node.TEXT_NODE) {
+            for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
+                if ((chi = ch.item(i - 1)).getNodeType() == Node.TEXT_NODE) {
                     e.removeChild(chi);
                 }
             }
@@ -553,8 +563,8 @@ public class XML {
      * @return This node (for convenience reasons)
      */
     public XML deleteChildren(String name) {
-        for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
-            if (((chi = ch.item(i)).getNodeName().equals(name))) {
+        for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
+            if (((chi = ch.item(i - 1)).getNodeName().equals(name))) {
                 e.removeChild(chi);
             }
         }
@@ -584,8 +594,8 @@ public class XML {
      * @return This node (for convenience reasons)
      */
     public XML clearChildren() {
-        for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
-            e.removeChild(ch.item(i));
+        for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
+            e.removeChild(ch.item(i - 1));
         }
         if (autosave) {
             reloadFile();

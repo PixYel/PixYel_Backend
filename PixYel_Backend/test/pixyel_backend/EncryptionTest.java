@@ -5,6 +5,7 @@
  */
 package pixyel_backend;
 
+import pixyel_backend.encryption.Encryption;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

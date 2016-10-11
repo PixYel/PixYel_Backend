@@ -1,4 +1,4 @@
-package pixyel_backend;
+package pixyel_backend.encryption;
 
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;

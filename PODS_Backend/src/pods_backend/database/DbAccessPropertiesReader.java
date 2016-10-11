@@ -19,7 +19,7 @@ public class DbAccessPropertiesReader {
 		Properties prop = new Properties();
 		InputStream input = null;
 		
-		// load t properties file
+		// load the properties file
 		input = new FileInputStream(System.getProperty("user.dir") + "/db_access.properties");
 		prop.load(input);
 		input.close();

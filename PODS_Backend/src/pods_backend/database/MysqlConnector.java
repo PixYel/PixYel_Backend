@@ -37,6 +37,9 @@ public class MysqlConnector {
 		return connection;
 	}
 
+	/**
+	 * Creates a connection to a database
+	 */
 	public static Connection connectToDatabaseUsingPropertiesFile() throws Exception {
 		try {
 			Properties properties = DbAccessPropertiesReader.getProperties();

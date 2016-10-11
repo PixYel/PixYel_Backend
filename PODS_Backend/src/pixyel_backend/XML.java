@@ -166,7 +166,6 @@ public class XML {
      */
     public boolean hasContent() {
         if (e.hasChildNodes()) {
-            
             for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
                 if ((chi = ch.item(i)).getNodeType() == Node.TEXT_NODE) {
                     return !chi.getTextContent().matches("[\\s]*");//not only whitespaces
@@ -175,8 +174,8 @@ public class XML {
         }
         return false;
     }
-    
-    public void test(){
+
+    public void test() {
         System.out.println(e.getTextContent());
     }
 
@@ -382,6 +381,22 @@ public class XML {
         return this;
     }
 
+    /**
+     * Deletes the content of this current node
+     *
+     * @return This node (for convenience reasons)
+     */
+    public XML deleteContent() {
+        if (hasContent()) {
+            for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
+                if ((chi = ch.item(i)).getNodeType() == Node.TEXT_NODE) {
+                    e.removeChild(chi);
+                }
+            }
+        }
+        return this;
+    }
+
     ArrayList<XML> alreadyAppended = new ArrayList<>();
 
     /**
@@ -401,13 +416,11 @@ public class XML {
                 }
                 alreadyAppended.add(child);
             } else//bla
-            {
-                if (doc.equals(child.e.getOwnerDocument())) {
+             if (doc.equals(child.e.getOwnerDocument())) {
                     e.appendChild(child.e.cloneNode(true));
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
-            }
         }
         if (autosave) {
             reloadFile();
@@ -434,13 +447,11 @@ public class XML {
                 }
                 alreadyAppended.add(child);
             } else//
-            {
-                if (doc.equals(child.e.getOwnerDocument())) {
+             if (doc.equals(child.e.getOwnerDocument())) {
                     e.appendChild(child.e.cloneNode(true));
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
-            }
         }
         if (autosave) {
             reloadFile();
@@ -729,7 +740,7 @@ public class XML {
     public String toXMLString(boolean inline) {
         try {
             // write the content into xml file
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();            
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");//removes this stuff: <?xml version='1.0' ?>
 

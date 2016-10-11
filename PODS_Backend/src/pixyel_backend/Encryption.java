@@ -22,27 +22,24 @@ import java.util.Base64;
  */
 public class Encryption {
 
-    /**
-     * Main Method for testing purposes ONLY
-     *
-     * @param args does not accept arguments
-     */
-    public static void main(String[] args) {
-        //Generate KeyPair (PublicKey AND PrivateKey)
-        String[] keyPair = generateKeyPair();
-
-        //Encryptes the text with the public key
-        String encrypted = encrypt("Geheime Nachricht", keyPair[0]);
-
-        //Decrypted the byteArray with the private key
-        String decrypted = decrypt(encrypted, keyPair[1]);
-
-        System.out.println("Entschlüsselt: " + decrypted);
-    }
+    /*
+    */
 
     /**
-     * Generates the Key-Pair which contains the public and the private key
-     *
+     * Generates the Key-Pair which contains the public and the private key<p>
+     * 
+     * Using:<p>
+     * {@code //Generate KeyPair (PublicKey AND PrivateKey)}<p>
+        {@code String[] keyPair = generateKeyPair();}<p>
+<p>
+        {@code //Encryptes the text with the public key}<p>
+        {@code String encrypted = encrypt("Geheime Nachricht", keyPair[0]);}<p>
+<p>
+        {@code //Decrypted the byteArray with the private key}<p>
+        {@code String decrypted = decrypt(encrypted, keyPair[1]);}<p>
+<p>
+        {@code System.out.println("Entschlüsselt: " + decrypted);}<p>
+     *<p>
      * @return A StringArray which contains the first the public and second the
      * private key
      */

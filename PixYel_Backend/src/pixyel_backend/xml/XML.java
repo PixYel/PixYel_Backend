@@ -255,7 +255,9 @@ public class XML {
     }
 
     /**
-     * Returns the LAST attribute value of this node or an empty String, if this node has no attributes
+     * Returns the LAST attribute value of this node or an empty String, if this
+     * node has no attributes
+     *
      * @return The value of the LAST attribute
      */
     public String getLastAttribute() {
@@ -446,11 +448,13 @@ public class XML {
                     e.appendChild(doc.adoptNode((Node) child.e));
                 }
             } else//bla
-             if (doc.equals(child.e.getOwnerDocument())) {
+            {
+                if (doc.equals(child.e.getOwnerDocument())) {
                     e.appendChild(child.e.cloneNode(true));
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
+            }
             alreadyAppended.add(child);
         }
         if (autosave) {
@@ -478,11 +482,13 @@ public class XML {
                 }
                 alreadyAppended.add(child);
             } else//
-             if (doc.equals(child.e.getOwnerDocument())) {
+            {
+                if (doc.equals(child.e.getOwnerDocument())) {
                     e.appendChild(child.e.cloneNode(true));
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
+            }
         }
         if (autosave) {
             reloadFile();
@@ -524,7 +530,13 @@ public class XML {
     public XML removeFirstAttribute() {
         for (int i = 0; i < (a = e.getAttributes()).getLength(); i++) {
             e.removeAttribute(a.item(i).getNodeName());
+            if (autosave) {
+                reloadFile();
+            }
             return this;
+        }
+        if (autosave) {
+            reloadFile();
         }
         return this;
     }
@@ -537,7 +549,13 @@ public class XML {
     public XML removeLastAttribute() {
         for (int i = (a = e.getAttributes()).getLength(); i > 0; i--) {
             e.removeAttribute(a.item(i - 1).getNodeName());
+            if (autosave) {
+                reloadFile();
+            }
             return this;
+        }
+        if (autosave) {
+            reloadFile();
         }
         return this;
     }
@@ -613,6 +631,9 @@ public class XML {
                     e.removeChild(chi);
                 }
             }
+        }
+        if (autosave) {
+            reloadFile();
         }
         return this;
     }

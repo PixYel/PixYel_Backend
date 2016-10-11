@@ -388,11 +388,11 @@ public class XML {
     }
 
     /**
-     * Deletes the content of this current node
+     * Removes the content of this current node
      *
      * @return This node (for convenience reasons)
      */
-    public XML deleteContent() {
+    public XML removeContent() {
         if (hasContent()) {
             for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
                 if ((chi = ch.item(i - 1)).getNodeType() == Node.TEXT_NODE) {
@@ -470,12 +470,12 @@ public class XML {
     }
 
     /**
-     * Deletes a attribute of this node
+     * Removes a attribute of this node
      *
-     * @param name The name of the attribute to be deleted
+     * @param name The name of the attribute to be removed
      * @return This node (for convenience reasons)
      */
-    public XML deleteAttribute(String name) {
+    public XML removeAttribute(String name) {
         e.removeAttribute(name);
         if (autosave) {
             reloadFile();
@@ -484,13 +484,13 @@ public class XML {
     }
 
     /**
-     * Deletes ALL attributes matching the specified value
+     * Removes ALL attributes matching the specified value
      *
      * @param value The specified name after which the all attributes equaling
-     * this value will be deleted
+     * this value will be removed
      * @return This node (for convenience reasons)
      */
-    public XML deleteAttributesByValue(String value) {
+    public XML removeAttributesByValue(String value) {
         for (int i = (a = e.getAttributes()).getLength(); i > 0; i--) {
             if (a.item(i - 1).getNodeValue().equals(value)) {
                 e.removeAttribute(a.item(i - 1).getNodeName());
@@ -503,13 +503,13 @@ public class XML {
     }
 
     /**
-     * Deletes the FIRST attributes matching the specified value
+     * Removes the FIRST attributes matching the specified value
      *
      * @param value The specified name after which the first attribute equaling
-     * this value will be deleted
+     * this value will be removed
      * @return This node (for convenience reasons)
      */
-    public XML deleteFirstAttributeByValue(String value) {
+    public XML removeFirstAttributeByValue(String value) {
         for (int i = (a = e.getAttributes()).getLength(); i > 0; i--) {
             if (a.item(i - 1).getNodeValue().equals(value)) {
                 e.removeAttribute(a.item(i - 1).getNodeName());
@@ -523,7 +523,7 @@ public class XML {
     }
 
     /**
-     * Deletes ALL attributes of this node
+     * Removes ALL attributes of this node
      *
      * @return This node (for convenience reasons)
      */
@@ -538,7 +538,7 @@ public class XML {
     }
 
     /**
-     * Deletes the text-content of this node
+     * Removes the text-content of this node
      *
      * @return This node (for convenience reasons)
      */
@@ -557,12 +557,12 @@ public class XML {
     }
 
     /**
-     * Deletes a child specified by its name
+     * Removes a child specified by its name
      *
-     * @param name The name of the to be deleted child
+     * @param name The name of the child to be removed
      * @return This node (for convenience reasons)
      */
-    public XML deleteChildren(String name) {
+    public XML removeChildren(String name) {
         for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
             if (((chi = ch.item(i - 1)).getNodeName().equals(name))) {
                 e.removeChild(chi);
@@ -575,12 +575,12 @@ public class XML {
     }
 
     /**
-     * Deletes a child specified by its XML-object
+     * Removes a child specified by its XML-object
      *
-     * @param child The XML-object of the child to be deleted
+     * @param child The XML-object of the child to be removed
      * @return This node (for convenience reasons)
      */
-    public XML deleteChild(XML child) {
+    public XML removeChild(XML child) {
         e.removeChild(child.e);
         if (autosave) {
             reloadFile();
@@ -589,7 +589,7 @@ public class XML {
     }
 
     /**
-     * Deletes ALL children of this node
+     * Removes ALL children of this node
      *
      * @return This node (for convenience reasons)
      */
@@ -604,9 +604,9 @@ public class XML {
     }
 
     /**
-     * Deletes this node and with it all its children, attributes and contents
+     * Removes this node and with it all its children, attributes and contents
      */
-    public void delete() {
+    public void remove() {
         if (hasParent()) {
             (chi = e.getParentNode()).removeChild(e);
             if (autosave) {

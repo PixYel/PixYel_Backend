@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package pixyel_backend;
+package pixyel_backend.xml;
 
 import pixyel_backend.xml.XML;
 import java.util.LinkedHashMap;
@@ -32,7 +32,7 @@ public class XMLTest {
         assertFalse("Shouldnt have Attributes", toTest.hasAttributes());
         toTest.addAttribute(attrName, "1");
         assertTrue("Should have a Attribute", toTest.hasAttributes());
-        toTest.deleteAttribute(attrName);
+        toTest.removeAttribute(attrName);
         assertFalse("Shouldnt have Attributes", toTest.hasAttributes());
     }
 
@@ -44,7 +44,7 @@ public class XMLTest {
         assertFalse("Should have no Content", toTest.hasContent());
         toTest.setContent("Testcontent");
         assertTrue("Should have Content", toTest.hasContent());
-        toTest.deleteContent();
+        toTest.removeContent();
         assertFalse("Should have no Content", toTest.hasContent());
     }
 
@@ -57,7 +57,7 @@ public class XMLTest {
         String childname = "testchildren";
         toTest.addChildren(childname);
         assertTrue("Should have children", toTest.hasChildren());
-        toTest.deleteChildren(childname);
+        toTest.removeChildren(childname);
         assertFalse("Shoudnt have Children", toTest.hasChildren());
     }
 
@@ -69,7 +69,7 @@ public class XMLTest {
         toTest.addChildren("child");
         XML child = toTest.getFirstChild();
         assertTrue("Should have children", child.hasParent());
-        toTest.deleteChild(child);
+        toTest.removeChild(child);
         assertFalse("Should have no Parents", toTest.hasParent());
         assertFalse("Cannot restore original XML", toTest.hasChildren());
     }
@@ -95,8 +95,8 @@ public class XMLTest {
         toTest.addAttribute(test2[0], test2[1]);
         map.put(test2[0], test2[1]);
         assertEquals("Should have the same attributes", map, toTest.getAttributes());
-        toTest.deleteAttribute(test1[0]);
-        toTest.deleteAttributesByValue(test2[1]);
+        toTest.removeAttribute(test1[0]);
+        toTest.removeAttributesByValue(test2[1]);
         assertFalse("Cannot restore original XML", toTest.hasAttributes());
     }
 
@@ -109,7 +109,7 @@ public class XMLTest {
         String attrValue = "1";
         toTest.addAttribute(attrName, attrValue);
         assertEquals("Should have the same Attribute value", attrValue, toTest.getAttribute(attrName));
-        toTest.deleteAttribute(attrName);
+        toTest.removeAttribute(attrName);
         assertFalse("cannot restore original XML", toTest.hasAttributes());
 
     }
@@ -123,7 +123,7 @@ public class XMLTest {
         String content = "testcontent";
         toTest.setContent(content);
         assertEquals("Should habe the same content", content, toTest.getContent());
-        toTest.deleteContent();
+        toTest.removeContent();
         assertFalse("Cannot restore original XML", toTest.hasContent());
     }
 
@@ -135,8 +135,8 @@ public class XMLTest {
         toTest.addChildren("B");
         toTest.addChildren("A");
         assertEquals("Should be equal", new XML("A").getName(), toTest.getFirstChild().getName());
-        toTest.deleteChildren("A");
-        toTest.deleteChildren("B");
+        toTest.removeChildren("A");
+        toTest.removeChildren("B");
         assertFalse("Cannot restore original XML", toTest.hasChildren());
     }
 
@@ -148,8 +148,8 @@ public class XMLTest {
         toTest.addChildren("B");
         toTest.addChildren("A");
         assertEquals("Should be equal", new XML("B").getName(), toTest.getLastChild().getName());
-        toTest.deleteChildren("A");
-        toTest.deleteChildren("B");
+        toTest.removeChildren("A");
+        toTest.removeChildren("B");
         assertFalse("Cannot restore original XML", toTest.hasChildren());
     }
 
@@ -160,7 +160,7 @@ public class XMLTest {
     public void testGetChildren() {
         toTest.addChildren("child");
         assertEquals("Should have the same name", toTest.getChildren().get(0).getName(), "child");
-        toTest.deleteChildren("child");
+        toTest.removeChildren("child");
         assertFalse("Should have no children", toTest.hasChildren());
     }
 
@@ -171,7 +171,7 @@ public class XMLTest {
     public void testGetChild() {
         toTest.addChildren("child");
         assertEquals("Should have the same name", toTest.getChild("child").get(0).getName(), "child");
-        toTest.deleteChildren("child");
+        toTest.removeChildren("child");
         assertFalse("Should have no children", toTest.hasChildren());
     }
 
@@ -182,7 +182,7 @@ public class XMLTest {
     public void testGetFirstChild_String() {
         toTest.addChildren("child");
         assertEquals("Should have the same name", toTest.getFirstChild("child").getName(), "child");
-        toTest.deleteChildren("child");
+        toTest.removeChildren("child");
         assertFalse("Should have no children", toTest.hasChildren());
     }
 
@@ -194,7 +194,7 @@ public class XMLTest {
         assertNull("Shouldnt have a Parent", toTest.getParent());
         toTest.addChildren("child");
         assertEquals("Should have the same name", rootname, toTest.getFirstChild().getParent().getName());
-        toTest.deleteChildren("child");
+        toTest.removeChildren("child");
         assertFalse("Could not restore the original XML", toTest.hasChildren());
     }
 
@@ -206,7 +206,7 @@ public class XMLTest {
         assertFalse("Shouldnt have a Attribute", toTest.hasAttributes());
         toTest.addAttribute("test", "test");
         assertTrue("Should have a Attribute", toTest.hasAttributes());
-        toTest.deleteAttribute("test");
+        toTest.removeAttribute("test");
         assertFalse("Could not recover the original XML", toTest.hasAttributes());
     }
 
@@ -218,7 +218,7 @@ public class XMLTest {
         assertEquals("Shouldnt have a content", "", toTest.getContent());
         toTest.setContent("testcontent");
         assertEquals("Should have the same content", toTest.getContent(), "testcontent");
-        toTest.deleteContent();
+        toTest.removeContent();
         assertEquals("Shouldnt have a content", "", toTest.getContent());
     }
 
@@ -231,7 +231,7 @@ public class XMLTest {
         XML child = new XML("child");
         toTest.addChildren(child);
         assertTrue("Should have a child", toTest.hasChildren());
-        toTest.deleteChildren("child");
+        toTest.removeChildren("child");
         assertFalse("Should have no children", toTest.hasChildren());
     }
 
@@ -243,49 +243,49 @@ public class XMLTest {
         assertFalse("Should have no children", toTest.hasChildren());
         toTest.addChildren("child");
         assertTrue("Should have a child", toTest.hasChildren());
-        toTest.deleteChildren("child");
+        toTest.removeChildren("child");
         assertFalse("Should have no children", toTest.hasChildren());
     }
 
     /**
-     * Test of deleteAttribute method, of class XML.
+     * Test of RemoveAttribute method, of class XML.
      */
     @Test
-    public void testDeleteAttribute() {
+    public void testRemoveAttribute() {
         assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
         toTest.addAttribute("test", "test");
         toTest.addAttribute("test2", "test");
         assertTrue("Should have Attributes", toTest.hasAttributes());
-        toTest.deleteAttribute("test2");
-        toTest.deleteAttribute("test");
+        toTest.removeAttribute("test2");
+        toTest.removeAttribute("test");
         assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
     }
 
     /**
-     * Test of deleteAttributesByValue method, of class XML.
+     * Test of removeAttributesByValue method, of class XML.
      */
     @Test
-    public void testDeleteAttributesByValue() {
+    public void testRemoveAttributesByValue() {
         assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
         toTest.addAttribute("test", "test");
         toTest.addAttribute("test2", "test");
         assertTrue("Should have Attributes", toTest.hasAttributes());
-        toTest.deleteAttributesByValue("test");
+        toTest.removeAttributesByValue("test");
         assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
     }
 
     /**
-     * Test of deleteFirstAttributeByValue method, of class XML.
+     * Test of removeFirstAttributeByValue method, of class XML.
      */
     @Test
-    public void testDeleteFirstAttributeByValue() {
+    public void testRemoveFirstAttributeByValue() {
         assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
         toTest.addAttribute("test", "test");
         toTest.addAttribute("test2", "test");
         assertTrue("Should have Attributes", toTest.hasAttributes());
-        toTest.deleteFirstAttributeByValue("test");
+        toTest.removeFirstAttributeByValue("test");
         assertTrue("Should have Attributes", toTest.hasAttributes());
-        toTest.deleteFirstAttributeByValue("test");
+        toTest.removeFirstAttributeByValue("test");
         assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
     }
 
@@ -314,26 +314,26 @@ public class XMLTest {
     }
 
     /**
-     * Test of deleteChildren method, of class XML.
+     * Test of removeChildren method, of class XML.
      */
     @Test
-    public void testDeleteChildren() {
+    public void testRemoveChildren() {
         toTest.addChildren("child");
         toTest.addChildren("child");
         assertTrue("Should have Children", toTest.hasChildren());
-        toTest.deleteChildren("child");
+        toTest.removeChildren("child");
         assertFalse("Should have no Children", toTest.hasChildren());
     }
 
     /**
-     * Test of deleteChild method, of class XML.
+     * Test of removeChild method, of class XML.
      */
     @Test
-    public void testDeleteChild() {
+    public void testRemoveChild() {
         toTest.addChildren("child");
         assertTrue("Should have Children", toTest.hasChildren());
         XML child = toTest.getFirstChild();
-        toTest.deleteChild(child);
+        toTest.removeChild(child);
         assertFalse("Should have no Children", toTest.hasChildren());
     }
 
@@ -350,13 +350,13 @@ public class XMLTest {
     }
 
     /**
-     * Test of delete method, of class XML.
+     * Test of remove method, of class XML.
      */
     @Test
-    public void testDelete() {
+    public void testRemove() {
         toTest.addChildren("child");
         assertTrue("Should have Children", toTest.hasChildren());
-        toTest.getChild("child").get(0).delete();
+        toTest.getChild("child").get(0).remove();
         assertFalse("Should have no Children", toTest.hasChildren());
     }
 
@@ -376,7 +376,7 @@ public class XMLTest {
         String expected = "<" + rootname + ">demo</" + rootname + ">";
         toTest.setContent("demo");
         assertEquals(expected, toTest.toXMLString());
-        toTest.deleteContent();
+        toTest.removeContent();
         assertFalse("Cannot restore original xml", toTest.hasContent());
     }
 
@@ -388,7 +388,7 @@ public class XMLTest {
         String expected = "<" + rootname + ">demo</" + rootname + ">";
         toTest.setContent("demo");
         assertEquals(expected, toTest.toXMLString(true));
-        toTest.deleteContent();
+        toTest.removeContent();
         assertFalse("Cannot restore original xml", toTest.hasContent());
     }
 
@@ -403,8 +403,8 @@ public class XMLTest {
         String temp = toTest.toString();
         assertEquals("should be equal", "Name: \"Roottag\" ; Content: \"content\" ; Children: 1 \n"
                 + "├─Name: \"demo\" ; Content: \"content2\" ; Parent: \"Roottag\" ", toTest.toString());
-        toTest.deleteChildren("demo");
-        toTest.deleteContent();
+        toTest.removeChildren("demo");
+        toTest.removeContent();
 
     }
 

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package pixyel_backend;
+package pixyel_backend.encryption;
 
 import pixyel_backend.encryption.Encryption;
 import org.junit.Test;

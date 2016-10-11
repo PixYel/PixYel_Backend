@@ -17,6 +17,6 @@ public class Test {
 
     public static void main(String[] args) throws XML.XMLException {
 
-        
+        System.out.println(new XML("demo").addChildren("B").addChildren("C").addChildren("A").toString());
     }
 }

@@ -134,10 +134,20 @@ public class XMLTest {
     public void testGetFirstChild_0args() {
         toTest.addChildren("B");
         toTest.addChildren("A");
-        assertEquals("Should be equal", new XML("A").getName(), toTest.getFirstChild().getName());
+        assertEquals("Should be equal", new XML("B").getName(), toTest.getFirstChild().getName());
         toTest.removeChildren("A");
         toTest.removeChildren("B");
         assertFalse("Cannot restore original XML", toTest.hasChildren());
+    }
+
+    @Test
+    public void testRemoveContent() {
+        assertEquals("Shouldnt have content", "", toTest.getContent());
+        String content = "testcontent";
+        toTest.setContent(content);
+        assertEquals("Should habe the same content", content, toTest.getContent());
+        toTest.removeContent();
+        assertFalse("Shouldnt have content", toTest.hasContent());
     }
 
     /**
@@ -147,7 +157,7 @@ public class XMLTest {
     public void testGetLastChild() {//Sorts the children
         toTest.addChildren("B");
         toTest.addChildren("A");
-        assertEquals("Should be equal", new XML("B").getName(), toTest.getLastChild().getName());
+        assertEquals("Should be equal", new XML("A").getName(), toTest.getLastChild().getName());
         toTest.removeChildren("A");
         toTest.removeChildren("B");
         assertFalse("Cannot restore original XML", toTest.hasChildren());
@@ -406,6 +416,68 @@ public class XMLTest {
         toTest.removeChildren("demo");
         toTest.removeContent();
 
+    }
+
+    @Test
+    public void testRemoveFirstChild() {
+        toTest.addChildren("child2");
+        toTest.addChildren("child1");
+        toTest.removeFirstChild();
+        assertEquals("Deletet wrong child", "child1", toTest.getFirstChild().getName());
+        toTest.clearChildren();
+        assertFalse("Could not restore the original xml", toTest.hasChildren());
+    }
+
+    @Test
+    public void testRemoveLastChild() {
+        toTest.addChildren("child2");
+        toTest.addChildren("child1");
+        toTest.removeLastChild();
+        assertEquals("Deletet wrong child", "child2", toTest.getLastChild().getName());
+        toTest.clearChildren();
+        assertFalse("Could not restore the original xml", toTest.hasChildren());
+    }
+
+    @Test
+    public void testRemoveFirstAttribute() {
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
+        toTest.addAttribute("test", "test");
+        toTest.addAttribute("test2", "test2");
+        toTest.removeFirstAttribute();
+        assertEquals("Should have the same Attribute values", "test2", toTest.getAttributes().get("test2"));
+        toTest.clearAttributes();
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
+    }
+
+    @Test
+    public void testLastRemoveAttribute() {
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
+        toTest.addAttribute("test", "test");
+        toTest.addAttribute("test2", "test2");
+        toTest.removeLastAttribute();
+        assertEquals("Should have the same Attribute values", "test", toTest.getAttributes().get("test"));
+        toTest.clearAttributes();
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
+    }
+
+    @Test
+    public void testGetFirstAttribute() {
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
+        toTest.addAttribute("test", "test");
+        toTest.addAttribute("test2", "test2");
+        assertEquals("Should have the same Attribute values", "test", toTest.getFirstAttribute());
+        toTest.clearAttributes();
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
+    }
+
+    @Test
+    public void testGetLastAttribute() {
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
+        toTest.addAttribute("test", "test");
+        toTest.addAttribute("test2", "test2");
+        assertEquals("Should have the same Attribute values", "test2", toTest.getLastAttribute());
+        toTest.clearAttributes();
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
     }
 
 }

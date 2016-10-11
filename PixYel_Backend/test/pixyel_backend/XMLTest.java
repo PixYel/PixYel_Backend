@@ -5,8 +5,6 @@
  */
 package pixyel_backend;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -159,13 +157,10 @@ public class XMLTest {
      */
     @Test
     public void testGetChildren() {
-        System.out.println("getChildren");
-        XML instance = null;
-        ArrayList<XML> expResult = null;
-        ArrayList<XML> result = instance.getChildren();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        toTest.addChildren("child");
+        assertEquals("Should have the same name", toTest.getChildren().get(0).getName(), "child");
+        toTest.deleteChildren("child");
+        assertFalse("Should have no children", toTest.hasChildren());
     }
 
     /**
@@ -173,14 +168,10 @@ public class XMLTest {
      */
     @Test
     public void testGetChild() {
-        System.out.println("getChild");
-        String name = "";
-        XML instance = null;
-        ArrayList<XML> expResult = null;
-        ArrayList<XML> result = instance.getChild(name);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        toTest.addChildren("child");
+        assertEquals("Should have the same name", toTest.getChild("child").get(0).getName(), "child");
+        toTest.deleteChildren("child");
+        assertFalse("Should have no children", toTest.hasChildren());
     }
 
     /**
@@ -188,14 +179,10 @@ public class XMLTest {
      */
     @Test
     public void testGetFirstChild_String() {
-        System.out.println("getFirstChild");
-        String name = "";
-        XML instance = null;
-        XML expResult = null;
-        XML result = instance.getFirstChild(name);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        toTest.addChildren("child");
+        assertEquals("Should have the same name", toTest.getFirstChild("child").getName(), "child");
+        toTest.deleteChildren("child");
+        assertFalse("Should have no children", toTest.hasChildren());
     }
 
     /**
@@ -203,13 +190,8 @@ public class XMLTest {
      */
     @Test
     public void testGetParent() {
-        System.out.println("getParent");
-        XML instance = null;
-        XML expResult = null;
-        XML result = instance.getParent();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        //assertFalse("Shouldnt have a Parent", toTest.getParent());
+        
     }
 
     /**
@@ -217,15 +199,7 @@ public class XMLTest {
      */
     @Test
     public void testAddAttribute() {
-        System.out.println("addAttribute");
-        String name = "";
-        String value = "";
-        XML instance = null;
-        XML expResult = null;
-        XML result = instance.addAttribute(name, value);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+
     }
 
     /**
@@ -233,14 +207,7 @@ public class XMLTest {
      */
     @Test
     public void testSetContent() {
-        System.out.println("setContent");
-        String content = "";
-        XML instance = null;
-        XML expResult = null;
-        XML result = instance.setContent(content);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+
     }
 
     /**
@@ -248,14 +215,7 @@ public class XMLTest {
      */
     @Test
     public void testAddChildren_XMLArr() {
-        System.out.println("addChildren");
-        XML[] children = null;
-        XML instance = null;
-        XML expResult = null;
-        XML result = instance.addChildren(children);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        
     }
 
     /**
@@ -263,14 +223,11 @@ public class XMLTest {
      */
     @Test
     public void testAddChildren_StringArr() {
-        System.out.println("addChildren");
-        String[] children = null;
-        XML instance = null;
-        XML expResult = null;
-        XML result = instance.addChildren(children);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertFalse("Should have no children", toTest.hasChildren());
+        toTest.addChildren("child");
+        assertTrue("Should have a child", toTest.hasChildren());
+        toTest.deleteChildren("child");
+        assertFalse("Should have no children", toTest.hasChildren());
     }
 
     /**
@@ -278,14 +235,13 @@ public class XMLTest {
      */
     @Test
     public void testDeleteAttribute() {
-        System.out.println("deleteAttribute");
-        String name = "";
-        XML instance = null;
-        XML expResult = null;
-        XML result = instance.deleteAttribute(name);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
+        toTest.addAttribute("test", "test");
+        toTest.addAttribute("test2", "test");
+        assertTrue("Should have Attributes", toTest.hasAttributes());
+        toTest.deleteAttribute("test2");
+        toTest.deleteAttribute("test");
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
     }
 
     /**
@@ -293,14 +249,12 @@ public class XMLTest {
      */
     @Test
     public void testDeleteAttributesByValue() {
-        System.out.println("deleteAttributesByValue");
-        String value = "";
-        XML instance = null;
-        XML expResult = null;
-        XML result = instance.deleteAttributesByValue(value);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
+        toTest.addAttribute("test", "test");
+        toTest.addAttribute("test2", "test");
+        assertTrue("Should have Attributes", toTest.hasAttributes());
+        toTest.deleteAttributesByValue("test");
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
     }
 
     /**
@@ -308,14 +262,14 @@ public class XMLTest {
      */
     @Test
     public void testDeleteFirstAttributeByValue() {
-        System.out.println("deleteFirstAttributeByValue");
-        String value = "";
-        XML instance = null;
-        XML expResult = null;
-        XML result = instance.deleteFirstAttributeByValue(value);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
+        toTest.addAttribute("test", "test");
+        toTest.addAttribute("test2", "test");
+        assertTrue("Should have Attributes", toTest.hasAttributes());
+        toTest.deleteFirstAttributeByValue("test");
+        assertTrue("Should have Attributes", toTest.hasAttributes());
+        toTest.deleteFirstAttributeByValue("test");
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
     }
 
     /**
@@ -323,13 +277,12 @@ public class XMLTest {
      */
     @Test
     public void testClearAttributes() {
-        System.out.println("clearAttributes");
-        XML instance = null;
-        XML expResult = null;
-        XML result = instance.clearAttributes();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
+        toTest.addAttribute("test", "test");
+        toTest.addAttribute("test2", "bla");
+        assertTrue("Should have Attributes", toTest.hasAttributes());
+        toTest.clearAttributes();
+        assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
     }
 
     /**
@@ -337,13 +290,10 @@ public class XMLTest {
      */
     @Test
     public void testClearContent() {
-        System.out.println("clearContent");
-        XML instance = null;
-        XML expResult = null;
-        XML result = instance.clearContent();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        toTest.setContent("content");
+        assertTrue("Should have a Content", toTest.hasContent());
+        toTest.clearContent();
+        assertFalse("Should have no Content", toTest.hasContent());
     }
 
     /**
@@ -351,14 +301,11 @@ public class XMLTest {
      */
     @Test
     public void testDeleteChildren() {
-        System.out.println("deleteChildren");
-        String name = "";
-        XML instance = null;
-        XML expResult = null;
-        XML result = instance.deleteChildren(name);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        toTest.addChildren("child");
+        toTest.addChildren("child");
+        assertTrue("Should have Children", toTest.hasChildren());
+        toTest.deleteChildren("child");
+        assertFalse("Should have no Children", toTest.hasChildren());
     }
 
     /**
@@ -366,14 +313,11 @@ public class XMLTest {
      */
     @Test
     public void testDeleteChild() {
-        System.out.println("deleteChild");
-        XML child = null;
-        XML instance = null;
-        XML expResult = null;
-        XML result = instance.deleteChild(child);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        toTest.addChildren("child");
+        assertTrue("Should have Children", toTest.hasChildren());
+        XML child = toTest.getFirstChild();
+        toTest.deleteChild(child);
+        assertFalse("Should have no Children", toTest.hasChildren());
     }
 
     /**
@@ -381,13 +325,11 @@ public class XMLTest {
      */
     @Test
     public void testClearChildren() {
-        System.out.println("clearChildren");
-        XML instance = null;
-        XML expResult = null;
-        XML result = instance.clearChildren();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        toTest.addChildren("child1");
+        toTest.addChildren("child2");
+        assertTrue("Should have Children", toTest.hasChildren());
+        toTest.clearChildren();
+        assertFalse("Should have no Children", toTest.hasChildren());
     }
 
     /**
@@ -395,49 +337,10 @@ public class XMLTest {
      */
     @Test
     public void testDelete() {
-        System.out.println("delete");
-        XML instance = null;
-        instance.delete();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of setFileToSaveIn method, of class XML.
-     */
-    @Test
-    public void testSetFileToSaveIn() {
-        System.out.println("setFileToSaveIn");
-        File file = null;
-        XML instance = null;
-        instance.setFileToSaveIn(file);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of save method, of class XML.
-     */
-    @Test
-    public void testSave() {
-        System.out.println("save");
-        XML instance = null;
-        instance.save();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of saveTo method, of class XML.
-     */
-    @Test
-    public void testSaveTo() {
-        System.out.println("saveTo");
-        File toSaveIn = null;
-        XML instance = null;
-        instance.saveTo(toSaveIn);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        toTest.addChildren("child");
+        assertTrue("Should have Children", toTest.hasChildren());
+        toTest.getChild("child").get(0).delete();
+        assertFalse("Should have no Children", toTest.hasChildren());
     }
 
     /**
@@ -445,13 +348,7 @@ public class XMLTest {
      */
     @Test
     public void testIsLastChild() {
-        System.out.println("isLastChild");
-        XML instance = null;
-        boolean expResult = false;
-        boolean result = instance.isLastChild();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertTrue("Should be the last child", toTest.isLastChild());
     }
 
     /**
@@ -459,7 +356,7 @@ public class XMLTest {
      */
     @Test
     public void testToXMLString_0args() {
-        String expected = "<"+rootname+">demo</"+rootname+">";
+        String expected = "<" + rootname + ">demo</" + rootname + ">";
         toTest.setContent("demo");
         assertEquals(expected, toTest.toXMLString());
         toTest.deleteContent();
@@ -471,7 +368,7 @@ public class XMLTest {
      */
     @Test
     public void testToXMLString_boolean() {
-        String expected = "<"+rootname+">demo</"+rootname+">";
+        String expected = "<" + rootname + ">demo</" + rootname + ">";
         toTest.setContent("demo");
         assertEquals(expected, toTest.toXMLString(true));
         toTest.deleteContent();
@@ -483,13 +380,15 @@ public class XMLTest {
      */
     @Test
     public void testToString() {
-        System.out.println("toString");
-        XML instance = null;
-        String expResult = "";
-        String result = instance.toString();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        toTest.addChildren("demo");
+        toTest.setContent("content");
+        toTest.getChild("demo").get(0).setContent("content2");
+        String temp = toTest.toString();
+        assertEquals("should be equal", "Name: \"Roottag\" ; Content: \"content\" ; Children: 1 \n"
+                + "├─Name: \"demo\" ; Content: \"content2\" ; Parent: \"Roottag\" ", toTest.toString());
+        toTest.deleteChildren("demo");
+        toTest.deleteContent();
+
     }
 
 }

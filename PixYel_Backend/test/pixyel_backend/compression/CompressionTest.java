@@ -1,5 +1,6 @@
 package pixyel_backend.compression;
 
+import pixyel_backend.connection.compression.Compression;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

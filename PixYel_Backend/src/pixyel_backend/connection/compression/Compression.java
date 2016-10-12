@@ -1,4 +1,4 @@
-package pixyel_backend.compression;
+package pixyel_backend.connection.compression;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

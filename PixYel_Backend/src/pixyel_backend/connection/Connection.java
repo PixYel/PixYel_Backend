@@ -1,7 +1,6 @@
 package pixyel_backend.connection;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -16,7 +15,7 @@ public class Connection implements Runnable {
 
     private static ServerSocket SERVER = null;
     private static ExecutorService THREADPOOL;
-    private final HashMap<String, Client> clientManagerMap = new HashMap<>();//Nur die eingeloggten Clienten (Geht somit schneller zum getUsername
+    private final HashMap<Integer, Client> clientManagerMap = new HashMap<>();//Nur die eingeloggten Clienten (Geht somit schneller zum getUsername
 
     /**
      * Hier wird der Server gestartet.
@@ -28,8 +27,7 @@ public class Connection implements Runnable {
 
     /**
      * Sucht unendlich lang nach Clients, die sich verbinden möchten. Sobald
-     * sich ein Client meldet, weist er ihm einen eigenen Thread (Client)
-     * zu.
+     * sich ein Client meldet, weist er ihm einen eigenen Thread (Client) zu.
      */
     private void listenForClients() {
         boolean loop = true;
@@ -39,7 +37,7 @@ public class Connection implements Runnable {
                 socket = SERVER.accept();
                 Client client = new Client(socket);
                 THREADPOOL.submit(client);
-                this.clientManagerMap.put(String.valueOf(socket.hashCode()), client);
+                this.clientManagerMap.put(socket.hashCode(), client);
                 this.onClientConnected(client);
             } catch (IOException e) {
                 if (e.toString().contains("Socket is closed")) {
@@ -69,11 +67,11 @@ public class Connection implements Runnable {
     /**
      * Sendet ein Objekt zu allen verbundenen Clienten
      *
-     * @param object Das zu sendende Objekt
+     * @param stringToSend
      */
     public void sendToEveryone(String stringToSend) {
-        clientManagerMap.entrySet().stream().forEach((client) -> {
-                client.sendToClient(stringToSend)
+        clientManagerMap.entrySet().stream().forEach((clientIdPair) -> {
+            clientIdPair.getValue().sendToClient(stringToSend);
         });
     }
 
@@ -83,7 +81,7 @@ public class Connection implements Runnable {
      * @param id Der Benutzer, dessen Client gesucht wird
      * @return Der ClientManager des Benutzers
      */
-    public Client getClient(String id) {
+    public Client getClient(int id) {
         return clientManagerMap.get(id);
     }
 
@@ -94,17 +92,15 @@ public class Connection implements Runnable {
      * @param client Der zu entfernende ClientManager
      */
     public void removeFromClientList(Client client) {
-        clientManagerMap.remove(client.getUsername());
-        clientManagerMap.remove(String.valueOf(client.getSocket().hashCode()));//Falls er nich nciht eingelogggt war
-        iManager.getGUI().setListView();
+        clientManagerMap.remove(client.id);
+        clientManagerMap.remove(client.socket.hashCode());//In the case he hasnt commited his device id and telephone number
     }
 
     public void addUsernameToMap(Client client) {
-        clientManagerMap.remove(String.valueOf(client.getSocket().hashCode()));
-        clientManagerMap.put(client.getUsername(), client);
+        clientManagerMap.remove(client.socket.hashCode());
+        clientManagerMap.put(client.id, client);
     }
 
-    
     @Override
     public void run() {
         try {
@@ -116,21 +112,22 @@ public class Connection implements Runnable {
         } catch (IOException ex) {
             System.err.println("Server konnte nicht gestartet werden: " + ex.getMessage());
         }
-        this.THREADPOOL = Executors.newCachedThreadPool();
+        Connection.THREADPOOL = Executors.newCachedThreadPool();
         System.out.println("Server erreichbar unter " + SERVER.getInetAddress() + ":" + SERVER.getLocalPort());
+        onServerStarted();
         this.listenForClients();
     }
 
-    private void onServerClosing(){
-        
+    private void onServerClosing() {
+
     }
-    
-    private void onServerStarted(){
-        
+
+    private void onServerStarted() {
+
     }
-    
-    private void onClientConnected(Client client){
-        
+
+    private void onClientConnected(Client client) {
+
     }
-    
+
 }

@@ -30,16 +30,16 @@ public class Encryption {
      * 
      * Using:<p>
      * {@code //Generate KeyPair (PublicKey AND PrivateKey)}<p>
-        {@code String[] keyPair = generateKeyPair();}<p>
-<p>
-        {@code //Encryptes the text with the public key}<p>
-        {@code String encrypted = encrypt("Geheime Nachricht", keyPair[0]);}<p>
-<p>
-        {@code //Decrypted the byteArray with the private key}<p>
-        {@code String decrypted = decrypt(encrypted, keyPair[1]);}<p>
-<p>
-        {@code System.out.println("Entschlüsselt: " + decrypted);}<p>
-     *<p>
+     * {@code String[] keyPair = generateKeyPair();}<p>
+     * <p>
+     * {@code //Encryptes the text with the public key}<p>
+     * {@code String encrypted = encrypt("Geheime Nachricht", keyPair[0]);}<p>
+     * <p>
+     * {@code //Decrypted the text with the private key}<p>
+     * {@code String decrypted = decrypt(encrypted, keyPair[1]);}<p>
+     * <p>
+     * {@code System.out.println("Entschlüsselt: " + decrypted);}<p>
+     * <p>
      * @return A StringArray which contains the first the public and second the
      * private key
      */
@@ -63,7 +63,19 @@ public class Encryption {
 
     /**
      * Encryptes text with a public key
-     *
+     * 
+     * Using:<p>
+     * {@code //Generate KeyPair (PublicKey AND PrivateKey)}<p>
+     * {@code String[] keyPair = generateKeyPair();}<p>
+     * <p>
+     * {@code //Encryptes the text with the public key}<p>
+     * {@code String encrypted = encrypt("Geheime Nachricht", keyPair[0]);}<p>
+     * <p>
+     * {@code //Decrypted the text with the private key}<p>
+     * {@code String decrypted = decrypt(encrypted, keyPair[1]);}<p>
+     * <p>
+     * {@code System.out.println("Entschlüsselt: " + decrypted);}<p>
+     * <p>
      * @param text The text as String to encrypt
      * @param publicKey The public key from the KeyPair to encrypt with
      * @return The result of the encryption as byte-array
@@ -86,7 +98,19 @@ public class Encryption {
 
     /**
      * Decryptes a byte-array with a private key
-     *
+     * 
+     * Using:<p>
+     * {@code //Generate KeyPair (PublicKey AND PrivateKey)}<p>
+     * {@code String[] keyPair = generateKeyPair();}<p>
+     * <p>
+     * {@code //Encryptes the text with the public key}<p>
+     * {@code String encrypted = encrypt("Geheime Nachricht", keyPair[0]);}<p>
+     * <p>
+     * {@code //Decrypted the text with the private key}<p>
+     * {@code String decrypted = decrypt(encrypted, keyPair[1]);}<p>
+     * <p>
+     * {@code System.out.println("Entschlüsselt: " + decrypted);}<p>
+     * <p>
      * @param toDecrypt The byte-array to decrypt
      * @param privateKey The private Key from the KeyPait to decrypt with
      * @return The result of the decryption as String

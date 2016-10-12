@@ -1,12 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package pixyel_backend.compression;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -17,45 +13,86 @@ import java.util.zip.Inflater;
  */
 public class Compression {
 
-    public static void main(String[] args) throws IOException, DataFormatException {
-        //Some string for testing
-        String sr = new String("fsdfesfsfdddddddsfdsfssdfdsfdsfdsfdsfdsdfggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggghghghghggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggfsdfesfsfdddddddsfdsfssdfdsfdsfdsfdsfdsdfggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggghghghghggggggggggggggggggggggggggggggggggggggggg");
-        byte[] data = sr.getBytes();
-        byte[] compressed = compress(data);
-        byte[] uncompressed = decompress(compressed);
-        System.out.println(new String(uncompressed));
+    /**
+     * Compresses a String using the GZIP algorithm
+     *
+     * Using:
+     * <p>
+     * {@code //Compresses the String with gzip}
+     * <p>
+     * {@code String compressed = compress("Groooooooooooße Nachricht");}
+     * <p>
+     * <p>
+     * {@code //Decompress the String}
+     * <p>
+     * {@code String decompressed = decompress(compressed);}
+     * <p>
+     * <p>
+     * {@code System.out.println("Dekomprimiert: " + decompressed);}
+     * <p>
+     * <p>
+     * @param toCompress The String to be compressed
+     * @return The compressed String
+     */
+    public static String compress(String toCompress) {
+        try {
+            Deflater deflater = new Deflater();
+            byte[] input = toCompress.getBytes();
+            deflater.setInput(input);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(input.length);
+            deflater.finish();
+            byte[] buffer = new byte[1024];
+            while (!deflater.finished()) {
+                int count = deflater.deflate(buffer); // returns the generated code... index
+                outputStream.write(buffer, 0, count);
+            }
+            outputStream.close();
+            byte[] output = outputStream.toByteArray();
+            return Base64.getEncoder().encodeToString(output);
+        } catch (IOException ex) {
+            System.err.println("Could not compress String: " + ex);
+        }
+        return "";
     }
 
-    public static byte[] compress(byte[] data) throws IOException {
-        Deflater deflater = new Deflater();
-        deflater.setInput(data);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
-        deflater.finish();
-        byte[] buffer = new byte[1024];
-        while (!deflater.finished()) {
-            int count = deflater.deflate(buffer); // returns the generated code... index  
-            outputStream.write(buffer, 0, count);
+        /**
+     * Decompresses a String using the GZIP algorithm
+     *
+     * Using:
+     * <p>
+     * {@code //Compresses the String with gzip}
+     * <p>
+     * {@code String compressed = compress("Groooooooooooße Nachricht");}
+     * <p>
+     * <p>
+     * {@code //Decompress the String}
+     * <p>
+     * {@code String decompressed = decompress(compressed);}
+     * <p>
+     * <p>
+     * {@code System.out.println("Dekomprimiert: " + decompressed);}
+     * <p>
+     * <p>
+     * @param toDecompress The String to be decompressed
+     * @return The decompressed String
+     */
+    public static String decompress(String toDecompress) {
+        try {
+            Inflater inflater = new Inflater();
+            byte[] input = Base64.getDecoder().decode(toDecompress);
+            inflater.setInput(input);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(input.length);
+            byte[] buffer = new byte[1024];
+            while (!inflater.finished()) {
+                int count = inflater.inflate(buffer);
+                outputStream.write(buffer, 0, count);
+            }
+            outputStream.close();
+            byte[] output = outputStream.toByteArray();
+            return new String(output);
+        } catch (IOException | DataFormatException ex) {
+            System.err.println("Cou,d not decompress String: " + ex);
         }
-        outputStream.close();
-        byte[] output = outputStream.toByteArray();
-        System.out.println("Original: " + data.length);
-        System.out.println("Compressed: " + output.length);
-        return output;
-    }
-
-    public static byte[] decompress(byte[] data) throws IOException, DataFormatException {
-        Inflater inflater = new Inflater();
-        inflater.setInput(data);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
-        byte[] buffer = new byte[1024];
-        while (!inflater.finished()) {
-            int count = inflater.inflate(buffer);
-            outputStream.write(buffer, 0, count);
-        }
-        outputStream.close();
-        byte[] output = outputStream.toByteArray();
-        System.out.println("Original: " + data.length);
-        System.out.println("Compressed: " + output.length);
-        return output;
+        return "";
     }
 }

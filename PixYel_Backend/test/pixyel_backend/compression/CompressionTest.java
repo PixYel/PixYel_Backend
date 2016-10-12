@@ -7,8 +7,8 @@ import static org.junit.Assert.*;
  *
  * @author i01frajos445
  */
-public class CompressionTest {
-    
+public class CompressionTest {          
+
 
     /**
      * Test of decompress method, of class Compression.

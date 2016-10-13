@@ -55,6 +55,7 @@ public class DatabaseFunctions {
             //fixme
             picturesInfo.put(id, ids);
         }
+        return picturesInfo;
     }
 
     public void closeConnection() {

@@ -3,6 +3,7 @@ package pixyel_backend.database.objects;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import pixyel_backend.database.DatabaseFunctions;
 import pixyel_backend.database.MysqlConnector;
 
 public class User {
@@ -16,21 +17,34 @@ public class User {
     private final int amountSMSsend;
 
     public User(int id) throws Exception {
-        this.id = 0;
-        this.telephonenumber = 0;
-        this.deviceID = null;
-        this.publicKey = null;
-        this.banned = false;
-        this.verified = true;
-        this.amountSMSsend = 0;
-
         Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
         Statement sta = conn.createStatement();
         ResultSet result = sta.executeQuery("SELECT * FROM users WHERE userid LIKE " + id);
         if (!result.isBeforeFirst()) {
             throw new Exception("no user found");
         }
-
+        result.next();
+        this.id = id;
+        this.telephonenumber = result.getInt("phonenumber");
+        this.deviceID = result.getString("deviceID");
+        this.publicKey = result.getString("publickey");
+        this.amountSMSsend = result.getInt("amountSMSsend");
+        
+        int status = result.getInt("status");
+        if (status < 0){
+            this.banned=true;
+        }
+        else{
+            this.banned=false;
+        }
+        if (status > 0){
+            this.verified = true;
+        }
+        else{
+            this.verified=false;
+        }
+        sta.close();
+        conn.close();
     }
 
     public static User getUser(int id) throws Exception {
@@ -47,6 +61,11 @@ public class User {
         } catch (Exception e) {
             return null;
         }
+    }
+    
+    public static void addNewUser(String telephoneNumber, String deviceID) throws Exception{
+        DatabaseFunctions func = new DatabaseFunctions();
+        func.addNewUser(telephoneNumber, deviceID);
     }
 
     public User(int telephoneNumber, String deviceID) throws Exception {
@@ -93,8 +112,8 @@ public class User {
 
     }
 
-    public void setPublicKey() {
-
+    public void setPublicKey(String key) {
+        //in db
     }
 
     public int getAmountSMSsend() {

@@ -7,12 +7,12 @@ public class DatabaseInitializer {
 
     public static void init() throws Exception {
         Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
-        Statement statments = conn.createStatement();
-        statments.executeUpdate("DROP DATABASE IF EXISTS pixdb");
-        statments.executeUpdate("CREATE DATABASE pixdb");
-        statments.executeUpdate("USE pixdb");
+        Statement statements = conn.createStatement();
+        statements.executeUpdate("DROP DATABASE IF EXISTS pixdb");
+        statements.executeUpdate("CREATE DATABASE pixdb");
+        statements.executeUpdate("USE pixdb");
 
-        statments.executeUpdate("CREATE TABLE users ("
+        statements.executeUpdate("CREATE TABLE users ("
                 + "userid INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
                 + "phonenumber INT(30) NOT NULL UNIQUE, "
                 + "deviceId VARCHAR(80) NOT NULL UNIQUE,"
@@ -22,7 +22,7 @@ public class DatabaseInitializer {
                 + "amountsmssend INT(5) DEFAULT '0')"
         );
 
-        statments.executeUpdate("CREATE TABLE picturesInfo ("
+        statements.executeUpdate("CREATE TABLE picturesInfo ("
                 + "pictureid INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
                 + "x_Coordinate DOUBLE, "
                 + "y_coordinate DOUBLE, "
@@ -34,11 +34,11 @@ public class DatabaseInitializer {
                 + "commentId MEDIUMTEXT)"
         );
 
-        statments.executeUpdate("CREATE TABLE picturesData ("
+        statements.executeUpdate("CREATE TABLE picturesData ("
                 + "pictureid INT(6) PRIMARY KEY, "
                 + "data LONGTEXT NOT NULL)"
         );
-        statments.close();
+        statements.close();
         conn.close();
     }
 }

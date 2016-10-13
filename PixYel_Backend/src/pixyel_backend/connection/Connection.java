@@ -15,7 +15,7 @@ public class Connection implements Runnable {
 
     private static ServerSocket SERVER = null;
     private static ExecutorService THREADPOOL;
-    private final HashMap<Integer, Client> clientManagerMap = new HashMap<>();//Nur die eingeloggten Clienten (Geht somit schneller zum getUsername
+    private static final HashMap<Integer, Client> CONNECTEDCLIENTS = new HashMap<>();//Nur die eingeloggten Clienten (Geht somit schneller zum getUsername
 
     /**
      * Hier wird der Server gestartet.
@@ -37,7 +37,7 @@ public class Connection implements Runnable {
                 socket = SERVER.accept();
                 Client client = new Client(socket);
                 THREADPOOL.submit(client);
-                this.clientManagerMap.put(socket.hashCode(), client);
+                CONNECTEDCLIENTS.put(socket.hashCode(), client);
                 this.onClientConnected(client);
             } catch (IOException e) {
                 if (e.toString().contains("Socket is closed")) {
@@ -69,8 +69,8 @@ public class Connection implements Runnable {
      *
      * @param stringToSend
      */
-    public void sendToEveryone(String stringToSend) {
-        clientManagerMap.entrySet().stream().forEach((clientIdPair) -> {
+    public static void sendToEveryone(String stringToSend) {
+        CONNECTEDCLIENTS.entrySet().stream().forEach((clientIdPair) -> {
             clientIdPair.getValue().sendToClient(stringToSend);
         });
     }
@@ -81,8 +81,8 @@ public class Connection implements Runnable {
      * @param id Der Benutzer, dessen Client gesucht wird
      * @return Der ClientManager des Benutzers
      */
-    public Client getClient(int id) {
-        return clientManagerMap.get(id);
+    public static Client getClient(int id) {
+        return CONNECTEDCLIENTS.get(id);
     }
 
     /**
@@ -91,14 +91,14 @@ public class Connection implements Runnable {
      *
      * @param client Der zu entfernende ClientManager
      */
-    public void removeFromClientList(Client client) {
-        clientManagerMap.remove(client.id);
-        clientManagerMap.remove(client.socket.hashCode());//In the case he hasnt commited his device id and telephone number
+    public static void removeFromClientList(Client client) {
+        CONNECTEDCLIENTS.remove(client.clientData.getID());
+        CONNECTEDCLIENTS.remove(client.socket.hashCode());//In the case he hasnt commited his device id and telephone number
     }
 
-    public void addUsernameToMap(Client client) {
-        clientManagerMap.remove(client.socket.hashCode());
-        clientManagerMap.put(client.id, client);
+    public static void addIDToMap(Client client) {
+        CONNECTEDCLIENTS.remove(client.socket.hashCode());
+        CONNECTEDCLIENTS.put(client.clientData.getID(), client);
     }
 
     @Override

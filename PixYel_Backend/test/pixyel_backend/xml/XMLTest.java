@@ -20,7 +20,7 @@ public class XMLTest {
     String rootname = "Roottag";
 
     public XMLTest() {
-        toTest = new XML(rootname);
+        toTest = XML.createNewXML(rootname);
     }
 
     /**
@@ -134,7 +134,7 @@ public class XMLTest {
     public void testGetFirstChild_0args() {
         toTest.addChildren("B");
         toTest.addChildren("A");
-        assertEquals("Should be equal", new XML("B").getName(), toTest.getFirstChild().getName());
+        assertEquals("Should be equal", XML.createNewXML("B").getName(), toTest.getFirstChild().getName());
         toTest.removeChildren("A");
         toTest.removeChildren("B");
         assertFalse("Cannot restore original XML", toTest.hasChildren());
@@ -157,7 +157,7 @@ public class XMLTest {
     public void testGetLastChild() {//Sorts the children
         toTest.addChildren("B");
         toTest.addChildren("A");
-        assertEquals("Should be equal", new XML("A").getName(), toTest.getLastChild().getName());
+        assertEquals("Should be equal", XML.createNewXML("A").getName(), toTest.getLastChild().getName());
         toTest.removeChildren("A");
         toTest.removeChildren("B");
         assertFalse("Cannot restore original XML", toTest.hasChildren());
@@ -238,7 +238,7 @@ public class XMLTest {
     @Test
     public void testAddChildren_XMLArr() {
         assertFalse("Should have no children", toTest.hasChildren());
-        XML child = new XML("child");
+        XML child = XML.createNewXML("child");
         toTest.addChildren(child);
         assertTrue("Should have a child", toTest.hasChildren());
         toTest.removeChildren("child");

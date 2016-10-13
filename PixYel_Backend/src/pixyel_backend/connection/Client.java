@@ -28,7 +28,7 @@ public class Client implements Runnable {
 
     public Client(Socket socket) {
         this.socket = socket;
-        
+
     }
 
     @Override
@@ -57,7 +57,10 @@ public class Client implements Runnable {
     }
 
     public void onStringReceived(String receivedString) {
-        System.out.println("String received: " + receivedString);
+        String decrypted = "";// = Encryption.decrypt(receivedString, User.privatekey);
+        String decompressed = Compression.decompress(decrypted);
+        
+        System.out.println("String received: " + decompressed);
     }
 
     public void disconnect(boolean expected) {
@@ -69,10 +72,12 @@ public class Client implements Runnable {
         @Override
         public void run() {
             System.out.println("Inputlistener for Client " + socket.hashCode() + " started");
+            BufferedReader rein;
+            String string;
             while (!socket.isClosed() && socket.isConnected() && socket.isBound()) {
                 try {
-                    BufferedReader rein = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    String string = rein.readLine();
+                    rein = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    string = rein.readLine();
                     onStringReceived(string);
                 } catch (IOException exe) {
                     switch (exe.toString()) {

@@ -2,9 +2,12 @@ package pixyel_backend.xml;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,6 +22,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import pixyel_backend.xml.XML.XMLException;
 
@@ -45,8 +49,46 @@ public class XML {
      * Creates a new XML without a file representation
      *
      * @param name name of the XML Node
+     * @return The new XML instance
      */
-    public XML(String name) {
+    public static XML createNewXML(String name) {
+        return new XML(name);
+    }
+
+    /**
+     * Creates a new XML file with the specific rootname
+     *
+     * @param file The XML file to be opened
+     * @param rootname The name of the first node
+     * @return The new XML instance
+     */
+    public static XML createNewXML(File file, String rootname) {
+        return new XML(file, rootname);
+    }
+
+    /**
+     * Opens a existing XML file
+     *
+     * @param file The XML file to be opened
+     * @return The new XML instance
+     * @throws pixyel_backend.xml.XML.XMLException Raised when the XML file contains errors
+     */
+    public static XML openXML(File file) throws XMLException {
+        return new XML(file);
+    }
+
+    /**
+     * Opens a existing XML by its String
+     *
+     * @param xml The XML String to be opened
+     * @return The new XML instance
+     * @throws pixyel_backend.xml.XML.XMLException Raised when the XML string contains errors
+     */
+    public static XML openXML(String xml) throws XMLException {
+        return new XML(xml, true);
+    }
+
+    private XML(String name) {
         doc = getDoc();
         if (name.equals("")) {
             name = EMPTYKEYWORD;
@@ -55,24 +97,17 @@ public class XML {
         LIST.put(e, this);
     }
 
-    /**
-     * Reads a existing XML file
-     *
-     * @param file
-     * @throws XMLException
-     */
-    public XML(File file) throws XMLException {
+    private XML(File file) throws XMLException {
         e = readXML(file);
         LIST.put(e, this);
     }
+    
+    private XML(String toRead, boolean useless) throws XMLException{
+        e = readXML(toRead);
+        LIST.put(e, this);
+    }
 
-    /**
-     * Creates a new XML file with the specific rootname
-     *
-     * @param file
-     * @param rootname
-     */
-    public XML(File file, String rootname) {
+    private XML(File file, String rootname) {
         if (rootname == null) {
             rootname = "";
         }
@@ -117,11 +152,17 @@ public class XML {
 
     private Element readXML(File file) throws XMLException {
         xmlFile = file;
-        Element element;
-        Document document;
-        document = isValid(xmlFile);
-        document.getDocumentElement().normalize();
-        element = document.getDocumentElement();
+        Document document = isValid(xmlFile);
+        Element element = document.getDocumentElement();
+        element.normalize();
+        doc = document;
+        return element;
+    }
+
+    private Element readXML(String string) throws XMLException {
+        Document document = isValid(string);
+        Element element = document.getDocumentElement();
+        element.normalize();
         doc = document;
         return element;
     }
@@ -133,7 +174,7 @@ public class XML {
 
     /**
      *
-     * @param xmlFile
+     * @param xmlFile The XML file to be parsed
      * @return null if invalid, a Document if valid
      * @throws Yes, a lot of shit can happen here
      */
@@ -141,8 +182,28 @@ public class XML {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(xmlFile);
-            return document;
+            return builder.parse(xmlFile);
+        } catch (ParserConfigurationException ex) {
+            throw new XMLException("[INTERNAL] The DocumentBuilder cannot be created with with the requested configuration: " + ex);
+        } catch (SAXException ex) {
+            throw new XMLException("Parsing error occured: " + ex);
+        } catch (IOException ex) {
+            throw new XMLException("IO error occured: " + ex);
+        }
+    }
+
+    /**
+     *
+     * @param string The String to be parsed
+     * @return null if invalid, a Document if valid
+     * @throws Yes, a lot of shit can happen here
+     */
+    private Document isValid(String string) throws XMLException {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            InputSource is = new InputSource(new StringReader(string));
+            return builder.parse(is);
         } catch (ParserConfigurationException ex) {
             throw new XMLException("[INTERNAL] The DocumentBuilder cannot be created with with the requested configuration: " + ex);
         } catch (SAXException ex) {

@@ -11,10 +11,10 @@ public class User {
     private final int id;
     private final int telephonenumber;
     private final String deviceID;
-    private final String publicKey;
-    private final boolean banned;
-    private final boolean verified;
-    private final int amountSMSsend;
+    private String publicKey;
+    private boolean banned;
+    private boolean verified;
+    private int amountSMSsend;
 
     public User(int id) throws Exception {
         Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
@@ -63,7 +63,7 @@ public class User {
         }
     }
     
-    public static void addNewUser(String telephoneNumber, String deviceID) throws Exception{
+    public static void addNewUser(int telephoneNumber, String deviceID) throws Exception{
         DatabaseFunctions func = new DatabaseFunctions();
         func.addNewUser(telephoneNumber, deviceID);
     }
@@ -100,7 +100,7 @@ public class User {
     }
 
     public boolean isVerified(int ID) {
-        return verified;
+        return isVerified();
     }
 
     public void setVerified(int ID, boolean verified) {
@@ -108,7 +108,7 @@ public class User {
     }
 
     public String getPublicKey() {
-        return deviceID;
+        return getDeviceID();
 
     }
 
@@ -127,4 +127,23 @@ public class User {
     public void raiseAmountSMSsend() {
 
     }
+
+    /**
+     * @return the telephonenumber
+     */
+    public int getTelephonenumber() {
+        return telephonenumber;
+    }
+
+    /**
+     * @return the deviceID
+     */
+    public String getDeviceID() {
+        return deviceID;
+    }
+
+    public boolean isVerified() {
+        return verified;
+    }
 }
+

@@ -4,8 +4,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import static pixyel_backend.database.SqlUtils.listToSqlINString;
@@ -19,9 +17,9 @@ public class DatabaseFunctions {
 		this.statements = conn.createStatement();
 	}
 
-	public void addNewUser(String phonenumber, String deviceId) throws SQLException {
+	public void addNewUser(int phonenumber, String deviceId) throws SQLException {
 		statements.executeUpdate("INSERT INTO users(phonenumber,deviceId)VALUES ('"
-				+ SqlUtils.escapeString(phonenumber) + "','" + SqlUtils.escapeString(deviceId)+"')");
+				+phonenumber + "','" + SqlUtils.escapeString(deviceId)+"')");
 	}
         
     /**

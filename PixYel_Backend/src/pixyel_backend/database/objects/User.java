@@ -33,7 +33,7 @@ public class User {
 
     }
 
-    public static User getUserById(int id) throws Exception {
+    public static User getUser(int id) throws Exception {
         try {
             return new User(id);
         } catch (Exception e) {
@@ -41,7 +41,7 @@ public class User {
         }
     }
 
-    public static User getUserById(int telephoneNumber, String deviceID) throws Exception {
+    public static User getUser(int telephoneNumber, String deviceID) throws Exception {
         try {
             return new User(telephoneNumber, deviceID);
         } catch (Exception e) {

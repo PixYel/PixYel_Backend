@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.util.concurrent.Executors;
 import pixyel_backend.connection.compression.Compression;
 import pixyel_backend.connection.encryption.Encryption;
+import pixyel_backend.xml.XML;
 
 /**
  *
@@ -57,10 +58,14 @@ public class Client implements Runnable {
     }
 
     public void onStringReceived(String receivedString) {
-        String decrypted = "";// = Encryption.decrypt(receivedString, User.privatekey);
-        String decompressed = Compression.decompress(decrypted);
-        
-        System.out.println("String received: " + decompressed);
+        try {
+            String decrypted = "";// = Encryption.decrypt(receivedString, User.privatekey);
+            String decompressed = Compression.decompress(decrypted);
+            XML xml = XML.openXML(decompressed);
+            System.out.println("String received: " + xml.toString());
+        } catch (XML.XMLException ex) {
+            System.err.println("Client has send an invalid XML: " + ex);
+        }
     }
 
     public void disconnect(boolean expected) {
@@ -97,6 +102,18 @@ public class Client implements Runnable {
                     }
                 }
             }
+        }
+    }
+
+    public void onCommandReceived(XML xml) {
+        switch (xml.getName()) {
+            case "login":
+                //setPublicKey
+                break;
+            case "smscode":
+                
+                break;
+                
         }
     }
 

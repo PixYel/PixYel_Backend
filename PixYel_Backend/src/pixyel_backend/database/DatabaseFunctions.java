@@ -7,44 +7,62 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import static pixyel_backend.database.SqlUtils.listToSqlINString;
+import pixyel_backend.database.objects.PictureInfo;
 
 public class DatabaseFunctions {
-	private Connection conn;
-	private Statement statements;
 
-	public DatabaseFunctions() throws Exception {
-		this.conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
-		this.statements = conn.createStatement();
-	}
+    private Connection conn;
+    private Statement statements;
 
-	public void addNewUser(int phonenumber, String deviceId) throws SQLException {
-		statements.executeUpdate("INSERT INTO users(phonenumber,deviceId)VALUES ('"
-				+phonenumber + "','" + SqlUtils.escapeString(deviceId)+"')");
-	}
-        
+    public void addNewUser(int phonenumber, String deviceId) throws SQLException {
+        statements.executeUpdate("INSERT INTO users(phonenumber,deviceId)VALUES ('"
+                + phonenumber + "','" + SqlUtils.escapeString(deviceId) + "')");
+    }
+
+    public DatabaseFunctions() throws Exception {
+        this.conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
+        this.statements = conn.createStatement();
+    }
+
     /**
      *
      * @param id
      * @return
      */
-    public HashMap<Integer, String> getPictureData(List ids) throws SQLException{
-            HashMap picturesData = new HashMap();
-            ResultSet resultSet;
-            String idString = listToSqlINString(ids); //Convert ID-List to String for SQL compatability
-            resultSet = statements.executeQuery("SELECT * FROM picturesData WHERE pictureid IN ("+idString+")");
-            //Create Hashmap from the result Set
-            while(resultSet.next()){ 
-                picturesData.put(resultSet.getInt("pictureid"), resultSet.getString("data"));
-            }
-            return picturesData;
+    public HashMap<Integer, String> getPictureData(List ids) throws SQLException {
+        HashMap picturesData = new HashMap();
+        ResultSet resultSet;
+        String idString = listToSqlINString(ids); //Convert ID-List to String for SQL compatability
+        resultSet = statements.executeQuery("SELECT * FROM picturesData WHERE pictureid IN (" + idString + ")");
+        //Create Hashmap from the result Set
+        while (resultSet.next()) {
+            picturesData.put(resultSet.getInt("pictureid"), resultSet.getString("data"));
         }
-        
-	public void closeConnection() {
-		try {
-			this.statements.close();
-			this.conn.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
+        return picturesData;
+    }
+
+    public HashMap<Integer, PictureInfo> getPictureInfo(List ids) throws SQLException {
+        HashMap picturesInfo = new HashMap();
+
+        ResultSet resultSet;
+        String idString = listToSqlINString(ids); //Convert ID-List to String for SQL compatability
+        resultSet = statements.executeQuery("SELECT * FROM picturesInfo WHERE pictureid IN (" + idString + ")");
+        //Create Hashmap from the result Set
+        PictureInfo info;
+        while (resultSet.next()) {
+            int id = resultSet.getInt("pictureid");
+            //info = new PictureInfo(id, 0, 0, timestamp, 0, 0, 0, 0, commentsId);
+            //fixme
+            picturesInfo.put(id, ids);
+        }
+    }
+
+    public void closeConnection() {
+        try {
+            this.statements.close();
+            this.conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

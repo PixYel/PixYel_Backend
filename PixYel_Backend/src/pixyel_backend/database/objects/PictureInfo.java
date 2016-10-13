@@ -6,7 +6,6 @@
 package pixyel_backend.database.objects;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  *
@@ -23,17 +22,141 @@ public class PictureInfo {
     private int userId;
     private String commentsId;
     
-    
-    
-                    statments.executeUpdate("CREATE TABLE picturesInfo ("
-                    + "pictureid INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
-                    + "x_Coordinate DOUBLE(30), "
-                    + "y_coordinate DOUBLE(30), "
-                    + "upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-                    + "upvotes INT(6), "
-                    + "downvotes INT(6), "
-                    + "flags INT(6), "
-                    + "userid INT(6), "
-                    + "comments MEDIUMTEXT)"
-                );
+    public PictureInfo(int id, double xCoord, double yCoord, Date timestamp, int upvotes, int downvotes, int flags, int userId, String commentsId){
+        this.id = id;
+        this.xCoord = xCoord;
+        this.yCoord = yCoord;
+        this.timestamp = timestamp;
+        this.upvotes = upvotes;
+        this.downvotes = downvotes;
+        this.flags = flags;
+        this.userId = userId;
+        this.commentsId = commentsId;
+    }
+
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    /**
+     * @return the xCoord
+     */
+    public double getxCoord() {
+        return xCoord;
+    }
+
+    /**
+     * @param xCoord the xCoord to set
+     */
+    public void setxCoord(double xCoord) {
+        this.xCoord = xCoord;
+    }
+
+    /**
+     * @return the yCoord
+     */
+    public double getyCoord() {
+        return yCoord;
+    }
+
+    /**
+     * @param yCoord the yCoord to set
+     */
+    public void setyCoord(double yCoord) {
+        this.yCoord = yCoord;
+    }
+
+    /**
+     * @return the timestamp
+     */
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    /**
+     * @param timestamp the timestamp to set
+     */
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    /**
+     * @return the upvotes
+     */
+    public int getUpvotes() {
+        return upvotes;
+    }
+
+    /**
+     * @param upvotes the upvotes to set
+     */
+    public void setUpvotes(int upvotes) {
+        this.upvotes = upvotes;
+    }
+
+    /**
+     * @return the downvotes
+     */
+    public int getDownvotes() {
+        return downvotes;
+    }
+
+    /**
+     * @param downvotes the downvotes to set
+     */
+    public void setDownvotes(int downvotes) {
+        this.downvotes = downvotes;
+    }
+
+    /**
+     * @return the flags
+     */
+    public int getFlags() {
+        return flags;
+    }
+
+    /**
+     * @param flags the flags to set
+     */
+    public void setFlags(int flags) {
+        this.flags = flags;
+    }
+
+    /**
+     * @return the userId
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * @param userId the userId to set
+     */
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    /**
+     * @return the commentsId
+     */
+    public String getCommentsId() {
+        return commentsId;
+    }
+
+    /**
+     * @param commentsId the commentsId to set
+     */
+    public void setCommentsId(String commentsId) {
+        this.commentsId = commentsId;
+    }
 }

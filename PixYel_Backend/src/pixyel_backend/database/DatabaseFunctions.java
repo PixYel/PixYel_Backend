@@ -1,31 +1,49 @@
 package pixyel_backend.database;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import static pixyel_backend.database.SqlUtils.listToSqlINString;
 
 public class DatabaseFunctions {
 	private Connection conn;
-	private Statement statments;
+	private Statement statements;
 
 	public DatabaseFunctions() throws Exception {
 		this.conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
-		this.statments = conn.createStatement();
+		this.statements = conn.createStatement();
 	}
 
 	public void addNewUser(String phonenumber, String deviceId) throws SQLException {
-
-		java.util.Date date = new Date();
-		Timestamp timestamp = new Timestamp(date.getTime());
-		statments.executeUpdate("INSERT INTO newUsers(phonenumber,deviceId,reg_date)VALUES ("
-				+ SqlUtils.escapeString(phonenumber) + "," + SqlUtils.escapeString(deviceId) + "," + timestamp + ")");
+		statements.executeUpdate("INSERT INTO users(phonenumber,deviceId)VALUES ('"
+				+ SqlUtils.escapeString(phonenumber) + "','" + SqlUtils.escapeString(deviceId)+"')");
 	}
-
+        
+    /**
+     *
+     * @param id
+     * @return
+     */
+    public HashMap<Integer, String> getPictureData(List ids) throws SQLException{
+            HashMap picturesData = new HashMap();
+            ResultSet resultSet;
+            String idString = listToSqlINString(ids); //Convert ID-List to String for SQL compatability
+            resultSet = statements.executeQuery("SELECT * FROM picturesData WHERE pictureid IN ("+idString+")");
+            //Create Hashmap from the result Set
+            while(resultSet.next()){ 
+                picturesData.put(resultSet.getInt("pictureid"), resultSet.getString("data"));
+            }
+            return picturesData;
+        }
+        
 	public void closeConnection() {
 		try {
-			this.statments.close();
+			this.statements.close();
 			this.conn.close();
 		} catch (SQLException e) {
 			e.printStackTrace();

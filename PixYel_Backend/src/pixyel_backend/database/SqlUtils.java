@@ -1,5 +1,7 @@
 package pixyel_backend.database;
 
+import java.util.List;
+
 public class SqlUtils {
 	public static String escapeString(String str) {
 		if (str == null) {
@@ -25,4 +27,14 @@ public class SqlUtils {
 		}
 		return null;
 	}
+    public static String listToSqlINString(List input){
+        StringBuffer output = new StringBuffer();
+        for(Object obj:input){
+            output.append("'");
+            output.append(obj);
+            output.append("',");
+        }
+        output.deleteCharAt(output.length()-1);
+        return output.toString();
+    }
 }

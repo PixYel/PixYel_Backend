@@ -10,10 +10,32 @@ public class DatabaseInitializer {
 		statments.executeUpdate("DROP DATABASE IF EXISTS pixdb");
 		statments.executeUpdate("CREATE DATABASE pixdb");
 		statments.executeUpdate("USE pixdb");
-		statments.executeUpdate(
-				"CREATE TABLE users (userid INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, phonenumber VARCHAR(30) NOT NULL UNIQUE, deviceId VARCHAR(30) NOT NULL UNIQUE,reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,status TINYINT(1) DEFAULT '0',amountsmssend INT(5) DEFAULT '0')");
-		statments.executeUpdate(
-				"CREATE TABLE picturesInfo (pictureid INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, geodata Varchar(30), upvotes int(6), downvotes int(6))");
-		statments.executeUpdate("CREATE TABLE picturesData (pictureid INT(6) PRIMARY KEY, data LONGTEXT NOT NULL)");
+                
+		statments.executeUpdate("CREATE TABLE users ("
+                    + "userid INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
+                    + "phonenumber INT(30) NOT NULL UNIQUE, "
+                    + "deviceId VARCHAR(80) NOT NULL UNIQUE,"
+                    + "reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+                    + "public_key TEXT, "
+                    + "status TINYINT(1) DEFAULT '0',"
+                    + "amountsmssend INT(5) DEFAULT '0')"
+                );
+		
+                statments.executeUpdate("CREATE TABLE picturesInfo ("
+                    + "pictureid INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
+                    + "x_Coordinate DOUBLE(30), "
+                    + "y_coordinate DOUBLE(30), "
+                    + "upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+                    + "upvotes INT(6), "
+                    + "downvotes INT(6), "
+                    + "flags INT(6), "
+                    + "userid INT(6), "
+                    + "comments MEDIUMTEXT)"
+                );
+                
+		statments.executeUpdate("CREATE TABLE picturesData ("
+                    + "pictureid INT(6) PRIMARY KEY, "    
+                    + "data LONGTEXT NOT NULL)"
+                );
 	}
 }

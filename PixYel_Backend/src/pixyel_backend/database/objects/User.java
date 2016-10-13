@@ -1,5 +1,10 @@
 package pixyel_backend.database.objects;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import pixyel_backend.database.MysqlConnector;
+
 public class User {
 
     private final int id;
@@ -18,6 +23,30 @@ public class User {
         this.banned = false;
         this.verified = true;
         this.amountSMSsend = 0;
+
+        Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
+        Statement sta = conn.createStatement();
+        ResultSet result = sta.executeQuery("SELECT * FROM users WHERE userid LIKE " + id);
+        if (!result.isBeforeFirst()) {
+            throw new Exception("no user found");
+        }
+
+    }
+
+    public static User getUserById(int id) throws Exception {
+        try {
+            return new User(id);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static User getUserById(int telephoneNumber, String deviceID) throws Exception {
+        try {
+            return new User(telephoneNumber, deviceID);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public User(int telephoneNumber, String deviceID) throws Exception {
@@ -33,6 +62,10 @@ public class User {
         this.banned = false;
         this.verified = true;
         this.amountSMSsend = 0;
+
+        Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
+        Statement sta = conn.createStatement();
+        ResultSet result = sta.executeQuery("SELECT * FROM users WHERE phonenumber LIKE " + telephoneNumber + " AND ");
     }
 
     public int getID() {

@@ -30,7 +30,7 @@ public class DatabaseInitializer {
                     + "downvotes INT(6), "
                     + "flags INT(6), "
                     + "userid INT(6), "
-                    + "comments MEDIUMTEXT)"
+                    + "commentId MEDIUMTEXT)"
                 );
                 
 		statments.executeUpdate("CREATE TABLE picturesData ("

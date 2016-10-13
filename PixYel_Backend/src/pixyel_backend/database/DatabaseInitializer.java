@@ -23,8 +23,8 @@ public class DatabaseInitializer {
 		
                 statments.executeUpdate("CREATE TABLE picturesInfo ("
                     + "pictureid INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
-                    + "x_Coordinate DOUBLE(30), "
-                    + "y_coordinate DOUBLE(30), "
+                    + "x_Coordinate DOUBLE, "
+                    + "y_coordinate DOUBLE, "
                     + "upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
                     + "upvotes INT(6), "
                     + "downvotes INT(6), "

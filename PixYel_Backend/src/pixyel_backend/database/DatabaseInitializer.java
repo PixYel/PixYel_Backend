@@ -17,7 +17,7 @@ public class DatabaseInitializer {
                 + "phonenumber INT(30) NOT NULL UNIQUE, "
                 + "deviceId VARCHAR(80) NOT NULL UNIQUE,"
                 + "reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-                + "public_key TEXT, "
+                + "publickey TEXT, "
                 + "status TINYINT(1) DEFAULT '0',"
                 + "amountsmssend INT(5) DEFAULT '0')"
         );

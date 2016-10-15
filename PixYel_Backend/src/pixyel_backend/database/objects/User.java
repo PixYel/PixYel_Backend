@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import pixyel_backend.database.DatabaseFunctions;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.SqlUtils;
@@ -17,6 +18,7 @@ public class User {
     private boolean isBanned;
     private boolean isVerified;
     private int amountSMSsend;
+    private final Timestamp registrationDate;
 
     public User(int id) throws Exception {
         Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
@@ -30,7 +32,7 @@ public class User {
         this.telephonenumber = result.getInt("phonenumber");
         this.deviceID = result.getString("deviceID");
         this.publicKey = result.getString("publickey");
-        this.amountSMSsend = result.getInt("amountSMSsend");
+        this.registrationDate = result.getTimestamp("reg_date");
 
         int status = result.getInt("status");
         if (status < 0) {
@@ -60,6 +62,7 @@ public class User {
         this.deviceID = result.getString("deviceID");
         this.publicKey = result.getString("publickey");
         this.amountSMSsend = result.getInt("amountSMSsend");
+        this.registrationDate = result.getTimestamp("reg_date");
 
         int status = result.getInt("status");
         if (status < 0) {
@@ -206,5 +209,12 @@ public class User {
         } catch (Exception ex) {
             System.out.println(ex);
         }
+    }
+
+    /**
+     * @return the registrationDate
+     */
+    public Timestamp getRegistrationDate() {
+        return registrationDate;
     }
 }

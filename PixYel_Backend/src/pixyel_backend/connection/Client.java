@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import pixyel_backend.connection.compression.Compression;
 import pixyel_backend.connection.encryption.Encryption;
@@ -32,10 +33,13 @@ public class Client implements Runnable {
 
     }
 
+    ExecutorService inputListenerThread;
+
     @Override
     public void run() {
         System.out.println("Client " + socket.hashCode() + " started");
-        Executors.newFixedThreadPool(1).submit(new ClientInputListener());
+        inputListenerThread = Executors.newFixedThreadPool(1);
+        inputListenerThread.submit(new ClientInputListener());
     }
 
     public void sendToClient(String toSend) {
@@ -74,7 +78,14 @@ public class Client implements Runnable {
     }
 
     public void disconnect(boolean expected) {
-
+        inputListenerThread.shutdownNow();
+        Connection.removeFromClientList(this);
+        try {
+            socket.close();
+        } catch (Exception e) {
+            System.err.println("Could not stop ");
+        }
+        System.out.println("Client stopped");
     }
 
     public class ClientInputListener implements Runnable {
@@ -84,7 +95,7 @@ public class Client implements Runnable {
             System.out.println("Inputlistener for Client " + socket.hashCode() + " started");
             BufferedReader rein;
             String string;
-            while (!socket.isClosed() && socket.isConnected() && socket.isBound()) {
+            while (!socket.isClosed() && socket.isConnected() && socket.isBound() && !socket.isInputShutdown() && !socket.isOutputShutdown()) {
                 try {
                     rein = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     string = rein.readLine();
@@ -95,12 +106,12 @@ public class Client implements Runnable {
                         case "java.net.SocketException: Socket closed":
                             System.err.println("Client has lost Connection: " + exe + ", shuting down the connection to the client");
                             disconnect(true);
-                            break;
+                            return;
                         case "invalid stream header":
                             //Jemand sendet zu lange Strings
                             System.err.println("Steam header too long, received String too long??!?: " + exe);
                             disconnect(true);
-                            break;
+                            return;
                         default:
                             System.err.println("Could not read incomming message: " + exe);
                             break;
@@ -128,6 +139,9 @@ public class Client implements Runnable {
                     break;
                 case "smscode":
 
+                    break;
+                case "echo":
+                    sendToClient("echo");
                     break;
 
             }

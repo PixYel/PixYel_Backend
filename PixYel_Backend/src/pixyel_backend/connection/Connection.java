@@ -92,8 +92,11 @@ public class Connection implements Runnable {
      * @param client Der zu entfernende ClientManager
      */
     public static void removeFromClientList(Client client) {
-        CONNECTEDCLIENTS.remove(client.clientData.getID());
-        CONNECTEDCLIENTS.remove(client.socket.hashCode());//In the case he hasnt commited his device id and telephone number
+        try {
+            CONNECTEDCLIENTS.remove(client.clientData.getID());
+            CONNECTEDCLIENTS.remove(client.socket.hashCode());//In the case he hasnt commited his device id and telephone number   
+        } catch (Exception e) {
+        }
     }
 
     public static void addIDToMap(Client client) {

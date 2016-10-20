@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import static pixyel_backend.database.SqlUtils.listToSqlINString;
@@ -51,9 +52,17 @@ public class DatabaseFunctions {
         PictureInfo info;
         while (resultSet.next()) {
             int id = resultSet.getInt("pictureid");
-            //info = new PictureInfo(id, 0, 0, timestamp, 0, 0, 0, 0, commentsId);
-            //fixme
-            picturesInfo.put(id, ids);
+            double xCoord = resultSet.getDouble("xCoords");
+            double yCoord = resultSet.getDouble("yCoords");
+            Date timestamp = resultSet.getDate("timestamp");
+            int upvotes = resultSet.getInt("upvotes");
+            int downvotes = resultSet.getInt("downvotes");
+            int flags = resultSet.getInt("flags");
+            int userId = resultSet.getInt("userId");
+            String commentsId = resultSet.getString("commentsId");
+            
+            info = new PictureInfo(id, xCoord, yCoord, timestamp, upvotes, downvotes, flags, userId, commentsId);
+            picturesInfo.put(id, info);
         }
         return picturesInfo;
     }

@@ -12,8 +12,7 @@ import pixyel_backend.database.SqlUtils;
 public class User {
 
     private final int id;
-    private int telephonenumber;
-    private String deviceID;
+    private final String storeID;
     private String publicKey;
     private boolean isBanned;
     private boolean isVerified;
@@ -21,62 +20,56 @@ public class User {
     private final Timestamp registrationDate;
 
     public User(int id) throws Exception {
-        Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
-        Statement sta = conn.createStatement();
-        ResultSet result = sta.executeQuery("SELECT * FROM users WHERE userid LIKE " + id);
-        if (!result.isBeforeFirst()) {
-            throw new Exception("no user found");
-        }
-        result.next();
-        this.id = id;
-        this.telephonenumber = result.getInt("phonenumber");
-        this.deviceID = result.getString("deviceID");
-        this.publicKey = result.getString("publickey");
-        this.registrationDate = result.getTimestamp("reg_date");
+        try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); Statement sta = conn.createStatement()) {
+            ResultSet result = sta.executeQuery("SELECT * FROM users WHERE id LIKE " + id);
+            if (!result.isBeforeFirst()) {
+                throw new Exception("no user found");
+            }
+            result.next();
+            this.id = id;
+            this.storeID = result.getString("storeid");
+            this.publicKey = result.getString("publickey");
+            this.registrationDate = result.getTimestamp("reg_date");
 
-        int status = result.getInt("status");
-        if (status < 0) {
-            this.isBanned = true;
-        } else {
-            this.isBanned = false;
+            int status = result.getInt("status");
+            if (status < 0) {
+                this.isBanned = true;
+            } else {
+                this.isBanned = false;
+            }
+            if (status > 0) {
+                this.isVerified = true;
+            } else {
+                this.isVerified = false;
+            }
         }
-        if (status > 0) {
-            this.isVerified = true;
-        } else {
-            this.isVerified = false;
-        }
-        sta.close();
-        conn.close();
     }
 
-    public User(int telephoneNumber, String deviceID) throws Exception {
-        Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
-        Statement sta = conn.createStatement();
-        ResultSet result = sta.executeQuery("SELECT * FROM users WHERE phonenumber LIKE " + telephoneNumber + " AND deviceID LIKE '" + deviceID + "'");
-        if (!result.isBeforeFirst()) {
-            throw new Exception("no user found");
-        }
-        result.next();
-        this.id = result.getInt("userID");;
-        this.telephonenumber = result.getInt("phonenumber");
-        this.deviceID = result.getString("deviceID");
-        this.publicKey = result.getString("publickey");
-        this.amountSMSsend = result.getInt("amountSMSsend");
-        this.registrationDate = result.getTimestamp("reg_date");
+    public User(String storeID) throws Exception {
+        try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); Statement sta = conn.createStatement()) {
+            ResultSet result = sta.executeQuery("SELECT * FROM users WHERE storeid LIKE '" + storeID + "'");
+            if (!result.isBeforeFirst()) {
+                throw new Exception("no user found");
+            }
+            result.next();
+            this.id = result.getInt("id");
+            this.storeID = result.getString("storeid");
+            this.publicKey = result.getString("publickey");
+            this.amountSMSsend = result.getInt("amountSMSsend");
+            this.registrationDate = result.getTimestamp("reg_date");
 
-        int status = result.getInt("status");
-        if (status < 0) {
-            this.isBanned = true;
-        } else {
-            this.isBanned = false;
+            int status = result.getInt("status");
+            if (status < 0) {
+                this.isBanned = true;
+            } else {
+                this.isBanned = false;
+            }
+            if (status > 0) {
+                this.isVerified = true;
+            } else {
+                this.isVerified = false;
+            }
         }
-        if (status > 0) {
-            this.isVerified = true;
-        } else {
-            this.isVerified = false;
-        }
-        sta.close();
-        conn.close();
     }
 
     public static User getUser(int id) throws Exception {
@@ -88,18 +81,18 @@ public class User {
         }
     }
 
-    public static User getUser(int telephoneNumber, String deviceID) throws Exception {
+    public static User getUser(String storeID) throws Exception {
         try {
-            return new User(telephoneNumber, deviceID);
+            return new User(storeID);
         } catch (Exception e) {
             System.out.println(e);
             return null;
         }
     }
 
-    public static void addNewUser(int telephoneNumber, String deviceID) throws Exception {
+    public static void addNewUser(String storeID) throws Exception {
         DatabaseFunctions func = new DatabaseFunctions();
-        func.addNewUser(telephoneNumber, deviceID);
+        func.addNewUser(storeID);
     }
 
     public int getID() {
@@ -154,27 +147,10 @@ public class User {
     }
 
     /**
-     * @return the telephonenumber
-     */
-    public int getTelephonenumber() {
-        return telephonenumber;
-    }
-    
-    public void setTelephonenumber(int newNumber){
-        this.telephonenumber=newNumber;
-        updateUserValue("phonenumber", newNumber);
-    }
-
-    /**
      * @return the deviceID
      */
-    public String getDeviceID() {
-        return deviceID;
-    }
-    
-    public void setDeviceID(String newDeviceID){
-        this.deviceID=newDeviceID;
-        updateUserValue("deviceID", newDeviceID);
+    public String getStoreID() {
+        return storeID;
     }
 
     public boolean isVerified() {
@@ -187,12 +163,10 @@ public class User {
 
     private void updateUserValue(String key, String value) {
         try {
-            Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
-            PreparedStatement sta = conn.prepareStatement("UPDATE users SET " + key + " = ? WHERE userid LIKE " + this.id);
-            sta.setString(1, SqlUtils.escapeString(value));
-            sta.execute();
-            sta.close();
-            conn.close();
+            try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); PreparedStatement sta = conn.prepareStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
+                sta.setString(1, SqlUtils.escapeString(value));
+                sta.execute();
+            }
         } catch (Exception ex) {
             System.out.println(ex);
         }
@@ -200,12 +174,10 @@ public class User {
 
     private void updateUserValue(String key, int value) {
         try {
-            Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
-            PreparedStatement sta = conn.prepareStatement("UPDATE users SET " + key + " = ? WHERE userid LIKE " + this.id);
-            sta.setInt(1, value);
-            sta.execute();
-            sta.close();
-            conn.close();
+            try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); PreparedStatement sta = conn.prepareStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
+                sta.setInt(1, value);
+                sta.execute();
+            }
         } catch (Exception ex) {
             System.out.println(ex);
         }
@@ -216,5 +188,15 @@ public class User {
      */
     public Timestamp getRegistrationDate() {
         return registrationDate;
+    }
+
+    public void delete() {
+        try {
+            try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); Statement sta = conn.createStatement()) {
+                sta.executeLargeUpdate("DELETE FROM Users WHERE id = " + this.id);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 }

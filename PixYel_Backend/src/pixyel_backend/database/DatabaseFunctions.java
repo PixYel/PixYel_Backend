@@ -12,12 +12,12 @@ import pixyel_backend.database.objects.PictureInfo;
 
 public class DatabaseFunctions {
 
-    private Connection conn;
-    private Statement statements;
+    private final Connection conn;
+    private final Statement statements;
 
-    public void addNewUser(int phonenumber, String deviceId) throws SQLException {
-        statements.executeUpdate("INSERT INTO users(phonenumber,deviceId)VALUES ('"
-                + phonenumber + "','" + SqlUtils.escapeString(deviceId) + "')");
+    public void addNewUser(String storeID) throws SQLException {
+        statements.executeUpdate("INSERT INTO users(storeid)VALUES ('"
+                + storeID + "')");
     }
 
     public DatabaseFunctions() throws Exception {
@@ -25,11 +25,7 @@ public class DatabaseFunctions {
         this.statements = conn.createStatement();
     }
 
-    /**
-     *
-     * @param id
-     * @return
-     */
+    
     public HashMap<Integer, String> getPictureData(List ids) throws SQLException {
         HashMap picturesData = new HashMap();
         ResultSet resultSet;
@@ -72,7 +68,7 @@ public class DatabaseFunctions {
             this.statements.close();
             this.conn.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e);
         }
     }
 }

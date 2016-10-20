@@ -14,8 +14,7 @@ public class DatabaseInitializer {
 
         statements.executeUpdate("CREATE TABLE users ("
                 + "id               INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
-                + "phonenumber      INT(30) NOT NULL UNIQUE, "
-                + "deviceId         VARCHAR(80) NOT NULL UNIQUE,"
+                + "storeid          VARCHAR(80) NOT NULL UNIQUE,"
                 + "reg_date         TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
                 + "publickey        TEXT, "
                 + "status           TINYINT(1) DEFAULT '0',"
@@ -43,7 +42,7 @@ public class DatabaseInitializer {
                 + "commentid        INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
                 + "pictureid        INT(6) NOT NULL, "
                 + "userid           INT(6) NOT NULL, "
-                + "comment          VARCHAR NOT NULL, "
+                + "comment          VARCHAR(1200) NOT NULL, "
                 + "comment_date     TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
                 + "flags            INT(6) DEFAULT '0')"
         );

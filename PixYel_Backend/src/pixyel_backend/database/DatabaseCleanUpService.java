@@ -25,9 +25,16 @@ public class DatabaseCleanUpService implements Runnable {
             Instant instant = Instant.now().minus(3, ChronoUnit.DAYS);
             Timestamp currentTimestamp = Timestamp.from(instant);
             sta.executeLargeUpdate("DELETE FROM Users WHERE status = 0 AND reg_date < '" + currentTimestamp + "'");
+            sta.close();
+            conn.close();
         } catch (Exception ex) {
             System.out.println("Could not clean up unregistered users - root cause: " + ex);
         }
+    }
+
+    public static void start() {
+        DatabaseCleanUpService dbService = new DatabaseCleanUpService();
+        dbService.run();
     }
 
     @Override
@@ -40,6 +47,6 @@ public class DatabaseCleanUpService implements Runnable {
                 CleanUnregistratedUsers();
             }
         };
-        timer.schedule(dalyTask, 0l, 86400000);
+        timer.schedule(dalyTask, 0l, 86400000);//3 days
     }
 }

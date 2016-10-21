@@ -11,10 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import pixyel_backend.connection.compression.Compression;
-import pixyel_backend.connection.encryption.Encryption;
 import pixyel_backend.database.objects.User;
 import pixyel_backend.xml.XML;
 
@@ -33,25 +30,22 @@ public class Client implements Runnable {
 
     }
 
-    ExecutorService inputListenerThread;
+    ClientInputListener listener;
 
     @Override
     public void run() {
         System.out.println("Client " + socket.hashCode() + " started");
-        inputListenerThread = Executors.newFixedThreadPool(1);
-        inputListenerThread.submit(new ClientInputListener());
+        //inputListenerThread = Executors.newFixedThreadPool(1);
+        listener = new ClientInputListener();
+        new Thread(listener).start();
     }
 
     public void sendToClient(String toSend) {
-        if (clientData == null) {
-            System.err.println("User has not yet submitted its telephonenumber and deviceID");
-            return;
-        }
         try {
             String compressed = Compression.compress(toSend);
-            String encrypted = Encryption.encrypt(compressed, clientData.getPublicKey());
+            //String encrypted = Encryption.encrypt(compressed, clientData.getPublicKey());
             PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-            raus.println(encrypted);
+            raus.println(compressed);
             raus.flush();
         } catch (Exception e) {
             if (e.toString().contains("Socket is closed")) {
@@ -67,8 +61,9 @@ public class Client implements Runnable {
 
     public void onStringReceived(String receivedString) {
         try {
-            String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
-            String decompressed = Compression.decompress(decrypted);
+            System.out.println("String received: " + receivedString);
+            //String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
+            String decompressed = Compression.decompress(receivedString);
             XML xml = XML.openXML(decompressed);
             System.out.println("String received: " + xml.toString());
             onCommandReceived(xml);
@@ -78,7 +73,6 @@ public class Client implements Runnable {
     }
 
     public void disconnect(boolean expected) {
-        inputListenerThread.shutdownNow();
         Connection.removeFromClientList(this);
         try {
             socket.close();
@@ -118,23 +112,26 @@ public class Client implements Runnable {
                     }
                 }
             }
+            System.err.println("Out of the endless while!");
         }
+
     }
 
     public void onCommandReceived(XML xml) {
         try {
+            System.out.println(xml);
             switch (xml.getName()) {
                 case "login":
-                    int telephonenumber = Integer.valueOf(xml.getFirstChild("telephonenumber").getContent());
-                    String deviceID = xml.getFirstChild("deviceid").getContent();
-                    if ((clientData = User.getUser(telephonenumber, deviceID)) != null) {//Existing user
-                        Connection.addIDToMap(this);
-                    } else {//New User
-                        Connection.addIDToMap(this);
-                        User.addNewUser(telephonenumber, deviceID);
-                        clientData = User.getUser(telephonenumber, deviceID);
-                        clientData.setPublicKey(xml.getFirstChild("publickey").getContent());
-                    }
+//                    int telephonenumber = Integer.valueOf(xml.getFirstChild("telephonenumber").getContent());
+//                    String deviceID = xml.getFirstChild("deviceid").getContent();
+//                    if ((clientData = User.getUser(telephonenumber, deviceID)) != null) {//Existing user
+//                        Connection.addIDToMap(this);
+//                    } else {//New User
+//                        Connection.addIDToMap(this);
+//                        User.addNewUser(telephonenumber, deviceID);
+//                        clientData = User.getUser(telephonenumber, deviceID);
+//                        clientData.setPublicKey(xml.getFirstChild("publickey").getContent());
+//                    }
 
                     break;
                 case "smscode":

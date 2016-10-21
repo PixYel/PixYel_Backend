@@ -15,7 +15,7 @@ import pixyel_backend.database.DatabaseCleanUpService;
 public class Main {
 
     public static void main(String[] args) {
-        Connection.start();
         DatabaseCleanUpService.start();
+        Connection.start();
     }
 }

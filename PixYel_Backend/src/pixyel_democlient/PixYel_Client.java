@@ -13,7 +13,8 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pixyel_democlient.compression.Compression;
 import pixyel_democlient.encryption.Encryption;
 import pixyel_democlient.xml.XML;
@@ -37,26 +38,33 @@ public class PixYel_Client {
 
     public PixYel_Client() {
         connect();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(PixYel_Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
         String[] keyPair = Encryption.generateKeyPair();
-        XML login = XML.createNewXML("login").addChildren("telephonenumber", "deviceid", "publickey");
-        login.getFirstChild("telephonenumber").setContent("07482123456");
-        login.getFirstChild("deviceid").setContent("Josuas-Over-9000-Handy");
-        login.getFirstChild("publickey").setContent(keyPair[0]);
-        sendToServer(login.toXMLString());
         sendToServer(XML.createNewXML("echo").toXMLString());
-        disconnect();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(PixYel_Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //disconnect();
     }
 
     public void connect() {
-        try {
-            socket = new Socket();
-            socket.connect(new InetSocketAddress(ip, 7331), 500);
-            Executors.newFixedThreadPool(1).submit(new ServerInputListener());
-            System.out.println("Erfolgreich verbunden");
-        } catch (UnknownHostException e) {
-            System.err.println("Unbekannter Host: " + e.getMessage());
-        } catch (IOException e) {
-            System.err.println("Server konnte nicht erreicht werden: " + e.getMessage());
+        while (socket == null || !socket.isConnected()) {
+            try {
+                socket = new Socket();
+                socket.connect(new InetSocketAddress(ip, 7331), 500);
+                new Thread(new ServerInputListener()).start();
+                System.out.println("Erfolgreich verbunden");
+            } catch (UnknownHostException e) {
+                System.err.println("Unbekannter Host: " + e.getMessage());
+            } catch (IOException e) {
+                System.err.println("Server konnte nicht erreicht werden: " + e.getMessage());
+            }
         }
     }
 
@@ -79,10 +87,11 @@ public class PixYel_Client {
     public void sendToServer(String toSend) {
         try {
             String compressed = Compression.compress(toSend);
-            String encrypted = Encryption.encrypt(compressed, ServerPublicKey);
+            //String encrypted = Encryption.encrypt(compressed, ServerPublicKey);
             PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-            raus.println(encrypted);
+            raus.println(compressed);
             raus.flush();
+            System.out.println("sending successful");
         } catch (Exception e) {
             if (e.toString().contains("Socket is closed")) {
                 System.err.println("Could not send String beacuase the socket is closed, closing the connection now: " + e);
@@ -99,7 +108,7 @@ public class PixYel_Client {
 
         @Override
         public void run() {
-            System.out.println("Inputlistener for Client " + socket.hashCode() + " started");
+            System.out.println("Inputlistener for Server " + socket.hashCode() + " started");
             BufferedReader rein;
             String string;
             while (!socket.isClosed() && socket.isConnected() && socket.isBound()) {
@@ -111,7 +120,7 @@ public class PixYel_Client {
                     switch (exe.toString()) {
                         case "java.net.SocketException: Connection reset":
                         case "java.net.SocketException: Socket closed":
-                            System.err.println("Client has lost Connection: " + exe + ", shuting down the connection to the client");
+                            //System.err.println("Client has lost Connection: " + exe + ", shuting down the connection to the client");
                             disconnect();
                             break;
                         case "invalid stream header":
@@ -129,7 +138,11 @@ public class PixYel_Client {
     }
 
     public void onStringReceived(String string) {
-        System.out.println("String received: " + string);
+        String decompressed = Compression.decompress(string);
+        try {
+            System.out.println(XML.openXML(decompressed));
+        } catch (Exception e) {
+        }
     }
 
 }

@@ -3,8 +3,6 @@ package pixyel_backend.connection;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.HashMap;
 
 /**
@@ -14,15 +12,14 @@ import java.util.HashMap;
 public class Connection implements Runnable {
 
     private static ServerSocket SERVER = null;
-    private static ExecutorService THREADPOOL;
-    private static final HashMap<Integer, Client> CONNECTEDCLIENTS = new HashMap<>();//Nur die eingeloggten Clienten (Geht somit schneller zum getUsername
+    private static HashMap<Integer, Client> CONNECTEDCLIENTS = new HashMap<>();//Nur die eingeloggten Clienten (Geht somit schneller zum getUsername
 
     /**
      * Hier wird der Server gestartet.
      *
      */
     public static void start() {
-        Executors.newFixedThreadPool(1).submit(new Connection());
+        new Thread(new Connection()).start();
     }
 
     /**
@@ -36,8 +33,8 @@ public class Connection implements Runnable {
             try {
                 socket = SERVER.accept();
                 Client client = new Client(socket);
-                THREADPOOL.submit(client);
                 CONNECTEDCLIENTS.put(socket.hashCode(), client);
+                new Thread(client).start();
                 this.onClientConnected(client);
             } catch (IOException e) {
                 if (e.toString().contains("Socket is closed")) {
@@ -115,7 +112,6 @@ public class Connection implements Runnable {
         } catch (IOException ex) {
             System.err.println("Server konnte nicht gestartet werden: " + ex.getMessage());
         }
-        Connection.THREADPOOL = Executors.newCachedThreadPool();
         System.out.println("Server erreichbar unter " + SERVER.getInetAddress() + ":" + SERVER.getLocalPort());
         onServerStarted();
         this.listenForClients();
@@ -130,7 +126,7 @@ public class Connection implements Runnable {
     }
 
     private void onClientConnected(Client client) {
-
+        System.out.println("Client connected");
     }
 
 }

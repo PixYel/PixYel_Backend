@@ -13,11 +13,10 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import pixyel_democlient.compression.Compression;
 import pixyel_democlient.encryption.Encryption;
 import pixyel_democlient.xml.XML;
+
 
 /**
  *
@@ -25,41 +24,41 @@ import pixyel_democlient.xml.XML;
  */
 public class PixYel_Client {
 
-    Socket socket;
-    String ip = "localhost";
-    String ServerPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxy9l8VAKfxIGN+syNncLSj+z+4TV/RDccfnoKrJEtIXcm0bUkU3Ajt9VlAHMzpyWYA5VT4Onsl5Pbe5UV6enFwPqCQUQVIJUzx8gBsnd3twzw6KbhMbbcXKstXVuXvd3h6VzH4ChA6aI2g7qwv7CoSgUw6149ReTXzzKt4eD8U0y/8Wbn9ns2RobakGNYKbHV3GB/jJB0C5uL/Vj5iMirnqh2mUThpHNZn+JG2CqHhtDrJeISDAZN8bBCYV/JEPgo7EzRajZ6hKUHSe1PbSRy6f9W/O7tyiTcgB/nq9BxxkZznc9WIltwCyClnesonP6OHlIrl0JZqRnAyEn0CeIcQIDAQAB";
+    Socket socket;//Der "Kanal" zum Server
+    ServerInputListener listener;//Ein eigener Thread, der auf eingehende Nachrichten vom Server horcht
+    String serverIP = "localhost";//IP-Adresse des Servers, zum testes localhost (Server und Client auf dem selben Computer), wird später "sharknoon.de" sein!
+    //Der öffentliche Key des Servers
+    String serverPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmG8OfhJrkN9/rXLh7auyUPcq7UxmYModYswChY8hIMgZO4m+cxOWopxOptUAYedjA4ZAKGp/P1g6n6YaXvtPQqIbi7G5oCT4vbh0zYFgI3wNCJlKtUX1gb6uCQW3rPinANcPtlZoIyegAsn/OW0FMZtc1x8PN0H1MQTlcCctXdJdotuljeYriO1lkRfb3GsotLIYjciMqIMKGQRQ2Rhj81bnxP9FybdNuVIjlS6Rfx9fzaZ2BKIdm7O7/Dzn9TcSZEOZdOSS7CHMMKr14O26g+bR2HiGWx8AbOH2zP3DMpR9/Y8GUrjO6QPqA+GorICGYWxIlrcm4iYx8740FsDaQQIDAQAB";
+    //Der private Key des Clients
+    String clientPrivateKey;
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        new PixYel_Client();
+        PixYel_Client demoClient = new PixYel_Client();
     }
 
     public PixYel_Client() {
+        //Verbindung zum Server herstellen
         connect();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(PixYel_Client.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        String[] keyPair = Encryption.generateKeyPair();
+        //Beispiel: sendet ein xml mit dem node "echo" an den Server, der server schickt daraufhin selbiges zurück
         sendToServer(XML.createNewXML("echo").toXMLString());
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(PixYel_Client.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        //disconnect();
+        //Wenn man die App schließt oder ähnliches, einfach die disconnect Methode aufrufen
     }
 
     public void connect() {
-        while (socket == null || !socket.isConnected()) {
+        //Falls der Server unerreichbar ist, versucht er es 'attemps' mal
+        int attempts = 10;
+        while (attempts > 0 && (socket == null || !socket.isConnected())) {
+            attempts--;
             try {
                 socket = new Socket();
-                socket.connect(new InetSocketAddress(ip, 7331), 500);
-                new Thread(new ServerInputListener()).start();
+                socket.connect(new InetSocketAddress(serverIP, 7331), 500);
                 System.out.println("Erfolgreich verbunden");
+                listener = new ServerInputListener();
+                new Thread(listener).start();
+                finishEncryptionStuff();
             } catch (UnknownHostException e) {
                 System.err.println("Unbekannter Host: " + e.getMessage());
             } catch (IOException e) {
@@ -68,14 +67,28 @@ public class PixYel_Client {
         }
     }
 
+    public void finishEncryptionStuff() {
+        //Erzeuge Client Private und Public Key
+        String[] keyPair = Encryption.generateKeyPair();
+        //Speichere den Private Key für andere Methoden sichtbar
+        clientPrivateKey = keyPair[1];
+        //Erzeuge ein XML mit einem Tag namens publickey und als Inhalt der public key
+        XML publicKeyAsXML = XML.createNewXML("publickey").setContent(keyPair[0]);
+        //Übermittle dem Server meinen Public Key
+        sendToServer(publicKeyAsXML.toXMLString());
+    }
+
     public void disconnect() {
+        //Unwahrscheinlicher Fall, dass der Socket sich unerwartet beendet hat
         if (socket == null) {
             System.out.println("Server unerreichbar, beende daher sofort...");
             System.exit(0);
         } else {
             try {
+                listener.stop();
+                //"Kanal" zum Server schließen
                 socket.close();
-                System.out.println("Habe mich abgemeldet und beende mich jetzt...");
+                System.out.println("Habe mich beim Server abgemeldet und beende mich jetzt...");
                 System.exit(0);
             } catch (IOException ex) {
                 System.out.println("Konnte Socket nicht schliessen!");
@@ -87,11 +100,11 @@ public class PixYel_Client {
     public void sendToServer(String toSend) {
         try {
             String compressed = Compression.compress(toSend);
-            //String encrypted = Encryption.encrypt(compressed, ServerPublicKey);
+            String encrypted = Encryption.encrypt(compressed, serverPublicKey);
             PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-            raus.println(compressed);
+            raus.println(encrypted);
             raus.flush();
-            System.out.println("sending successful");
+            System.out.println("Erfolgreich \"" + toSend + "\" gesendet!");
         } catch (Exception e) {
             if (e.toString().contains("Socket is closed")) {
                 System.err.println("Could not send String beacuase the socket is closed, closing the connection now: " + e);
@@ -106,41 +119,58 @@ public class PixYel_Client {
 
     public class ServerInputListener implements Runnable {
 
+        //Dient zum einfachen Beenden dieses Threads
+        public boolean run = true;
+
         @Override
         public void run() {
-            System.out.println("Inputlistener for Server " + socket.hashCode() + " started");
+            System.out.println("Listener für eingehende Nachrichten vom Server in eigenem Thread erfolgreich gestartet!");
             BufferedReader rein;
             String string;
-            while (!socket.isClosed() && socket.isConnected() && socket.isBound()) {
+            while (!socket.isClosed() && socket.isConnected() && socket.isBound() && run) {
                 try {
                     rein = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     string = rein.readLine();
-                    onStringReceived(string);
+                    if (run) {
+                        onStringReceived(string);
+                    }
                 } catch (IOException exe) {
-                    switch (exe.toString()) {
-                        case "java.net.SocketException: Connection reset":
-                        case "java.net.SocketException: Socket closed":
-                            //System.err.println("Client has lost Connection: " + exe + ", shuting down the connection to the client");
-                            disconnect();
-                            break;
-                        case "invalid stream header":
-                            //Jemand sendet zu lange Strings
-                            System.err.println("Steam header too long, received String too long??!?: " + exe);
-                            disconnect();
-                            break;
-                        default:
-                            System.err.println("Could not read incomming message: " + exe);
-                            break;
+                    if (run) {
+                        switch (exe.toString()) {
+                            case "java.net.SocketException: Connection reset":
+                            case "java.net.SocketException: Socket closed":
+                                System.err.println("Server unreachable: " + exe + ", shuting down the connection to the Server");
+                                disconnect();
+                                break;
+                            case "invalid stream header":
+                                //Jemand sendet zu lange Strings
+                                System.err.println("Steam header too long, received String too long??!?: " + exe);
+                                disconnect();
+                                break;
+                            default:
+                                System.err.println("Could not read incomming message: " + exe);
+                                break;
+                        }
                     }
                 }
             }
         }
+
+        public void stop() {
+            run = false;
+            System.out.println("Listener für Nachrichten vom Server erfolgreich gestoppt!");
+        }
     }
 
     public void onStringReceived(String string) {
-        String decompressed = Compression.decompress(string);
+        //Decomprimiere den String
+        String decrypted = Encryption.decrypt(string, clientPrivateKey);
+        String decompressed = Compression.decompress(decrypted);
         try {
-            System.out.println(XML.openXML(decompressed));
+            //Parse den String in ein XML
+            XML receivedXML = XML.openXML(decompressed);
+            //Beispielvorgehen: Zeige den XML Baum in der Ausgabe an
+            System.out.println("Command received: \n" + receivedXML.toString());
         } catch (Exception e) {
         }
     }

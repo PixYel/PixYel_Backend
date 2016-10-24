@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import static pixyel_backend.database.SqlUtils.listToSqlINString;
+import pixyel_backend.database.objects.Comment;
 import pixyel_backend.database.objects.PictureInfo;
 
 public class DatabaseFunctions {
@@ -25,7 +26,6 @@ public class DatabaseFunctions {
         this.statements = conn.createStatement();
     }
 
-    
     public HashMap<Integer, String> getPictureData(List ids) throws SQLException {
         HashMap picturesData = new HashMap();
         ResultSet resultSet;
@@ -38,7 +38,7 @@ public class DatabaseFunctions {
         return picturesData;
     }
 
-    public HashMap<Integer, PictureInfo> getPictureInfo(List ids) throws SQLException {
+    public HashMap<Integer, PictureInfo> getPictureInfoList(List ids) throws SQLException {
         HashMap picturesInfo = new HashMap();
 
         ResultSet resultSet;
@@ -56,11 +56,69 @@ public class DatabaseFunctions {
             int flags = resultSet.getInt("flags");
             int userId = resultSet.getInt("userId");
             String commentsId = resultSet.getString("commentsId");
-            
+
             info = new PictureInfo(id, xCoord, yCoord, timestamp, upvotes, downvotes, flags, userId, commentsId);
             picturesInfo.put(id, info);
         }
         return picturesInfo;
+    }
+
+    public Comment getComment(int id) throws SQLException {
+        Comment comment;
+        ResultSet resultSet;
+        String idString = Integer.toString(id);
+        resultSet = statements.executeQuery("SELECT * FROM comments WHERE commentid LIKE (" + idString + ")");
+        resultSet.next();
+        
+        int commentId = resultSet.getInt("commentid");
+        int pictureId = resultSet.getInt("pictureid");
+        int userId = resultSet.getInt("userid");
+        String commentString = resultSet.getString("comment");
+        Date commentDate = resultSet.getDate("comment_date");
+        int flags = resultSet.getInt("flags");
+        
+        comment = new Comment(commentId, pictureId, userId, commentString, commentDate, flags);
+        return comment;
+    }
+
+    public HashMap<Integer, Comment> getCommentListFromCommentId(List ids) throws SQLException {
+        HashMap commentList;
+        ResultSet resultSet;
+        String idString = listToSqlINString(ids);
+        resultSet = statements.executeQuery("SELECT * FROM comments WHERE commentid IN (" + idString + ")");
+        commentList = getCommentList(resultSet); //getCommentList creates the Hashmap
+        return commentList;
+    }
+
+    public HashMap<Integer, Comment> getCommentListFromPictureId(List ids) throws SQLException {
+        HashMap commentList;
+        ResultSet resultSet;
+        String idString = listToSqlINString(ids);
+        resultSet = statements.executeQuery("SELECT * FROM comments WHERE pictureid IN (" + idString + ")");
+        commentList = getCommentList(resultSet); //getCommentList creates the Hashmap
+        return commentList;
+    }
+
+    /**
+     *
+     * @param commentResults
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public HashMap<Integer, Comment> getCommentList(ResultSet commentResults) throws SQLException {
+        HashMap commentList = new HashMap();
+        while (commentResults.next()) {
+            int commentId = commentResults.getInt("commentid");
+            int pictureId = commentResults.getInt("pictureid");
+            int userId = commentResults.getInt("userid");
+            String commentString = commentResults.getString("comment");
+            Date commentDate = commentResults.getDate("comment_date");
+            int flags = commentResults.getInt("flags");
+
+            Comment comment = new Comment(commentId, pictureId, userId, commentString, commentDate, flags);
+            commentList.put(commentId, comment);
+        }
+        return commentList;
     }
 
     public void closeConnection() {

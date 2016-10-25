@@ -17,7 +17,6 @@ import pixyel_democlient.compression.Compression;
 import pixyel_democlient.encryption.Encryption;
 import pixyel_democlient.xml.XML;
 
-
 /**
  *
  * @author Josua Frank
@@ -40,11 +39,36 @@ public class PixYel_Client {
     }
 
     public PixYel_Client() {
-        //Verbindung zum Server herstellen
-        connect("HanswurstID");
-        //Beispiel: sendet ein xml mit dem node "echo" an den Server, der server schickt daraufhin selbiges zurück
-        sendToServer(XML.createNewXML("echo").toXMLString());
-        //Wenn man die App schließt oder ähnliches, einfach die disconnect Methode aufrufen
+        ping();
+        System.exit(0);
+        //**Verbindung zum Server herstellen
+        //connect("HanswurstID");
+        //**Beispiel: sendet ein xml mit dem node "echo" an den Server, der server schickt daraufhin selbiges zurück
+        //sendToServer(XML.createNewXML("echo").toXMLString());
+        //**Wenn man die App schließt oder ähnliches, einfach die disconnect Methode aufrufen
+    }
+
+    public void ping() {
+        //Falls der Server unerreichbar ist, versucht er es 'attemps' mal
+        int attempts = 10;
+        while (attempts > 0 && (socket == null || !socket.isConnected())) {
+            attempts--;
+            try {
+                socket = new Socket();
+                socket.connect(new InetSocketAddress(serverIP, 7331), 500);
+                System.out.println("Erfolgreich verbunden");
+                listener = new ServerInputListener();
+                new Thread(listener).start();
+                System.out.println("Sende Echo...");
+                PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+                raus.println("echo");
+                raus.flush();
+            } catch (UnknownHostException e) {
+                System.err.println("Unbekannter Host: " + e.getMessage());
+            } catch (IOException e) {
+                System.err.println("Server konnte nicht erreicht werden: " + e.getMessage());
+            }
+        }
     }
 
     public void connect(String storeID) {
@@ -73,7 +97,7 @@ public class PixYel_Client {
         //Speichere den Private Key für andere Methoden sichtbar
         clientPrivateKey = keyPair[1];
         //Erzeuge ein XML mit einem Tag namens publickey und einem tag namens storeid, siehe Spezifikation!
-        XML loginXML = XML.createNewXML("login").addChildren("storeid","publickey");
+        XML loginXML = XML.createNewXML("login").addChildren("storeid", "publickey");
         loginXML.getFirstChild("storeid").setContent(storeID);
         loginXML.getFirstChild("publickey").setContent(keyPair[0]);
         //Übermittle dem Server meinen Public Key
@@ -165,9 +189,16 @@ public class PixYel_Client {
     }
 
     public void onStringReceived(String string) {
+        if (string.contains("echo")) {
+            System.out.println("Nachricht vom Server: " + string);
+            return;
+        }
         //Decomprimiere den String
+        System.out.println("verschl. + comp.: " + string);
         String decrypted = Encryption.decrypt(string, clientPrivateKey);
+        System.out.println("comp.: " + decrypted);
         String decompressed = Compression.decompress(decrypted);
+        System.out.println("origin.: " + decompressed);
         try {
             //Parse den String in ein XML
             XML receivedXML = XML.openXML(decompressed);

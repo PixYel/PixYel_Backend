@@ -8,14 +8,15 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import pixyel_backend.ServerLog;
+import pixyel_backend.Log;
 import pixyel_backend.database.Exceptions.DbConnectionException;
 import pixyel_backend.database.Exceptions.UserCreationException;
+import pixyel_backend.database.Exceptions.UserNotFoundException;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.SqlUtils;
 
 public class User {
-    private final static Logger LOG = Logger.getLogger(User.class.getName());
+
     private final int id;
     private final String storeID;
     private String publicKey;
@@ -23,7 +24,16 @@ public class User {
     private boolean isVerified;
     private final Timestamp registrationDate;
 
-    public User(int id) throws UserNotFoundException, SQLException, DbConnectionException {
+    /**
+     * creates a user which by reading out all information about the user from
+     * the db
+     *
+     * @param id
+     * @throws UserNotFoundException
+     * @throws pixyel_backend.database.Exceptions.UserCreationException
+
+     */
+    public User(int id) throws UserNotFoundException, UserCreationException {
         try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); Statement sta = conn.createStatement()) {
             ResultSet result = sta.executeQuery("SELECT * FROM users WHERE id LIKE " + id);
             if (!result.isBeforeFirst()) {
@@ -46,10 +56,21 @@ public class User {
             } else {
                 this.isVerified = false;
             }
+        } catch (SQLException | DbConnectionException ex) {
+             Log.logError(ex.getMessage());
+             throw new UserCreationException();
         }
     }
 
-    public User(String storeID) throws UserNotFoundException, DbConnectionException, SQLException {
+    /**
+     * creates a user which by reading out all information about the user from
+     * the db
+     *
+     * @param storeID
+     * @throws UserNotFoundException
+     * @throws pixyel_backend.database.Exceptions.UserCreationException
+     */
+    public User(String storeID)throws UserNotFoundException, UserCreationException {
         try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile()) {
             ResultSet result = null;
             try {
@@ -57,7 +78,7 @@ public class User {
                 sta.setString(1, SqlUtils.escapeString(storeID));
                 result = sta.executeQuery();
             } catch (SQLException sqlEx) {
-                ServerLog.logInfo(sqlEx.toString());
+                Log.logInfo(sqlEx.toString());
             }
 
             if (result == null || !result.isBeforeFirst()) {
@@ -80,25 +101,30 @@ public class User {
             } else {
                 this.isVerified = false;
             }
+        } catch (SQLException | DbConnectionException ex) {
+             Log.logError(ex.getMessage());
+             throw new UserCreationException();
         }
     }
 
-    public static User getUser(int id) throws Exception {
-        try {
+    /**
+     * static methode to get a User
+     * @param id
+     * @return
+     * @throws UserCreationException 
+     */
+    public static User getUser(int id) throws UserNotFoundException,UserCreationException {
             return new User(id);
-        } catch (UserNotFoundException | SQLException | DbConnectionException e) {
-            System.out.println(e);
-            return null;
-        }
     }
-
-    public static User getUser(String storeID) throws Exception {
-        try {
+    
+    /**
+     * static methode to get a User
+     * @param id
+     * @return
+     * @throws UserCreationException 
+     */
+    public static User getUser(String storeID) throws UserNotFoundException, UserCreationException {
             return new User(storeID);
-        } catch (UserNotFoundException | DbConnectionException | SQLException e) {
-            System.out.println(e);
-            return null;
-        }
     }
 
     /**
@@ -106,7 +132,8 @@ public class User {
      *
      * @param storeID storeId of the client should not be null
      * @return the User that was created
-     * @throws pixyel_backend.database.Exceptions.UserCreationException if creation fails
+     * @throws pixyel_backend.database.Exceptions.UserCreationException if
+     * creation fails
      */
     public static User addNewUser(String storeID) throws UserCreationException {
         try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile()) {
@@ -121,6 +148,7 @@ public class User {
             throw new UserCreationException();
         }
     }
+
 
     public int getID() {
         return this.id;
@@ -159,9 +187,7 @@ public class User {
     public void setPublicKey(String key) {
         updateUserValue("publickey", key);
     }
-    /**
-     * @return the deviceID
-     */
+
     public String getStoreID() {
         return storeID;
     }
@@ -174,14 +200,19 @@ public class User {
         updateUserValue("status", i);
     }
 
-    private void updateUserValue(String key, String value) {
+    /**
+     * Updates a user atribute in the database in the database
+     * @param key name auf the table collum
+     * @param value value that should be inserted
+     */
+    private void updateUserValue(String key, String value){
         try {
             try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); PreparedStatement sta = conn.prepareStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
                 sta.setString(1, SqlUtils.escapeString(value));
                 sta.execute();
             }
-        } catch (Exception ex) {
-            System.out.println(ex);
+        } catch (SQLException | DbConnectionException ex) {
+            Log.logWarning(ex.getMessage());
         }
     }
 
@@ -212,7 +243,4 @@ public class User {
             System.out.println(e);
         }
     }
-}
-
-class UserNotFoundException extends RuntimeException {
 }

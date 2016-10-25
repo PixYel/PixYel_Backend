@@ -24,15 +24,16 @@ public class SqlUtils {
 
         if (clean_string.replaceAll("[a-zA-Z0-9_!@#$%^&*()-=+~.;:,\\Q[\\E\\Q]\\E<>{}\\/?\\\\\"' ]", "").length() < 1) {
             return clean_string;
+        } else {
+            return null;
         }
-        return null;
     }
 
     public static String listToSqlINString(List input) {
         StringBuilder output = new StringBuilder();
         final String highcomma = "'";
         final String highcommacomma = "',";
-        input.forEach((Object obj)->{
+        input.forEach((Object obj) -> {
             output.append(highcomma);
             output.append(obj);
             output.append(highcommacomma);

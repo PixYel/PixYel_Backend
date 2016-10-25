@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pixyel_backend.connection.compression.Compression;
 import pixyel_backend.connection.encryption.Encryption;
 import pixyel_backend.database.objects.User;
@@ -24,12 +26,10 @@ public class Client implements Runnable {
 
     Socket socket;
     private static final String SERVERPRIVATEKEY = "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCYbw5+EmuQ33+tcuHtq7JQ9yrtTGZgyh1izAKFjyEgyBk7ib5zE5ainE6m1QBh52MDhkAoan8/WDqfphpe+09CohuLsbmgJPi9uHTNgWAjfA0ImUq1RfWBvq4JBbes+KcA1w+2VmgjJ6ACyf85bQUxm1zXHw83QfUxBOVwJy1d0l2i26WN5iuI7WWRF9vcayi0shiNyIyogwoZBFDZGGPzVufE/0XJt025UiOVLpF/H1/NpnYEoh2bs7v8POf1NxJkQ5l05JLsIcwwqvXg7bqD5tHYeIZbHwBs4fbM/cMylH39jwZSuM7pA+oD4aisgIZhbEiWtybiJjHzvjQWwNpBAgMBAAECggEAa9DRPVamAlgypGnHZyW0ABRyplkNaJRMaJ7HgdQUqG0fe78Xl6lZODa6YsHxfU39+HYyVuPMkO9Et7rymA/Epeqm9Q2Fr8G2teoLo3dImpCZX2WdM84Bsf0+d1815QASj0ON93fyPDtAr/hTrzhvHgE3j2iGiJz8YemGpubu7ZZPVy89hwNhFcLZxEj8ZTI07nuy+uSiOaJQhrIl8jqH/Y099ex838zP4Bkqo321q5Rb0eYKB+cAB2oU6GQ411mARzkOwB6TI+PHB4l6MPryR24fO0JokiRafs178K3sRIEG2ZwC6VS/5cYDzoksEC/ztmmVV8UBmZXgTJqlQ9OjYQKBgQDTKXQw4pg7V9dV1ku+VrMc09EkI76SX+gZ8+qu4ogM4BFx7ifuwORRAv8pvvKXLN1N0o1br4JgEHnspAZdBOi/GqSnk93Mzdyu4eVeNJsWCW9uQG+x3JutsI4uTipGL3Ujf3RNVVBLz8Mn09iWKBq9x+k3DO6NS7ZsYIK7ueDyBQKBgQC4zTPeoGicyAiONGRwatS94gB7O0OB1OmR0ogjgHxKnZYji1fZZB3MtvspIThFbFM899+iRNwCm9DBSswzmAHCrUEdMVSapuLIcDnFFBD4bsGIi1WQSR0/sq9KXeDb7y2mXDOBdQKT+/YBYCIFSc0uMYuTKPJETXZbAZIqn1dQDQKBgFDmDNG9vjzeBm2oUBR3+t8Md4+08gn6HF31CPA/cYgdQBG6ACqEU/SFhWRk92PbmF18URPTRcuwBEYZAScZ/mFYv8RD7jHMnMOTX+Cbnt7udnZy0Vf/ANWmUpKC98cz31jeN5x5Fu40hrv3eX7tlnEm6b5hgfM4Eoeq4esx53BRAoGAfowWbucNe/8GzMpX1Rty3yx6A+kLS0bPQwoWK6l6c2YCQAjVeYozVdIfn4SeEfwh6+gZffcFacvlYdekidgXrIYTxrfXJagOOA+Rn8Ej9dtyL9yqFQncO5hSrOwoZLMeYYNVydqkj03EoiCAa3qkRHOtDnLFo7wfxiYHP6Spl6kCgYAyE7LN0YZFqHqsvYhLcJVfQtW2kEJp/1HnXIwMHLqDJVeQf3+JPGXZ9vAaonz1bKL9LNdkPXGjVYwxJ99HEdahwgD9TGs57MjfliF4tG9h38KCpSiGD1PXRq3/GJt2XsG5xK5gglBOauAVWRDZAZNqDCNiTIQtw3eXatyZPklrSw==";
-    private String clientPublicKey;
-    User clientData;
+    User userdata;
 
     public Client(Socket socket) {
         this.socket = socket;
-
     }
 
     ClientInputListener listener;
@@ -42,13 +42,13 @@ public class Client implements Runnable {
     }
 
     public void sendToClient(String toSend) {
-        if (clientPublicKey == null || clientPublicKey.isEmpty()) {
+        if (userdata.getPublicKey() == null || userdata.getPublicKey().isEmpty()) {
             System.err.println("Public Key not yet received!");
             return;
         }
         try {
             String compressed = Compression.compress(toSend);
-            String encrypted = Encryption.encrypt(compressed, clientPublicKey);
+            String encrypted = Encryption.encrypt(compressed, userdata.getPublicKey());
             PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
             raus.println(encrypted);
             raus.flush();
@@ -69,10 +69,23 @@ public class Client implements Runnable {
             String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
             String decompressed = Compression.decompress(decrypted);
             XML xml = XML.openXML(decompressed);
-            onCommandReceived(xml);
+            if (!xml.getFirstChild().getContent().equals("login")) {
+                Command.onCommandReceived(this, userdata, xml);
+            } else {
+                login(xml);
+            }
         } catch (XML.XMLException ex) {
             System.err.println("Client has send an invalid XML: " + ex);
         }
+    }
+
+    public void login(XML xml) {
+        try {
+            userdata = User.getUser(xml.getFirstChild("storeid").getContent());
+        } catch (Exception ex) {
+            userdata = User.addNewUser(xml.getFirstChild("storeid").getContent());
+        }
+        userdata.setPublicKey(xml.getFirstChild("login").getContent());
     }
 
     public void disconnect(boolean expected) {
@@ -117,27 +130,6 @@ public class Client implements Runnable {
                 }
             }
             System.err.println("Out of the endless while!");
-        }
-
-    }
-
-    public void onCommandReceived(XML xml) {
-        System.out.println("Command received: \n" + xml);
-        try {
-            switch (xml.getName()) {
-                case "publickey":
-                    clientPublicKey = xml.getContent();
-                    break;
-                case "smscode":
-
-                    break;
-                case "echo":
-                    sendToClient(XML.createNewXML("echo").toXMLString());
-                    break;
-
-            }
-        } catch (Exception e) {
-            System.err.println("Could not execute command: " + xml.getName() + ": " + e);
         }
 
     }

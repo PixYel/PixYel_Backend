@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import pixyel_backend.Log;
 
 /**
  *
@@ -36,11 +37,9 @@ public class Connection implements Runnable {
                 CONNECTEDCLIENTS.put(socket.hashCode(), client);
                 new Thread(client).start();
                 this.onClientConnected(client);
-            } catch (IOException e) {
-                if (e.toString().contains("Socket is closed")) {
-                    System.err.println("Socket geschlossen... " + e);
-                    loop = false;
-                }
+            } catch (Exception e) {
+                Log.logError("IO Error occured during the setup of the connection to the client: " + e);
+                loop = false;
             }
         }
     }
@@ -56,7 +55,7 @@ public class Connection implements Runnable {
                 SERVER.close();
                 System.exit(0);
             } catch (IOException e) {
-                System.err.println("Socket konnte nicht geschlossen werden: " + e.getMessage());
+                Log.logError("Socket could not be closed: " + e.getMessage());
             }
         }
     }
@@ -106,27 +105,39 @@ public class Connection implements Runnable {
         try {
             SERVER = new ServerSocket(7331);
         } catch (java.net.BindException e) {
-            System.err.println("Adresse schon vergeben, läuft schon ein Server?: " + e.getMessage());
-            System.err.println("Server wird beendet, um doppelte Server sofort zu unterbinden!");
+            Log.logError("Adress already binded, is there an existing server running?: " + e.getMessage());
+            Log.logError("Shutting down this server to prevent double servers!");
             System.exit(0);
         } catch (IOException ex) {
-            System.err.println("Server konnte nicht gestartet werden: " + ex.getMessage());
+            Log.logError("Server could not be started: " + ex.getMessage());
         }
-        System.out.println("Server erreichbar unter " + SERVER.getInetAddress() + ":" + SERVER.getLocalPort());
         onServerStarted();
         this.listenForClients();
     }
 
+    /**
+     * Calls this Method just before its closing its socket
+     */
     private void onServerClosing() {
-
+        Log.logInfo("Shutting down the Server...");
     }
 
+    /**
+     * Calls this Method right after it initialized iteself but before its
+     * accepting new clients
+     */
     private void onServerStarted() {
-
+        Log.logInfo("Server reachable on " + SERVER.getLocalSocketAddress() + ":" + SERVER.getLocalPort());
     }
 
+    /**
+     * Calls this method right after the socket connection from a new client is
+     * established, the client runs in a seperate thread
+     *
+     * @param client
+     */
     private void onClientConnected(Client client) {
-        System.out.println("Client connected");
+        Log.logInfo("Client connected");
     }
 
 }

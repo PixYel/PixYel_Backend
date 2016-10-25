@@ -27,8 +27,9 @@ public class Encryption {
     /**
      * Generates the Key-Pair which contains the public and the private key<p>
      *
-     * IMPORTANT: DO NOT SEND DATA LARGER THAN 526 GB!!!!! (because Max Integer, but if you need to, change all ints to longs)
-     * 
+     * IMPORTANT: DO NOT SEND DATA LARGER THAN 526 GB!!!!! (because Max Integer,
+     * but if you need to, change all ints to longs)
+     *
      * Using:
      * <p>
      * {@code //Generate KeyPair (PublicKey AND PrivateKey)}
@@ -73,8 +74,9 @@ public class Encryption {
     /**
      * Encryptes text with a public key
      *
-     * IMPORTANT: DO NOT SEND DATA LARGER THAN 526 GB!!!!! (because Max Integer, but if you need to, change all ints to longs)
-     * 
+     * IMPORTANT: DO NOT SEND DATA LARGER THAN 526 GB!!!!! (because Max Integer,
+     * but if you need to, change all ints to longs)
+     *
      * Using:
      * <p>
      * {@code //Generate KeyPair (PublicKey AND PrivateKey)}
@@ -147,8 +149,9 @@ public class Encryption {
     /**
      * Decryptes a byte-array with a private key
      *
-     * IMPORTANT: DO NOT SEND DATA LARGER THAN 526 GB!!!!! (because Max Integer, but if you need to, change all ints to longs)
-     * 
+     * IMPORTANT: DO NOT SEND DATA LARGER THAN 526 GB!!!!! (because Max Integer,
+     * but if you need to, change all ints to longs)
+     *
      * Using:
      * <p>
      * {@code //Generate KeyPair (PublicKey AND PrivateKey)}

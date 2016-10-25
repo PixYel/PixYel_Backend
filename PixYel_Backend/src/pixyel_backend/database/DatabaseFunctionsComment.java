@@ -9,84 +9,17 @@ import java.util.HashMap;
 import java.util.List;
 import static pixyel_backend.database.SqlUtils.listToSqlINString;
 import pixyel_backend.database.objects.Comment;
-import pixyel_backend.database.objects.PictureInfo;
 
-public class DatabaseFunctions {
+/**
+ *
+ * @author Da_Groove
+ */
+public class DatabaseFunctionsComment {
 
     private final Connection conn;
 
-    /**
-     * Adds a user to a Database
-     * @param storeID storeId of the client should not be null
-     * @throws SQLException
-     */
-    public void addNewUser(String storeID) throws SQLException {
-        storeID = SqlUtils.escapeString(storeID);
-        try (PreparedStatement statement = conn.prepareStatement("INSERT INTO users(storeid)VALUES (?)")) {
-            statement.setString(0, storeID);
-            statement.executeUpdate();
-        }
-    }
-
-    public DatabaseFunctions() throws Exception {
+    public DatabaseFunctionsComment() throws Exception {
         this.conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
-    }
-
-    /**
-     * Creates a HashMap with the PicutreId as Key & all infos about the Picture
-     * in the value - except the Picturedata
-     *
-     * @param ids
-     * @return
-     * @throws SQLException
-     */
-    public HashMap<Integer, String> getPictureData(List ids) throws SQLException {
-        HashMap picturesData = new HashMap();
-        ResultSet resultSet;
-        String idString = listToSqlINString(ids); //Convert ID-List to String for SQL compatability
-        try (PreparedStatement statement = conn.prepareStatement("SELECT * FROM picturesData WHERE pictureid IN (?)")) {
-            statement.setString(0, idString);
-            resultSet = statement.executeQuery();
-        }
-        //Create Hashmap from the result Set
-        while (resultSet.next()) {
-            picturesData.put(resultSet.getInt("pictureid"), resultSet.getString("data"));
-        }
-        return picturesData;
-    }
-
-    /**
-     *
-     * @param ids
-     * @return
-     * @throws SQLException
-     */
-    public HashMap<Integer, PictureInfo> getPictureInfoList(List ids) throws SQLException {
-        HashMap picturesInfo = new HashMap();
-
-        ResultSet resultSet;
-        String idString = listToSqlINString(ids); //Convert ID-List to String for SQL compatability
-        try (PreparedStatement statement = conn.prepareStatement("SELECT * FROM picturesInfo WHERE pictureid IN (?)")) {
-            statement.setString(0, idString);
-            resultSet = statement.executeQuery();
-        }
-        //Create Hashmap from the result Set
-        PictureInfo info;
-        while (resultSet.next()) {
-            int id = resultSet.getInt("pictureid");
-            double xCoord = resultSet.getDouble("xCoords");
-            double yCoord = resultSet.getDouble("yCoords");
-            Date timestamp = resultSet.getDate("timestamp");
-            int upvotes = resultSet.getInt("upvotes");
-            int downvotes = resultSet.getInt("downvotes");
-            int flags = resultSet.getInt("flags");
-            int userId = resultSet.getInt("userId");
-            String commentsId = resultSet.getString("commentsId");
-
-            info = new PictureInfo(id, xCoord, yCoord, timestamp, upvotes, downvotes, flags, userId, commentsId);
-            picturesInfo.put(id, info);
-        }
-        return picturesInfo;
     }
 
     /**
@@ -125,7 +58,11 @@ public class DatabaseFunctions {
         HashMap commentList;
         ResultSet resultSet;
         String idString = listToSqlINString(ids);
-        resultSet = statements.executeQuery("SELECT * FROM comments WHERE commentid IN (" + idString + ")");
+        idString = SqlUtils.escapeString(idString);
+        try (PreparedStatement statement = conn.prepareStatement("SELECT * FROM comments WHERE commentid IN (?)")) {
+            statement.setString(0, idString);
+            resultSet = statement.executeQuery();
+        }
         commentList = getCommentList(resultSet); //getCommentList creates the Hashmap
         return commentList;
     }
@@ -140,7 +77,11 @@ public class DatabaseFunctions {
         HashMap commentList;
         ResultSet resultSet;
         String idString = listToSqlINString(ids);
-        resultSet = statements.executeQuery("SELECT * FROM comments WHERE pictureid IN (" + idString + ")");
+        idString = SqlUtils.escapeString(idString);
+        try(PreparedStatement statement = conn.prepareStatement("SELECT * FROM comments WHERE pictureid IN (?)")){
+            statement.setString(0, idString);
+            resultSet = statement.executeQuery();
+        }
         commentList = getCommentList(resultSet); //getCommentList creates the Hashmap
         return commentList;
     }
@@ -169,7 +110,6 @@ public class DatabaseFunctions {
 
     public void closeConnection() {
         try {
-            this.statements.close();
             this.conn.close();
         } catch (SQLException e) {
             System.out.println(e);

@@ -90,7 +90,7 @@ public class Connection implements Runnable {
      */
     public static void removeFromClientList(Client client) {
         try {
-            CONNECTEDCLIENTS.remove(client.clientData.getID());
+            CONNECTEDCLIENTS.remove(client.userdata.getID());
             CONNECTEDCLIENTS.remove(client.socket.hashCode());//In the case he hasnt commited his device id and telephone number   
         } catch (Exception e) {
         }
@@ -98,7 +98,7 @@ public class Connection implements Runnable {
 
     public static void addIDToMap(Client client) {
         CONNECTEDCLIENTS.remove(client.socket.hashCode());
-        CONNECTEDCLIENTS.put(client.clientData.getID(), client);
+        CONNECTEDCLIENTS.put(client.userdata.getID(), client);
     }
 
     @Override

@@ -17,7 +17,7 @@ public class Log {
     private final static Logger LOG = Logger.getLogger(Logger.class.getName());
 
     public static void logInfo(String logMessage) {
-        LOG.log(Level.WARNING, logMessage);
+        LOG.log(Level.INFO, logMessage);
     }
     
     public static void logError(String logMessage){

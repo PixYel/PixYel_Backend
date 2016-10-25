@@ -25,7 +25,13 @@ public class DatabaseFunctions {
         this.conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
         this.statements = conn.createStatement();
     }
-
+    
+    /**
+     * Creates a HashMap with the PicutreId as Key & all infos about the Picture in the value - except the Picturedata
+     * @param ids
+     * @return
+     * @throws SQLException 
+     */
     public HashMap<Integer, String> getPictureData(List ids) throws SQLException {
         HashMap picturesData = new HashMap();
         ResultSet resultSet;
@@ -37,7 +43,12 @@ public class DatabaseFunctions {
         }
         return picturesData;
     }
-
+    /**
+     * 
+     * @param ids
+     * @return
+     * @throws SQLException 
+     */
     public HashMap<Integer, PictureInfo> getPictureInfoList(List ids) throws SQLException {
         HashMap picturesInfo = new HashMap();
 
@@ -62,7 +73,13 @@ public class DatabaseFunctions {
         }
         return picturesInfo;
     }
-
+    
+    /**
+     * 
+     * @param id
+     * @return
+     * @throws SQLException 
+     */
     public Comment getComment(int id) throws SQLException {
         Comment comment;
         ResultSet resultSet;
@@ -80,7 +97,12 @@ public class DatabaseFunctions {
         comment = new Comment(commentId, pictureId, userId, commentString, commentDate, flags);
         return comment;
     }
-
+    /**
+     * 
+     * @param ids
+     * @return
+     * @throws SQLException 
+     */
     public HashMap<Integer, Comment> getCommentListFromCommentId(List ids) throws SQLException {
         HashMap commentList;
         ResultSet resultSet;
@@ -89,7 +111,13 @@ public class DatabaseFunctions {
         commentList = getCommentList(resultSet); //getCommentList creates the Hashmap
         return commentList;
     }
-
+    
+    /**
+     * 
+     * @param ids
+     * @return
+     * @throws SQLException 
+     */
     public HashMap<Integer, Comment> getCommentListFromPictureId(List ids) throws SQLException {
         HashMap commentList;
         ResultSet resultSet;

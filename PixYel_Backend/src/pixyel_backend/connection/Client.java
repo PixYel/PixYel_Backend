@@ -73,7 +73,7 @@ public class Client implements Runnable {
             String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
             String decompressed = Compression.decompress(decrypted);
             XML xml = XML.openXML(decompressed);
-            if (!xml.getFirstChild().getContent().equals("login")) {
+            if (xml.hasChildren() && !xml.getFirstChild().getName().equals("login")) {
                 Command.onCommandReceived(this, userdata, xml);
             } else {
                 login(xml);

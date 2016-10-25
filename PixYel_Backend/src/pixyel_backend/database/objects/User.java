@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,11 +30,12 @@ public class User {
      * @param id
      * @throws UserNotFoundException
      * @throws pixyel_backend.database.Exceptions.UserCreationException
-
+     *
      */
     public User(int id) throws UserNotFoundException, UserCreationException {
-        try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); Statement sta = conn.createStatement()) {
-            ResultSet result = sta.executeQuery("SELECT * FROM users WHERE id LIKE " + id);
+        try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); PreparedStatement sta = conn.prepareStatement("SELECT * FROM users WHERE id LIKE ?")) {
+            sta.setInt(1, id);
+            ResultSet result = sta.executeQuery();
             if (!result.isBeforeFirst()) {
                 throw new UserNotFoundException();
             }
@@ -57,8 +57,8 @@ public class User {
                 this.isVerified = false;
             }
         } catch (SQLException | DbConnectionException ex) {
-             Log.logError(ex.getMessage());
-             throw new UserCreationException();
+            Log.logError(ex.getMessage());
+            throw new UserCreationException();
         }
     }
 
@@ -70,7 +70,7 @@ public class User {
      * @throws UserNotFoundException
      * @throws pixyel_backend.database.Exceptions.UserCreationException
      */
-    public User(String storeID)throws UserNotFoundException, UserCreationException {
+    public User(String storeID) throws UserNotFoundException, UserCreationException {
         try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile()) {
             ResultSet result = null;
             try {
@@ -102,29 +102,31 @@ public class User {
                 this.isVerified = false;
             }
         } catch (SQLException | DbConnectionException ex) {
-             Log.logError(ex.getMessage());
-             throw new UserCreationException();
+            Log.logError(ex.getMessage());
+            throw new UserCreationException();
         }
     }
 
     /**
      * static methode to get a User
+     *
      * @param id
      * @return
-     * @throws UserCreationException 
+     * @throws UserCreationException
      */
-    public static User getUser(int id) throws UserNotFoundException,UserCreationException {
-            return new User(id);
+    public static User getUser(int id) throws UserNotFoundException, UserCreationException {
+        return new User(id);
     }
-    
+
     /**
      * static methode to get a User
-     * @param id
+     *
+     * @param storeID
      * @return
-     * @throws UserCreationException 
+     * @throws UserCreationException
      */
     public static User getUser(String storeID) throws UserNotFoundException, UserCreationException {
-            return new User(storeID);
+        return new User(storeID);
     }
 
     /**
@@ -148,7 +150,6 @@ public class User {
             throw new UserCreationException();
         }
     }
-
 
     public int getID() {
         return this.id;
@@ -202,42 +203,53 @@ public class User {
 
     /**
      * Updates a user atribute in the database in the database
+     *
      * @param key name auf the table collum
      * @param value value that should be inserted
      */
-    private void updateUserValue(String key, String value){
+    private void updateUserValue(String key, String value) {
         try {
             try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); PreparedStatement sta = conn.prepareStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
                 sta.setString(1, SqlUtils.escapeString(value));
                 sta.execute();
+                sta.close();
             }
         } catch (SQLException | DbConnectionException ex) {
             Log.logWarning(ex.getMessage());
         }
     }
 
+    /**
+     * Updates a user atribute in the database in the database
+     *
+     * @param key name auf the table collum
+     * @param value value that should be inserted
+     */
     private void updateUserValue(String key, int value) {
         try {
             try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); PreparedStatement sta = conn.prepareStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
                 sta.setInt(1, value);
                 sta.execute();
+                sta.close();
             }
         } catch (Exception ex) {
             System.out.println(ex);
         }
     }
 
-    /**
-     * @return the registrationDate
-     */
     public Timestamp getRegistrationDate() {
         return registrationDate;
     }
 
+    /**
+     * deletes this user from the database
+     */
     public void delete() {
         try {
-            try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); Statement sta = conn.createStatement()) {
-                sta.executeLargeUpdate("DELETE FROM Users WHERE id = " + this.id);
+            try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); PreparedStatement sta = conn.prepareStatement("DELETE FROM Users WHERE id = " + this.id);) {
+                sta.setInt(1, this.id);
+                sta.executeUpdate();
+                sta.close();
             }
         } catch (Exception e) {
             System.out.println(e);

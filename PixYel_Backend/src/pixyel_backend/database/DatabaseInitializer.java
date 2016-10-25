@@ -17,7 +17,7 @@ public class DatabaseInitializer {
                 + "storeid          VARCHAR(80) NOT NULL UNIQUE,"
                 + "reg_date         TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
                 + "publickey        TEXT, "
-                + "status           TINYINT(1) DEFAULT '0'"
+                + "status           TINYINT(1) DEFAULT '0')"
         );
 
         statements.executeUpdate("CREATE TABLE picturesInfo ("

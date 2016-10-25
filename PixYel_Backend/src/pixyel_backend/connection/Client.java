@@ -15,6 +15,7 @@ import pixyel_backend.Log;
 import pixyel_backend.connection.compression.Compression;
 import pixyel_backend.connection.encryption.Encryption;
 import pixyel_backend.database.Exceptions.UserCreationException;
+import pixyel_backend.database.Exceptions.UserNotFoundException;
 import pixyel_backend.database.objects.User;
 import pixyel_backend.xml.XML;
 
@@ -85,10 +86,10 @@ public class Client implements Runnable {
 
     public void login(XML xml) {
         try {
-            userdata = User.getUser(xml.getFirstChild("storeid").getContent());
-        } catch (Exception ex) {
+            userdata = User.getUser(xml.getFirstChild().getFirstChild("storeid").getContent());
+        } catch (UserNotFoundException | UserCreationException ex) {
             try {
-                userdata = User.addNewUser(xml.getFirstChild("storeid").getContent());
+                userdata = User.addNewUser(xml.getFirstChild().getFirstChild("storeid").getContent());
             } catch (UserCreationException ex1) {
                 Log.logError("Could not create User: "+ex1);
             }

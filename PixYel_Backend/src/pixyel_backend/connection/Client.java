@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.connection.compression.Compression;
 import pixyel_backend.connection.encryption.Encryption;
@@ -44,16 +46,20 @@ public class Client implements Runnable {
 
     /**
      * Sends a String to the Client
-     * @param toSend The String to be send, not allowed to be 
+     *
+     * @param toSend The String to be send, not allowed to be
      */
     public void sendToClient(String toSend) {
-        if (userdata.getPublicKey() == null || userdata.getPublicKey().isEmpty()) {
-            Log.logError("Public Key not yet received!");
+        if (userdata == null || userdata.getPublicKey() == null || userdata.getPublicKey().isEmpty()) {
+            Log.logError("Log in first!");
             return;
         }
         try {
+            System.out.println("origin.: " + toSend);
             String compressed = Compression.compress(toSend);
+            System.out.println("comp.: " + compressed);
             String encrypted = Encryption.encrypt(compressed, userdata.getPublicKey());
+            System.out.println("verschl. + comp.: " + encrypted);
             PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
             raus.println(encrypted);
             raus.flush();
@@ -70,11 +76,22 @@ public class Client implements Runnable {
     }
 
     public void onStringReceived(String receivedString) {
+        if (receivedString.equals("echo")) {
+            PrintWriter raus;
+            try {
+                raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+                raus.println("echo zurueck");
+                raus.flush();
+            } catch (IOException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return;
+        }
         try {
             String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
             String decompressed = Compression.decompress(decrypted);
             XML xml = XML.openXML(decompressed);
-            if (xml.hasChildren() && !xml.getFirstChild().getName().equals("login")) {
+            if (!xml.getName().equals("login")) {
                 Command.onCommandReceived(this, userdata, xml);
             } else {
                 login(xml);
@@ -86,15 +103,15 @@ public class Client implements Runnable {
 
     public void login(XML xml) {
         try {
-            userdata = User.getUser(xml.getFirstChild().getFirstChild("storeid").getContent());
+            userdata = User.getUser(xml.getFirstChild("storeid").getContent());
         } catch (UserNotFoundException | UserCreationException ex) {
             try {
-                userdata = User.addNewUser(xml.getFirstChild().getFirstChild("storeid").getContent());
+                userdata = User.addNewUser(xml.getFirstChild("storeid").getContent());
             } catch (UserCreationException ex1) {
-                Log.logError("Could not create User: "+ex1);
+                Log.logError("Could not create User: " + ex1);
             }
         }
-        userdata.setPublicKey(xml.getFirstChild("login").getContent());
+        userdata.setPublicKey(xml.getFirstChild("publickey").getContent());
     }
 
     public void disconnect(boolean expected) {

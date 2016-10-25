@@ -41,13 +41,13 @@ public class PixYel_Client {
 
     public PixYel_Client() {
         //Verbindung zum Server herstellen
-        connect();
+        connect("HanswurstID");
         //Beispiel: sendet ein xml mit dem node "echo" an den Server, der server schickt daraufhin selbiges zurück
         sendToServer(XML.createNewXML("echo").toXMLString());
         //Wenn man die App schließt oder ähnliches, einfach die disconnect Methode aufrufen
     }
 
-    public void connect() {
+    public void connect(String storeID) {
         //Falls der Server unerreichbar ist, versucht er es 'attemps' mal
         int attempts = 10;
         while (attempts > 0 && (socket == null || !socket.isConnected())) {
@@ -58,7 +58,7 @@ public class PixYel_Client {
                 System.out.println("Erfolgreich verbunden");
                 listener = new ServerInputListener();
                 new Thread(listener).start();
-                finishEncryptionStuff();
+                finishEncryptionStuff(storeID);
             } catch (UnknownHostException e) {
                 System.err.println("Unbekannter Host: " + e.getMessage());
             } catch (IOException e) {
@@ -67,15 +67,17 @@ public class PixYel_Client {
         }
     }
 
-    public void finishEncryptionStuff() {
+    public void finishEncryptionStuff(String storeID) {
         //Erzeuge Client Private und Public Key
         String[] keyPair = Encryption.generateKeyPair();
         //Speichere den Private Key für andere Methoden sichtbar
         clientPrivateKey = keyPair[1];
-        //Erzeuge ein XML mit einem Tag namens publickey und als Inhalt der public key
-        XML publicKeyAsXML = XML.createNewXML("publickey").setContent(keyPair[0]);
+        //Erzeuge ein XML mit einem Tag namens publickey und einem tag namens storeid, siehe Spezifikation!
+        XML loginXML = XML.createNewXML("login").addChildren("storeid","publickey");
+        loginXML.getFirstChild("storeid").setContent(storeID);
+        loginXML.getFirstChild("publickey").setContent(keyPair[0]);
         //Übermittle dem Server meinen Public Key
-        sendToServer(publicKeyAsXML.toXMLString());
+        sendToServer(loginXML.toXMLString());
     }
 
     public void disconnect() {

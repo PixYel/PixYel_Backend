@@ -71,7 +71,8 @@ public class XML {
      *
      * @param file The XML file to be opened
      * @return The new XML instance
-     * @throws pixyel_backend.xml.XML.XMLException Raised when the XML file contains errors
+     * @throws pixyel_backend.xml.XML.XMLException Raised when the XML file
+     * contains errors
      */
     public static XML openXML(File file) throws XMLException {
         return new XML(file);
@@ -82,7 +83,8 @@ public class XML {
      *
      * @param xml The XML String to be opened
      * @return The new XML instance
-     * @throws pixyel_backend.xml.XML.XMLException Raised when the XML string contains errors
+     * @throws pixyel_backend.xml.XML.XMLException Raised when the XML string
+     * contains errors
      */
     public static XML openXML(String xml) throws XMLException {
         return new XML(xml, true);
@@ -101,8 +103,8 @@ public class XML {
         e = readXML(file);
         LIST.put(e, this);
     }
-    
-    private XML(String toRead, boolean useless) throws XMLException{
+
+    private XML(String toRead, boolean useless) throws XMLException {
         e = readXML(toRead);
         LIST.put(e, this);
     }
@@ -509,15 +511,40 @@ public class XML {
                     e.appendChild(doc.adoptNode((Node) child.e));
                 }
             } else//bla
-            {
-                if (doc.equals(child.e.getOwnerDocument())) {
+             if (doc.equals(child.e.getOwnerDocument())) {
                     e.appendChild(child.e.cloneNode(true));
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
-            }
             alreadyAppended.add(child);
         }
+        if (autosave) {
+            reloadFile();
+        }
+        return this;
+    }
+
+    /**
+     * Adds a child to this node
+     *
+     * @param child The new child to be added
+     * @return The parent of the new child (your current node)
+     */
+    public XML addChild(XML child) {
+        doc = getDoc();
+        if (!alreadyAppended.contains(child)) {
+            if (child.e.getOwnerDocument().equals(doc)) {
+                e.appendChild(child.e);
+            } else {
+                e.appendChild(doc.adoptNode((Node) child.e));
+            }
+        } else//bla
+         if (doc.equals(child.e.getOwnerDocument())) {
+                e.appendChild(child.e.cloneNode(true));
+            } else {
+                e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
+            }
+        alreadyAppended.add(child);
         if (autosave) {
             reloadFile();
         }
@@ -543,14 +570,40 @@ public class XML {
                 }
                 alreadyAppended.add(child);
             } else//
-            {
-                if (doc.equals(child.e.getOwnerDocument())) {
+             if (doc.equals(child.e.getOwnerDocument())) {
                     e.appendChild(child.e.cloneNode(true));
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
-            }
         }
+        if (autosave) {
+            reloadFile();
+        }
+        return this;
+    }
+
+    /**
+     * Adds a child to this node
+     *
+     * @param child The name of the new child to be added
+     * @return The parent of the new child (your current node)
+     */
+    public XML addChild(String child) {
+        doc = getDoc();
+        XML childXML = new XML(child);
+        if (!alreadyAppended.contains(childXML)) {
+            if (childXML.e.getOwnerDocument().equals(doc)) {
+                e.appendChild(childXML.e);
+            } else {
+                e.appendChild(doc.adoptNode((Node) childXML.e));
+            }
+            alreadyAppended.add(childXML);
+        } else//
+         if (doc.equals(childXML.e.getOwnerDocument())) {
+                e.appendChild(childXML.e.cloneNode(true));
+            } else {
+                e.appendChild(doc.adoptNode((Node) childXML.e.cloneNode(true)));
+            }
         if (autosave) {
             reloadFile();
         }

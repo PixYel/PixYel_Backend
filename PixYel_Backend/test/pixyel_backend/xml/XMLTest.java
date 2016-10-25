@@ -480,4 +480,20 @@ public class XMLTest {
         assertFalse("Shouldnt have no Attributes", toTest.hasAttributes());
     }
 
+    @Test
+    public void testAddChild() {
+        toTest.addChild("child");
+        assertTrue("Should have a children", toTest.hasChildren());
+        assertEquals("Should have another name", "child", toTest.getFirstChild().getName());
+        toTest.clearChildren();
+        assertFalse("Could not recover XML", toTest.hasChildren());
+
+        XML child = XML.createNewXML("childxml");
+        toTest.addChild(child);
+        assertTrue("Should have a children", toTest.hasChildren());
+        assertEquals("Should have another name", "childxml", toTest.getFirstChild().getName());
+        toTest.clearChildren();
+        assertFalse("Could not recover XML", toTest.hasChildren());
+    }
+
 }

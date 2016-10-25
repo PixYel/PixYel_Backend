@@ -6,9 +6,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import pixyel_backend.ServerLog;
 import pixyel_backend.database.Exceptions.DbConnectionException;
+import pixyel_backend.database.Exceptions.UserCreationException;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.SqlUtils;
 
@@ -19,7 +21,6 @@ public class User {
     private String publicKey;
     private boolean isBanned;
     private boolean isVerified;
-    private int amountSMSsend;
     private final Timestamp registrationDate;
 
     public User(int id) throws UserNotFoundException, SQLException, DbConnectionException {
@@ -66,7 +67,6 @@ public class User {
             this.id = result.getInt("id");
             this.storeID = result.getString("storeid");
             this.publicKey = result.getString("publickey");
-            this.amountSMSsend = result.getInt("amountSMSsend");
             this.registrationDate = result.getTimestamp("reg_date");
 
             int status = result.getInt("status");
@@ -106,17 +106,20 @@ public class User {
      *
      * @param storeID storeId of the client should not be null
      * @return the User that was created
-     * @throws SQLException
+     * @throws pixyel_backend.database.Exceptions.UserCreationException if creation fails
      */
-    public static User addNewUser(String storeID) throws Exception {
+    public static User addNewUser(String storeID) throws UserCreationException {
         try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile()) {
             try (PreparedStatement statement = conn.prepareStatement("INSERT INTO users(storeid)VALUES (?)")) {
                 storeID = SqlUtils.escapeString(storeID);
                 statement.setString(1, storeID);
                 statement.executeUpdate();
             }
+            return getUser(storeID);
+        } catch (Exception ex) {
+            Logger.getLogger(User.class.getName()).log(Level.WARNING, null, ex);
+            throw new UserCreationException();
         }
-        return getUser(storeID);
     }
 
     public int getID() {
@@ -156,20 +159,6 @@ public class User {
     public void setPublicKey(String key) {
         updateUserValue("publickey", key);
     }
-
-    public int getAmountSMSsend() {
-        return amountSMSsend;
-    }
-
-    public void setAmountSMSsend(int amount) {
-        updateUserValue("amountSMSsend", amount);
-    }
-
-    public void raiseAmountSMSsend() {
-        this.amountSMSsend += 1;
-        setAmountSMSsend(this.amountSMSsend);
-    }
-
     /**
      * @return the deviceID
      */

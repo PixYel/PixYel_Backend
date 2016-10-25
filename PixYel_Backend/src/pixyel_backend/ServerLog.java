@@ -17,7 +17,11 @@ public class ServerLog {
     private final static Logger LOG = Logger.getLogger(Logger.class.getName());
 
     public static void logInfo(String logMessage) {
-        LOG.log(Level.INFO, logMessage);
+        LOG.log(Level.WARNING, logMessage);
+    }
+    
+    public static void logError(String logMessage){
+        LOG.log(Level.SEVERE,logMessage);
     }
 
     public static void logWarning(String logMessage) {

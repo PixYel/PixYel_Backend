@@ -11,10 +11,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import pixyel_backend.Log;
 import pixyel_backend.connection.compression.Compression;
 import pixyel_backend.connection.encryption.Encryption;
+import pixyel_backend.database.Exceptions.UserCreationException;
 import pixyel_backend.database.objects.User;
 import pixyel_backend.xml.XML;
 
@@ -36,14 +36,18 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Client " + socket.hashCode() + " started");
+        Log.logInfo("Client " + socket.hashCode() + " started");
         listener = new ClientInputListener();
         new Thread(listener).start();
     }
 
+    /**
+     * Sends a String to the Client
+     * @param toSend The String to be send, not allowed to be 
+     */
     public void sendToClient(String toSend) {
         if (userdata.getPublicKey() == null || userdata.getPublicKey().isEmpty()) {
-            System.err.println("Public Key not yet received!");
+            Log.logError("Public Key not yet received!");
             return;
         }
         try {
@@ -54,12 +58,12 @@ public class Client implements Runnable {
             raus.flush();
         } catch (Exception e) {
             if (e.toString().contains("Socket is closed")) {
-                System.err.println("Could not send String beacuase the socket is closed, closing the connection now: " + e);
+                Log.logError("Could not send String beacuase the socket is closed, closing the connection now: " + e);
                 this.disconnect(false);
             } else if (e.toString().contains("socket write error")) {
-                System.err.println("Could not write on Socket: " + e);
+                Log.logError("Could not write on Socket: " + e);
             } else {
-                System.err.println("String(" + toSend + ") could not be send: " + e);
+                Log.logError("String(" + toSend + ") could not be send: " + e);
             }
         }
     }
@@ -75,7 +79,7 @@ public class Client implements Runnable {
                 login(xml);
             }
         } catch (XML.XMLException ex) {
-            System.err.println("Client has send an invalid XML: " + ex);
+            Log.logError("Client has send an invalid XML: " + ex);
         }
     }
 
@@ -83,7 +87,11 @@ public class Client implements Runnable {
         try {
             userdata = User.getUser(xml.getFirstChild("storeid").getContent());
         } catch (Exception ex) {
-            userdata = User.addNewUser(xml.getFirstChild("storeid").getContent());
+            try {
+                userdata = User.addNewUser(xml.getFirstChild("storeid").getContent());
+            } catch (UserCreationException ex1) {
+                Log.logError("Could not create User: "+ex1);
+            }
         }
         userdata.setPublicKey(xml.getFirstChild("login").getContent());
     }
@@ -93,16 +101,16 @@ public class Client implements Runnable {
         try {
             socket.close();
         } catch (Exception e) {
-            System.err.println("Could not stop ");
+            Log.logError("Could not stop ");
         }
-        System.out.println("Client stopped");
+        Log.logInfo("Client stopped");
     }
 
     public class ClientInputListener implements Runnable {
 
         @Override
         public void run() {
-            System.out.println("Inputlistener for Client " + socket.hashCode() + " started");
+            Log.logInfo("Inputlistener for Client " + socket.hashCode() + " started");
             BufferedReader rein;
             String string;
             while (!socket.isClosed() && socket.isConnected() && socket.isBound() && !socket.isInputShutdown() && !socket.isOutputShutdown()) {
@@ -115,21 +123,21 @@ public class Client implements Runnable {
                         case "java.net.SocketException: Connection reset":
                         case "java.net.SocketException: Socket closed":
                         case "java.net.SocketException: Software caused connection abort: recv failed":
-                            System.err.println("Client has lost Connection: " + exe + ", shuting down the connection to the client");
+                            Log.logError("Client has lost Connection: " + exe + ", shuting down the connection to the client");
                             disconnect(true);
                             return;
                         case "invalid stream header":
                             //Jemand sendet zu lange Strings
-                            System.err.println("Steam header too long, received String too long??!?: " + exe);
+                            Log.logError("Steam header too long, received String too long??!?: " + exe);
                             disconnect(true);
                             return;
                         default:
-                            System.err.println("Could not read incomming message: " + exe);
+                            Log.logError("Could not read incomming message: " + exe);
                             break;
                     }
                 }
             }
-            System.err.println("Out of the endless while!");
+            Log.logError("Out of the endless while!");
         }
 
     }

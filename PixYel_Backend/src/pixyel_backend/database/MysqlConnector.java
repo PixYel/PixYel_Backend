@@ -3,6 +3,7 @@ package pixyel_backend.database;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Properties;
+import pixyel_backend.database.Exceptions.DbConnectionException;
 
 /**
  * @author Yannick
@@ -40,9 +41,9 @@ public class MysqlConnector {
      * Creates a connection to a database
      *
      * @return
-     * @throws java.lang.Exception
+     * @throws DbConnectionException if can not connect to database
      */
-    public static Connection connectToDatabaseUsingPropertiesFile() throws Exception {
+    public static Connection connectToDatabaseUsingPropertiesFile() throws DbConnectionException {
         try {
             Properties properties = DbAccessPropertiesReader.getProperties();
             String host = properties.getProperty("mysqlhost");
@@ -51,7 +52,8 @@ public class MysqlConnector {
             String passwd = properties.getProperty("mysqlpassword");
             return getConnection(host, database, user, passwd);
         } catch (Exception ex) {
-            throw new Exception("Cant connect to Db \n rootcause : " + ex);
+            System.out.println(ex);
+            throw new DbConnectionException();
         }
     }
 }

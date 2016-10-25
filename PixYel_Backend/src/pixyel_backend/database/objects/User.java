@@ -3,14 +3,17 @@ package pixyel_backend.database.objects;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import pixyel_backend.database.DatabaseFunctions;
+import java.util.logging.Logger;
+import pixyel_backend.ServerLog;
+import pixyel_backend.database.Exceptions.DbConnectionException;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.SqlUtils;
 
 public class User {
-
+    private final static Logger LOG = Logger.getLogger(User.class.getName());
     private final int id;
     private final String storeID;
     private String publicKey;
@@ -19,11 +22,11 @@ public class User {
     private int amountSMSsend;
     private final Timestamp registrationDate;
 
-    public User(int id) throws Exception {
+    public User(int id) throws UserNotFoundException, SQLException, DbConnectionException {
         try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); Statement sta = conn.createStatement()) {
             ResultSet result = sta.executeQuery("SELECT * FROM users WHERE id LIKE " + id);
             if (!result.isBeforeFirst()) {
-                throw new Exception("no user found");
+                throw new UserNotFoundException();
             }
             result.next();
             this.id = id;
@@ -45,11 +48,19 @@ public class User {
         }
     }
 
-    public User(String storeID) throws Exception {
-        try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); Statement sta = conn.createStatement()) {
-            ResultSet result = sta.executeQuery("SELECT * FROM users WHERE storeid LIKE '" + storeID + "'");
-            if (!result.isBeforeFirst()) {
-                throw new Exception("no user found");
+    public User(String storeID) throws UserNotFoundException, DbConnectionException, SQLException {
+        try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile()) {
+            ResultSet result = null;
+            try {
+                PreparedStatement sta = conn.prepareStatement("SELECT * FROM users WHERE storeid LIKE ?");
+                sta.setString(1, SqlUtils.escapeString(storeID));
+                result = sta.executeQuery();
+            } catch (SQLException sqlEx) {
+                ServerLog.logInfo(sqlEx.toString());
+            }
+
+            if (result == null || !result.isBeforeFirst()) {
+                throw new UserNotFoundException();
             }
             result.next();
             this.id = result.getInt("id");
@@ -75,7 +86,7 @@ public class User {
     public static User getUser(int id) throws Exception {
         try {
             return new User(id);
-        } catch (Exception e) {
+        } catch (UserNotFoundException | SQLException | DbConnectionException e) {
             System.out.println(e);
             return null;
         }
@@ -84,15 +95,28 @@ public class User {
     public static User getUser(String storeID) throws Exception {
         try {
             return new User(storeID);
-        } catch (Exception e) {
+        } catch (UserNotFoundException | DbConnectionException | SQLException e) {
             System.out.println(e);
             return null;
         }
     }
 
-    public static void addNewUser(String storeID) throws Exception {
-        DatabaseFunctions func = new DatabaseFunctions();
-        func.addNewUser(storeID);
+    /**
+     * Adds a user to a Database
+     *
+     * @param storeID storeId of the client should not be null
+     * @return the User that was created
+     * @throws SQLException
+     */
+    public static User addNewUser(String storeID) throws Exception {
+        try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile()) {
+            try (PreparedStatement statement = conn.prepareStatement("INSERT INTO users(storeid)VALUES (?)")) {
+                storeID = SqlUtils.escapeString(storeID);
+                statement.setString(1, storeID);
+                statement.executeUpdate();
+            }
+        }
+        return getUser(storeID);
     }
 
     public int getID() {
@@ -199,4 +223,7 @@ public class User {
             System.out.println(e);
         }
     }
+}
+
+class UserNotFoundException extends RuntimeException {
 }

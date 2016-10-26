@@ -43,14 +43,19 @@ public class Log {
     private static String getClassNameWithDate(Object clasS) {
         String result = "";
         int tempLength;
-        if ((tempLength = clasS.getClass().getTypeName().length()) > maxLengthOfClassName) {
+        String className = clasS.getClass().getTypeName();
+        className = className.substring(className.lastIndexOf(".") + 1);
+        if (className.contains("$")) {
+            className = className.substring(0, className.lastIndexOf("$"));
+        }
+        if ((tempLength = className.length()) > maxLengthOfClassName) {
             maxLengthOfClassName = tempLength;
         }
         if (maxLengthOfClassName % 2 == 0) {
             for (int i = 0; i < (maxLengthOfClassName - tempLength) / 2; i++) {
                 result += (" ");
             }
-            result += ("[" + clasS.getClass().getTypeName() + "]");
+            result += ("[" + className + "]");
             for (int i = 0; i < (maxLengthOfClassName - tempLength) / 2; i++) {
                 result += (" ");
             }
@@ -58,7 +63,7 @@ public class Log {
             for (int i = 0; i < ((maxLengthOfClassName - tempLength) / 2) - 1; i++) {
                 result += (" ");
             }
-            result += ("[" + clasS.getClass().getTypeName() + "]");
+            result += ("[" + className + "]");
             for (int i = 0; i < (maxLengthOfClassName - tempLength) / 2; i++) {
                 result += (" ");
             }

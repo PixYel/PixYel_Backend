@@ -34,18 +34,20 @@ public class PixYel_Client {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         PixYel_Client demoClient = new PixYel_Client();
     }
 
-    public PixYel_Client() {
-        ping();
-        System.exit(0);
-        //**Verbindung zum Server herstellen
-        //connect("HanswurstID");
+    public PixYel_Client() throws InterruptedException {
+        //Ping dient nur zum Überprüfen der Socketverbindung, NICHT zum Überprüfen der Verschlüsselung und Compression
+        //ping();
+        //**Verbindung zum Server herstellen ENTWEDER Ping ODER connect aufrufen!!!!!!!!!!!11!!!!!elf!!
+        connect("HanswurstID");
         //**Beispiel: sendet ein xml mit dem node "echo" an den Server, der server schickt daraufhin selbiges zurück
-        //sendToServer(XML.createNewXML("echo").toXMLString());
+        sendToServer(XML.createNewXML("echo").toXMLString());
         //**Wenn man die App schließt oder ähnliches, einfach die disconnect Methode aufrufen
+        Thread.sleep(1000);
+        disconnect();
     }
 
     public void ping() {
@@ -82,7 +84,7 @@ public class PixYel_Client {
                 System.out.println("Erfolgreich verbunden");
                 listener = new ServerInputListener();
                 new Thread(listener).start();
-                finishEncryptionStuff(storeID);
+                login(storeID);
             } catch (UnknownHostException e) {
                 System.err.println("Unbekannter Host: " + e.getMessage());
             } catch (IOException e) {
@@ -91,7 +93,7 @@ public class PixYel_Client {
         }
     }
 
-    public void finishEncryptionStuff(String storeID) {
+    public void login(String storeID) {
         //Erzeuge Client Private und Public Key
         String[] keyPair = Encryption.generateKeyPair();
         //Speichere den Private Key für andere Methoden sichtbar
@@ -111,6 +113,7 @@ public class PixYel_Client {
             System.exit(0);
         } else {
             try {
+                sendToServer(XML.createNewXML("disconnect").toXMLString());
                 listener.stop();
                 //"Kanal" zum Server schließen
                 socket.close();
@@ -194,11 +197,8 @@ public class PixYel_Client {
             return;
         }
         //Decomprimiere den String
-        System.out.println("verschl. + comp.: " + string);
         String decrypted = Encryption.decrypt(string, clientPrivateKey);
-        System.out.println("comp.: " + decrypted);
         String decompressed = Compression.decompress(decrypted);
-        System.out.println("origin.: " + decompressed);
         try {
             //Parse den String in ein XML
             XML receivedXML = XML.openXML(decompressed);

@@ -5,7 +5,12 @@
  */
 package pixyel_backend.connection;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import pixyel_backend.Log;
+import pixyel_backend.database.exceptions.UserCreationException;
+import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.objects.User;
 import pixyel_backend.xml.XML;
 
@@ -15,12 +20,38 @@ import pixyel_backend.xml.XML;
  */
 public class Command {
 
-    public static void onCommandReceived(Client connection, User userdata, XML xml) {
+    public static void onCommandReceived(Client connection, XML xml) {
         Log.logInfo("Command received: \n" + xml, Command.class);
         try {
             switch (xml.getName()) {
+                /*
+                Is for debugging reasons only
+                */
                 case "echo":
-                    connection.sendToClient(XML.createNewXML("echo").toXMLString());
+                    DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+                    String date = " " + dateFormat.format(new Date()) + " ";
+                    connection.sendToClient(XML.createNewXML("echo_zurueck").addAttribute("Date", date).toXMLString());
+                    break;
+                    /*
+                    The client wants to disconnect
+                    */
+                case "disconnect":
+                    connection.disconnect(true);
+                    break;
+                    /*
+                    The client wants to connect
+                    */
+                case "login":
+                    try {
+                        connection.userdata = User.getUser(xml.getFirstChild("storeid").getContent());
+                    } catch (UserNotFoundException | UserCreationException ex) {
+                        try {
+                            connection.userdata = User.addNewUser(xml.getFirstChild("storeid").getContent());
+                        } catch (UserCreationException ex1) {
+                            Log.logError("Could not create User: " + ex1, Command.class);
+                        }
+                    }
+                    connection.userdata.setPublicKey(xml.getFirstChild("publickey").getContent());
                     break;
             }
         } catch (Exception e) {

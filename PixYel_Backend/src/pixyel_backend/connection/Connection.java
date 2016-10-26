@@ -13,10 +13,10 @@ import pixyel_backend.Log;
 public class Connection implements Runnable {
 
     private static ServerSocket SERVER = null;
-    private static HashMap<Integer, Client> CONNECTEDCLIENTS = new HashMap<>();//Nur die eingeloggten Clienten (Geht somit schneller zum getUsername
+    private static final HashMap<Integer, Client> CONNECTEDCLIENTS = new HashMap<>();//All online clients
 
     /**
-     * Hier wird der Server gestartet.
+     * Here the server is going to be started.
      *
      */
     public static void start() {
@@ -24,10 +24,20 @@ public class Connection implements Runnable {
     }
 
     /**
-     * Sucht unendlich lang nach Clients, die sich verbinden möchten. Sobald
-     * sich ein Client meldet, weist er ihm einen eigenen Thread (Client) zu.
+     * Removes the client from the list of connected clients
+     *
+     * @param socketHashCode The Hash code of the socket as key of the map
      */
-    private void listenForClients() {
+    public static void disconnect(int socketHashCode) {
+        onClientDisconnected(CONNECTEDCLIENTS.get(socketHashCode));
+        CONNECTEDCLIENTS.remove(socketHashCode);
+    }
+
+    /**
+     * Searches infinietly for clients, when a client is connected, it gets its
+     * own thread
+     */
+    private static void listenForClients() {
         boolean loop = true;
         Socket socket;
         while (loop) {
@@ -36,32 +46,32 @@ public class Connection implements Runnable {
                 Client client = new Client(socket);
                 CONNECTEDCLIENTS.put(socket.hashCode(), client);
                 new Thread(client).start();
-                this.onClientConnected(client);
+                onClientConnected(client);
             } catch (Exception e) {
-                Log.logError("IO Error occured during the setup of the connection to the client: " + e, this);
+                Log.logError("IO Error occured during the setup of the connection to the client: " + e, Connection.class);
                 loop = false;
             }
         }
     }
 
     /**
-     * Muss bei Disconnect des Servers aufgerufen werden
+     * Stops the server
      *
      */
-    public void stopServer() {
+    public static void stopServer() {
         if (SERVER != null) {
             try {
                 onServerClosing();
                 SERVER.close();
                 System.exit(0);
             } catch (IOException e) {
-                Log.logError("Socket could not be closed: " + e.getMessage(), this);
+                Log.logError("Socket could not be closed: " + e.getMessage(), Connection.class);
             }
         }
     }
 
     /**
-     * Sendet ein Objekt zu allen verbundenen Clienten
+     * Sends a strig to everyone who is connected
      *
      * @param stringToSend
      */
@@ -72,34 +82,8 @@ public class Connection implements Runnable {
     }
 
     /**
-     * Gibt den ClientManager des jeweiigen Benutzers zurück
-     *
-     * @param id Der Benutzer, dessen Client gesucht wird
-     * @return Der ClientManager des Benutzers
+     * Startes the server, use {@code Connection.start()} !!
      */
-    public static Client getClient(int id) {
-        return CONNECTEDCLIENTS.get(id);
-    }
-
-    /**
-     * Entfernt einen Clienten von der Clientmanagerliste, z.B. falls er seine
-     * Verbindung trennt
-     *
-     * @param client Der zu entfernende ClientManager
-     */
-    public static void removeFromClientList(Client client) {
-        try {
-            CONNECTEDCLIENTS.remove(client.userdata.getID());
-            CONNECTEDCLIENTS.remove(client.socket.hashCode());//In the case he hasnt commited his device id and telephone number   
-        } catch (Exception e) {
-        }
-    }
-
-    public static void addIDToMap(Client client) {
-        CONNECTEDCLIENTS.remove(client.socket.hashCode());
-        CONNECTEDCLIENTS.put(client.userdata.getID(), client);
-    }
-
     @Override
     public void run() {
         try {
@@ -112,32 +96,40 @@ public class Connection implements Runnable {
             Log.logError("Server could not be started: " + ex.getMessage(), this);
         }
         onServerStarted();
-        this.listenForClients();
+        Connection.listenForClients();
     }
 
     /**
      * Calls this Method just before its closing its socket
      */
-    private void onServerClosing() {
-        Log.logInfo("Shutting down the Server...", this);
+    private static void onServerClosing() {
+        Log.logInfo("Shutting down the Server...", Connection.class);
     }
 
     /**
      * Calls this Method right after it initialized iteself but before its
      * accepting new clients
      */
-    private void onServerStarted() {
-        Log.logInfo("Server reachable on " + SERVER.getLocalSocketAddress() + ":" + SERVER.getLocalPort(), this);
+    private static void onServerStarted() {
+        Log.logInfo("Server reachable on " + SERVER.getLocalSocketAddress() + ":" + SERVER.getLocalPort(), Connection.class);
     }
 
     /**
      * Calls this method right after the socket connection from a new client is
      * established, the client runs in a seperate thread
      *
-     * @param client
+     * @param client The client which is connected
      */
-    private void onClientConnected(Client client) {
-        Log.logInfo("Client connected", this);
+    private static void onClientConnected(Client client) {
+        Log.logInfo("Client " + client.getName() + "connected", Connection.class);
+    }
+
+    /**
+     * Calls this method just before its closing the socket of the client
+     * @param client The client which is going to be disconnected
+     */
+    private static void onClientDisconnected(Client client) {
+        Log.logInfo("Client " + client.getName() + " disconnected", Connection.class);
     }
 
 }

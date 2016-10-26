@@ -27,7 +27,7 @@ public class UserTest {
 
     public UserTest() {
         try {
-            this.testuser = User.addNewUser(System.currentTimeMillis()+"");
+            this.testuser = User.addNewUser("JUnit-Test-User-"+System.currentTimeMillis());
         } catch (UserCreationException ex) {
             System.err.println("Could not create testuser");
         }
@@ -78,8 +78,8 @@ public class UserTest {
         assertFalse(testuser.isBanned());
         testuser.setBanned(true);
         assertTrue(testuser.isBanned());
+        testuser.setBanned(false);       
         assertFalse(testuser.isBanned());
-        testuser.setBanned(true);
     }
 
     /**
@@ -90,8 +90,8 @@ public class UserTest {
         assertFalse(testuser.isBanned());
         testuser.setBanned(true);
         assertTrue(testuser.isBanned());
+        testuser.setBanned(false);       
         assertFalse(testuser.isBanned());
-        testuser.setBanned(true);
     }
 
     /**

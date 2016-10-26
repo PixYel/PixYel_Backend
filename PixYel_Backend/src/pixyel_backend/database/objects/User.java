@@ -60,7 +60,7 @@ public class User {
                 this.isVerified = false;
             }
         } catch (SQLException | DbConnectionException ex) {
-            Log.logError("Could not read userinformation from database - rootcause: " + ex.getMessage());
+            Log.logError("Could not read userinformation from database - rootcause: " + ex.getMessage(), this);
             throw new UserCreationException();
         }
     }
@@ -101,7 +101,7 @@ public class User {
                 this.isVerified = false;
             }
         } catch (SQLException | DbConnectionException ex) {
-            Log.logError("Could not read userinformation from database - rootcause: " + ex.getMessage());
+            Log.logError("Could not read userinformation from database - rootcause: " + ex.getMessage(), this);
             throw new UserCreationException();
         }
     }
@@ -143,12 +143,10 @@ public class User {
             statement.executeUpdate();
             return new User(storeID);
         } catch (SQLException | UserNotFoundException | UserCreationException | DbConnectionException ex) {
-            Log.logWarning("Could not create user for storeid \"" + storeID + "\" - rootcause: " + ex);
+            Log.logWarning("Could not create user for storeid \"" + storeID + "\" - rootcause: " + ex, User.class);
             throw new UserCreationException();
         }
     }
-
-    
 
     public int getID() {
         return this.id;
@@ -224,7 +222,7 @@ public class User {
             sta.execute();
             sta.close();
         } catch (SQLException ex) {
-            Log.logError("couldnt update user value \"" + key + "\" - rootcause:" + ex.getMessage());
+            Log.logError("couldnt update user value \"" + key + "\" - rootcause:" + ex.getMessage(),this);
         }
     }
 
@@ -241,7 +239,7 @@ public class User {
             sta.execute();
             sta.close();
         } catch (SQLException ex) {
-            Log.logError("couldnt update user value \"" + key + "\" - rootcause:" + ex.getMessage());
+            Log.logError("couldnt update user value \"" + key + "\" - rootcause:" + ex.getMessage(),this);
         }
 
     }
@@ -259,7 +257,7 @@ public class User {
             sta.executeUpdate();
 
         } catch (Exception e) {
-            Log.logWarning("Couldnt delete user \"" + this.id + "\" - rootcause:" + e);
+            Log.logWarning("Couldnt delete user \"" + this.id + "\" - rootcause:" + e,this);
         }
     }
 }

@@ -21,7 +21,7 @@ public class DatabaseCleanUpService implements Runnable {
      * days but didn't finished the account validation
      */
     public void CleanUnregistratedUsers() {
-        Log.logInfo("Cleaning usertable");
+        Log.logInfo("Cleaning usertable", this);
         try {
             Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
             Statement sta = conn.createStatement();
@@ -31,7 +31,7 @@ public class DatabaseCleanUpService implements Runnable {
             sta.close();
             conn.close();
         } catch (DbConnectionException | SQLException ex) {
-            Log.logWarning("Could not clean up unregistered users - root cause: " + ex);
+            Log.logWarning("Could not clean up unregistered users - root cause: " + ex, this);
         }
     }
 
@@ -46,7 +46,7 @@ public class DatabaseCleanUpService implements Runnable {
         TimerTask dalyTask = new TimerTask() {
             @Override
             public void run() {
-                Log.logInfo("Starting DatabaseCleanupService");
+                Log.logInfo("Starting DatabaseCleanupService", this);
                 CleanUnregistratedUsers();
             }
         };

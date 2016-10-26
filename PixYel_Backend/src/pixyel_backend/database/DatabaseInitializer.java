@@ -9,17 +9,17 @@ import pixyel_backend.database.exceptions.DbConnectionException;
 public class DatabaseInitializer {
 
     public static void init() throws SQLException, DbConnectionException {
-        Log.logInfo("Database-Initialization: starting database-initialization");
-        Log.logInfo("Database-Initialization: setting up Connection to the database");
+        Log.logInfo("Database-Initialization: starting database-initialization", DatabaseInitializer.class);
+        Log.logInfo("Database-Initialization: setting up Connection to the database", DatabaseInitializer.class);
         Connection conn;
         conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
         Statement statements;
         statements = conn.createStatement();
         
-        Log.logInfo("Database-Initialization: deleting old Database");
+        Log.logInfo("Database-Initialization: deleting old Database", DatabaseInitializer.class);
         statements.executeUpdate("DROP DATABASE IF EXISTS pixdb");
         
-        Log.logInfo("Database-Initialization: creating new Databse");
+        Log.logInfo("Database-Initialization: creating new Databse", DatabaseInitializer.class);
         statements.executeUpdate("CREATE DATABASE pixdb");
         statements.executeUpdate("USE pixdb");
 
@@ -59,7 +59,7 @@ public class DatabaseInitializer {
         
         statements.close();
         conn.close();
-        Log.logInfo("finished database-initialization");
+        Log.logInfo("finished database-initialization", DatabaseInitializer.class);
     }
 }
 

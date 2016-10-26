@@ -5,12 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import pixyel_backend.Log;
-import pixyel_backend.database.Exceptions.DbConnectionException;
-import pixyel_backend.database.Exceptions.UserCreationException;
-import pixyel_backend.database.Exceptions.UserNotFoundException;
+import pixyel_backend.database.exceptions.DbConnectionException;
+import pixyel_backend.database.exceptions.UserCreationException;
+import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.SqlUtils;
 
@@ -29,7 +27,7 @@ public class User {
      *
      * @param id
      * @throws UserNotFoundException
-     * @throws pixyel_backend.database.Exceptions.UserCreationException
+     * @throws pixyel_backend.database.exceptions.UserCreationException
      *
      */
     public User(int id) throws UserNotFoundException, UserCreationException {
@@ -68,7 +66,7 @@ public class User {
      *
      * @param storeID
      * @throws UserNotFoundException
-     * @throws pixyel_backend.database.Exceptions.UserCreationException
+     * @throws pixyel_backend.database.exceptions.UserCreationException
      */
     public User(String storeID) throws UserNotFoundException, UserCreationException {
         try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile()) {
@@ -134,7 +132,7 @@ public class User {
      *
      * @param storeID storeId of the client should not be null
      * @return the User that was created
-     * @throws pixyel_backend.database.Exceptions.UserCreationException if
+     * @throws pixyel_backend.database.exceptions.UserCreationException if
      * creation fails
      */
     public static User addNewUser(String storeID) throws UserCreationException {
@@ -186,6 +184,7 @@ public class User {
     }
 
     public void setPublicKey(String key) {
+        this.publicKey=key;
         updateUserValue("publickey", key);
     }
 
@@ -198,6 +197,16 @@ public class User {
     }
 
     private void changeStatusTo(int i) {
+        if (i < 0) {
+                this.isBanned = true;
+            } else {
+                this.isBanned = false;
+            }
+            if (i > 0) {
+                this.isVerified = true;
+            } else {
+                this.isVerified = false;
+            }
         updateUserValue("status", i);
     }
 

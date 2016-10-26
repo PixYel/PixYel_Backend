@@ -16,8 +16,8 @@ import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.connection.compression.Compression;
 import pixyel_backend.connection.encryption.Encryption;
-import pixyel_backend.database.Exceptions.UserCreationException;
-import pixyel_backend.database.Exceptions.UserNotFoundException;
+import pixyel_backend.database.exceptions.UserCreationException;
+import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.objects.User;
 import pixyel_backend.xml.XML;
 

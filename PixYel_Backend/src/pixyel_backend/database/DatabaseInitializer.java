@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import pixyel_backend.Log;
-import pixyel_backend.database.Exceptions.DbConnectionException;
+import pixyel_backend.database.exceptions.DbConnectionException;
 
 public class DatabaseInitializer {
 

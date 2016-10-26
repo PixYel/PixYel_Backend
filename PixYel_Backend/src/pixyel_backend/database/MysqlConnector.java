@@ -3,7 +3,7 @@ package pixyel_backend.database;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Properties;
-import pixyel_backend.database.Exceptions.DbConnectionException;
+import pixyel_backend.database.exceptions.DbConnectionException;
 
 /**
  * @author Yannick

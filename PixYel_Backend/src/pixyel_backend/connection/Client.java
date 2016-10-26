@@ -55,11 +55,8 @@ public class Client implements Runnable {
             return;
         }
         try {
-            System.out.println("origin.: " + toSend);
             String compressed = Compression.compress(toSend);
-            System.out.println("comp.: " + compressed);
             String encrypted = Encryption.encrypt(compressed, userdata.getPublicKey());
-            System.out.println("verschl. + comp.: " + encrypted);
             PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
             raus.println(encrypted);
             raus.flush();
@@ -77,6 +74,7 @@ public class Client implements Runnable {
 
     public void onStringReceived(String receivedString) {
         if (receivedString != null) {
+            //------------TEMP-START-------------
             if (receivedString.equals("echo")) {
                 PrintWriter raus;
                 try {
@@ -88,6 +86,7 @@ public class Client implements Runnable {
                 }
                 return;
             }
+            //--------------TEMP-END-------------
             try {
                 String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
                 String decompressed = Compression.decompress(decrypted);

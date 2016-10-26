@@ -5,6 +5,9 @@
  */
 package pixyel_backend.connection;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import pixyel_backend.Log;
 import pixyel_backend.database.objects.User;
 import pixyel_backend.xml.XML;
@@ -20,7 +23,9 @@ public class Command {
         try {
             switch (xml.getName()) {
                 case "echo":
-                    connection.sendToClient(XML.createNewXML("echo").toXMLString());
+                    DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+                    String date = " " + dateFormat.format(new Date()) + " ";
+                    connection.sendToClient(XML.createNewXML("echo_zurueck").addAttribute("Date", date).toXMLString());
                     break;
             }
         } catch (Exception e) {

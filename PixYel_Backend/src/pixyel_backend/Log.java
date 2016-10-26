@@ -18,21 +18,27 @@ public class Log {
     static int maxLengthOfClassName = 0;
 
     public static void logInfo(String logMessage, Object clasS) {
-        String toPrint = getClassNameWithDate(clasS);
-        toPrint += "INFO:    " + logMessage;
-        System.out.println(toPrint);
+        String[] lines = logMessage.split("\\r?\\n");
+        String toPrint = getClassNameWithDate(clasS) + "INFO:    ";
+        for (String line : lines) {
+            System.out.println(toPrint + line);
+        }
     }
 
     public static void logError(String logMessage, Object clasS) {
-        String toPrint = getClassNameWithDate(clasS);
-        toPrint += "ERROR:   " + logMessage;
-        System.err.println(toPrint);
+        String[] lines = logMessage.split("\\r?\\n");
+        String toPrint = getClassNameWithDate(clasS) + "ERROR:   ";
+        for (String line : lines) {
+            System.err.println(toPrint + line);
+        }
     }
 
     public static void logWarning(String logMessage, Object clasS) {
-        String toPrint = getClassNameWithDate(clasS);
-        toPrint += "WARNING: " + logMessage;
-        System.out.println(toPrint);
+        String[] lines = logMessage.split("\\r?\\n");
+        String toPrint = getClassNameWithDate(clasS) + "WARNING: ";
+        for (String line : lines) {
+            System.out.println(toPrint + line);
+        }
     }
 
     /**

@@ -37,7 +37,7 @@ public class Compression {
     public static String compress(String toCompress) {
         try {
             Deflater deflater = new Deflater();
-            byte[] input = toCompress.getBytes();
+            byte[] input = toCompress.getBytes("UTF8");
             deflater.setInput(input);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream(input.length);
             deflater.finish();
@@ -55,7 +55,7 @@ public class Compression {
         return "";
     }
 
-        /**
+    /**
      * Decompresses a String using the GZIP algorithm
      *
      * Using:
@@ -89,7 +89,7 @@ public class Compression {
             }
             outputStream.close();
             byte[] output = outputStream.toByteArray();
-            return new String(output);
+            return new String(output, "UTF8");
         } catch (IOException | DataFormatException ex) {
             System.err.println("Cou,d not decompress String: " + ex);
         }

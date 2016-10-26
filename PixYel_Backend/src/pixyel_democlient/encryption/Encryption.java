@@ -1,5 +1,6 @@
 package pixyel_democlient.encryption;
 
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -15,6 +16,8 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.util.Base64;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Josua Frank
@@ -27,8 +30,9 @@ public class Encryption {
     /**
      * Generates the Key-Pair which contains the public and the private key<p>
      *
-     * IMPORTANT: DO NOT SEND DATA LARGER THAN 526 GB!!!!! (because Max Integer, but if you need to, change all ints to longs)
-     * 
+     * IMPORTANT: DO NOT SEND DATA LARGER THAN 526 GB!!!!! (because Max Integer,
+     * but if you need to, change all ints to longs)
+     *
      * Using:
      * <p>
      * {@code //Generate KeyPair (PublicKey AND PrivateKey)}
@@ -73,8 +77,9 @@ public class Encryption {
     /**
      * Encryptes text with a public key
      *
-     * IMPORTANT: DO NOT SEND DATA LARGER THAN 526 GB!!!!! (because Max Integer, but if you need to, change all ints to longs)
-     * 
+     * IMPORTANT: DO NOT SEND DATA LARGER THAN 526 GB!!!!! (because Max Integer,
+     * but if you need to, change all ints to longs)
+     *
      * Using:
      * <p>
      * {@code //Generate KeyPair (PublicKey AND PrivateKey)}
@@ -96,8 +101,9 @@ public class Encryption {
      * <p>
      * <p>
      * @param text The text as String to encrypt
-     * @param publicKey The public key from the KeyPair to encrypt with
-     * @return The result of the encryption as byte-array
+     * @param publicKey The public key from the KeyPair to encrypt with in
+     * BASE64 encoded!!
+     * @return The result of the encryption as a BASE64 encoded String
      */
     public static String encrypt(String text, String publicKey) {
         try {
@@ -108,23 +114,23 @@ public class Encryption {
             // Initiate the Cipher, telling it that it is going to Encrypt, giving it the public key
             encrypter.init(Cipher.ENCRYPT_MODE, pubKey);
 
+            byte[] textAsBytes = text.getBytes("UTF8");
             //I dont know why but this is the max amount of encryption data
             int encryptedKeyLength = (keyLength / 8);
             int maxBytesToEncrypt = encryptedKeyLength - 11;
-            int amountOfSplitting = text.length() / maxBytesToEncrypt;
-            if (text.length() % maxBytesToEncrypt != 0) {
+            int amountOfSplitting = textAsBytes.length / maxBytesToEncrypt;
+            if (textAsBytes.length % maxBytesToEncrypt != 0) {
                 amountOfSplitting += 1;
             }
             int residual;
 
             //String to byte Array
-            byte[] textAsBytes = text.getBytes();
             byte[][] textAsList = new byte[amountOfSplitting][maxBytesToEncrypt];
             byte[] encrypted = new byte[amountOfSplitting * encryptedKeyLength];
 
             for (int i = 0; i < amountOfSplitting; i++) {
                 //Split the byte array into the right length to encrypt it
-                if ((i + 1) * maxBytesToEncrypt <= text.length()) {
+                if ((i + 1) * maxBytesToEncrypt <= textAsBytes.length) {
                     System.arraycopy(textAsBytes, i * maxBytesToEncrypt, textAsList[i], 0, maxBytesToEncrypt);
                 } else {
                     textAsList[i] = new byte[(residual = textAsBytes.length % maxBytesToEncrypt)];
@@ -140,6 +146,8 @@ public class Encryption {
             return Base64.getEncoder().encodeToString(encrypted);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException ex) {
             System.err.println("Could String not encrypt: " + ex);
+        } catch (UnsupportedEncodingException ex) {
+            System.err.println("UFT-8 not supported");
         }
         return "";
     }
@@ -147,8 +155,9 @@ public class Encryption {
     /**
      * Decryptes a byte-array with a private key
      *
-     * IMPORTANT: DO NOT SEND DATA LARGER THAN 526 GB!!!!! (because Max Integer, but if you need to, change all ints to longs)
-     * 
+     * IMPORTANT: DO NOT SEND DATA LARGER THAN 526 GB!!!!! (because Max Integer,
+     * but if you need to, change all ints to longs)
+     *
      * Using:
      * <p>
      * {@code //Generate KeyPair (PublicKey AND PrivateKey)}
@@ -169,8 +178,8 @@ public class Encryption {
      * {@code System.out.println("Entschlüsselt: " + decrypted);}
      * <p>
      * <p>
-     * @param toDecrypt The byte-array to decrypt
-     * @param privateKey The private Key from the KeyPait to decrypt with
+     * @param toDecrypt The String to be encrypted as a BASE64 String
+     * @param privateKey The private Key from the KeyPair (in BASE64!) to decrypt with
      * @return The result of the decryption as String
      */
     public static String decrypt(String toDecrypt, String privateKey) {
@@ -217,9 +226,11 @@ public class Encryption {
                     System.arraycopy(textAsList[i], 0, textAsBytes, i * maxBytesToEncrypt, textAsList[i].length);
                 }
             }
-            return new String(textAsBytes);
+            return new String(textAsBytes, "UTF8");
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException ex) {
             System.err.println("Could not decrypt byte-array: " + ex);
+        } catch (UnsupportedEncodingException ex) {
+            System.err.println("UTF-8 not supported!");
         }
         return "";
     }

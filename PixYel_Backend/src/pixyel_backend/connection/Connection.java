@@ -38,7 +38,7 @@ public class Connection implements Runnable {
                 new Thread(client).start();
                 this.onClientConnected(client);
             } catch (Exception e) {
-                Log.logError("IO Error occured during the setup of the connection to the client: " + e);
+                Log.logError("IO Error occured during the setup of the connection to the client: " + e, this);
                 loop = false;
             }
         }
@@ -55,7 +55,7 @@ public class Connection implements Runnable {
                 SERVER.close();
                 System.exit(0);
             } catch (IOException e) {
-                Log.logError("Socket could not be closed: " + e.getMessage());
+                Log.logError("Socket could not be closed: " + e.getMessage(), this);
             }
         }
     }
@@ -105,11 +105,11 @@ public class Connection implements Runnable {
         try {
             SERVER = new ServerSocket(7331);
         } catch (java.net.BindException e) {
-            Log.logError("Adress already binded, is there an existing server running?: " + e.getMessage());
-            Log.logError("Shutting down this server to prevent double servers!");
+            Log.logError("Adress already binded, is there an existing server running?: " + e.getMessage(), this);
+            Log.logError("Shutting down this server to prevent double servers!", this);
             System.exit(0);
         } catch (IOException ex) {
-            Log.logError("Server could not be started: " + ex.getMessage());
+            Log.logError("Server could not be started: " + ex.getMessage(), this);
         }
         onServerStarted();
         this.listenForClients();
@@ -119,7 +119,7 @@ public class Connection implements Runnable {
      * Calls this Method just before its closing its socket
      */
     private void onServerClosing() {
-        Log.logInfo("Shutting down the Server...");
+        Log.logInfo("Shutting down the Server...", this);
     }
 
     /**
@@ -127,7 +127,7 @@ public class Connection implements Runnable {
      * accepting new clients
      */
     private void onServerStarted() {
-        Log.logInfo("Server reachable on " + SERVER.getLocalSocketAddress() + ":" + SERVER.getLocalPort());
+        Log.logInfo("Server reachable on " + SERVER.getLocalSocketAddress() + ":" + SERVER.getLocalPort(), this);
     }
 
     /**
@@ -137,7 +137,7 @@ public class Connection implements Runnable {
      * @param client
      */
     private void onClientConnected(Client client) {
-        Log.logInfo("Client connected");
+        Log.logInfo("Client connected", this);
     }
 
 }

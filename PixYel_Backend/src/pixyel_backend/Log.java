@@ -5,12 +5,9 @@
  */
 package pixyel_backend;
 
-import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -20,19 +17,19 @@ public class Log {
 
     static int maxLengthOfClassName = 0;
 
-    public static void logInfo(String logMessage, Class<?> clasS) {
+    public static void logInfo(String logMessage, Object clasS) {
         String toPrint = getClassNameWithDate(clasS);
         toPrint += "INFO:    " + logMessage;
         System.out.println(toPrint);
     }
 
-    public static void logError(String logMessage, Class<?> clasS) {
+    public static void logError(String logMessage, Object clasS) {
         String toPrint = getClassNameWithDate(clasS);
         toPrint += "ERROR:   " + logMessage;
         System.err.println(toPrint);
     }
 
-    public static void logWarning(String logMessage, Class<?> clasS) {
+    public static void logWarning(String logMessage, Object clasS) {
         String toPrint = getClassNameWithDate(clasS);
         toPrint += "WARNING: " + logMessage;
         System.out.println(toPrint);
@@ -43,17 +40,17 @@ public class Log {
      * @param clasS
      * @param color 0 = black, 1 = red
      */
-    private static String getClassNameWithDate(Class<?> clasS) {
+    private static String getClassNameWithDate(Object clasS) {
         String result = "";
         int tempLength;
-        if ((tempLength = clasS.getTypeName().length()) > maxLengthOfClassName) {
+        if ((tempLength = clasS.getClass().getTypeName().length()) > maxLengthOfClassName) {
             maxLengthOfClassName = tempLength;
         }
         if (maxLengthOfClassName % 2 == 0) {
             for (int i = 0; i < (maxLengthOfClassName - tempLength) / 2; i++) {
                 result += (" ");
             }
-            result += ("[" + clasS.getTypeName() + "]");
+            result += ("[" + clasS.getClass().getTypeName() + "]");
             for (int i = 0; i < (maxLengthOfClassName - tempLength) / 2; i++) {
                 result += (" ");
             }
@@ -61,7 +58,7 @@ public class Log {
             for (int i = 0; i < ((maxLengthOfClassName - tempLength) / 2) - 1; i++) {
                 result += (" ");
             }
-            result += ("[" + clasS.getTypeName() + "]");
+            result += ("[" + clasS.getClass().getTypeName() + "]");
             for (int i = 0; i < (maxLengthOfClassName - tempLength) / 2; i++) {
                 result += (" ");
             }

@@ -39,7 +39,7 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
-        Log.logInfo("Client " + socket.hashCode() + " started");
+        Log.logInfo("Client " + socket.hashCode() + " started", this);
         listener = new ClientInputListener();
         new Thread(listener).start();
     }
@@ -51,7 +51,7 @@ public class Client implements Runnable {
      */
     public void sendToClient(String toSend) {
         if (userdata == null || userdata.getPublicKey() == null || userdata.getPublicKey().isEmpty()) {
-            Log.logError("Log in first!");
+            Log.logError("Log in first!", this);
             return;
         }
         try {
@@ -65,39 +65,43 @@ public class Client implements Runnable {
             raus.flush();
         } catch (Exception e) {
             if (e.toString().contains("Socket is closed")) {
-                Log.logError("Could not send String beacuase the socket is closed, closing the connection now: " + e);
+                Log.logError("Could not send String beacuase the socket is closed, closing the connection now: " + e, this);
                 this.disconnect(false);
             } else if (e.toString().contains("socket write error")) {
-                Log.logError("Could not write on Socket: " + e);
+                Log.logError("Could not write on Socket: " + e, this);
             } else {
-                Log.logError("String(" + toSend + ") could not be send: " + e);
+                Log.logError("String(" + toSend + ") could not be send: " + e, this);
             }
         }
     }
 
     public void onStringReceived(String receivedString) {
-        if (receivedString.equals("echo")) {
-            PrintWriter raus;
+        if (receivedString != null) {
+            if (receivedString.equals("echo")) {
+                PrintWriter raus;
+                try {
+                    raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+                    raus.println("echo zurueck " + new java.util.Date().toString());
+                    raus.flush();
+                } catch (IOException ex) {
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                return;
+            }
             try {
-                raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-                raus.println("echo zurueck");
-                raus.flush();
-            } catch (IOException ex) {
-                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
+                String decompressed = Compression.decompress(decrypted);
+                XML xml = XML.openXML(decompressed);
+                if (!xml.getName().equals("login")) {
+                    Command.onCommandReceived(this, userdata, xml);
+                } else {
+                    login(xml);
+                }
+            } catch (XML.XMLException ex) {
+                Log.logError("Client has send an invalid XML: " + ex, this);
             }
-            return;
-        }
-        try {
-            String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
-            String decompressed = Compression.decompress(decrypted);
-            XML xml = XML.openXML(decompressed);
-            if (!xml.getName().equals("login")) {
-                Command.onCommandReceived(this, userdata, xml);
-            } else {
-                login(xml);
-            }
-        } catch (XML.XMLException ex) {
-            Log.logError("Client has send an invalid XML: " + ex);
+        } else {
+            Log.logError("String ist NULL", this);
         }
     }
 
@@ -108,7 +112,7 @@ public class Client implements Runnable {
             try {
                 userdata = User.addNewUser(xml.getFirstChild("storeid").getContent());
             } catch (UserCreationException ex1) {
-                Log.logError("Could not create User: " + ex1);
+                Log.logError("Could not create User: " + ex1, this);
             }
         }
         userdata.setPublicKey(xml.getFirstChild("publickey").getContent());
@@ -119,16 +123,16 @@ public class Client implements Runnable {
         try {
             socket.close();
         } catch (Exception e) {
-            Log.logError("Could not stop ");
+            Log.logError("Could not stop ", this);
         }
-        Log.logInfo("Client stopped");
+        Log.logInfo("Client stopped", this);
     }
 
     public class ClientInputListener implements Runnable {
 
         @Override
         public void run() {
-            Log.logInfo("Inputlistener for Client " + socket.hashCode() + " started");
+            Log.logInfo("Inputlistener for Client " + socket.hashCode() + " started", this);
             BufferedReader rein;
             String string;
             while (!socket.isClosed() && socket.isConnected() && socket.isBound() && !socket.isInputShutdown() && !socket.isOutputShutdown()) {
@@ -141,21 +145,21 @@ public class Client implements Runnable {
                         case "java.net.SocketException: Connection reset":
                         case "java.net.SocketException: Socket closed":
                         case "java.net.SocketException: Software caused connection abort: recv failed":
-                            Log.logError("Client has lost Connection: " + exe + ", shuting down the connection to the client");
+                            Log.logError("Client has lost Connection: " + exe + ", shuting down the connection to the client", this);
                             disconnect(true);
                             return;
                         case "invalid stream header":
                             //Jemand sendet zu lange Strings
-                            Log.logError("Steam header too long, received String too long??!?: " + exe);
+                            Log.logError("Steam header too long, received String too long??!?: " + exe, this);
                             disconnect(true);
                             return;
                         default:
-                            Log.logError("Could not read incomming message: " + exe);
+                            Log.logError("Could not read incomming message: " + exe, this);
                             break;
                     }
                 }
             }
-            Log.logError("Out of the endless while!");
+            Log.logError("Out of the endless while!", this);
         }
 
     }

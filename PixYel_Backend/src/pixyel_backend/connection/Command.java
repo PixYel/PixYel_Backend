@@ -16,7 +16,7 @@ import pixyel_backend.xml.XML;
 public class Command {
 
     public static void onCommandReceived(Client connection, User userdata, XML xml) {
-        Log.logInfo("Command received: \n" + xml);
+        Log.logInfo("Command received: \n" + xml, Command.class);
         try {
             switch (xml.getName()) {
                 case "echo":
@@ -24,7 +24,7 @@ public class Command {
                     break;
             }
         } catch (Exception e) {
-            Log.logError("Could not execute command: " + xml.getName() + ": " + e);
+            Log.logError("Could not execute command: " + xml.getName() + ": " + e, Command.class);
         }
 
     }

@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.DbConnection;
 import pixyel_backend.database.exceptions.DbConnectionException;
@@ -258,6 +260,14 @@ public class User {
 
         } catch (Exception e) {
             Log.logWarning("Couldnt delete user \"" + this.id + "\" - rootcause:" + e,this);
+        }
+    }
+    
+    public void closeDbConnection(){
+        try {
+            this.con.close();
+        } catch (SQLException ex) {
+            Log.logWarning("Error while closing connection for user \""+this.id+"\" - rootcause: "+ex , this);
         }
     }
 }

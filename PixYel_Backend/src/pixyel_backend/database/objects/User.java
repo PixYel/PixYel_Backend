@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import pixyel_backend.Log;
+import pixyel_backend.database.DbConnection;
 import pixyel_backend.database.exceptions.DbConnectionException;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
@@ -14,6 +15,7 @@ import pixyel_backend.database.SqlUtils;
 
 public class User {
 
+    private DbConnection con;
     private final int id;
     private final String storeID;
     private String publicKey;
@@ -31,10 +33,13 @@ public class User {
      *
      */
     public User(int id) throws UserNotFoundException, UserCreationException {
-        try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); PreparedStatement sta = conn.prepareStatement("SELECT * FROM users WHERE id LIKE ?")) {
+
+        try {
+            this.con = new DbConnection();
+            PreparedStatement sta = con.getPreparedStatement("SELECT * FROM users WHERE id LIKE ?");
             sta.setInt(1, id);
             ResultSet result = sta.executeQuery();
-            if (!result.isBeforeFirst()) {
+            if (result == null || !result.isBeforeFirst()) {
                 throw new UserNotFoundException();
             }
             result.next();
@@ -69,15 +74,11 @@ public class User {
      * @throws pixyel_backend.database.exceptions.UserCreationException
      */
     public User(String storeID) throws UserNotFoundException, UserCreationException {
-        try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile()) {
-            ResultSet result = null;
-            try {
-                PreparedStatement sta = conn.prepareStatement("SELECT * FROM users WHERE storeid LIKE ?");
-                sta.setString(1, SqlUtils.escapeString(storeID));
-                result = sta.executeQuery();
-            } catch (SQLException sqlEx) {
-                Log.logInfo(sqlEx.toString());
-            }
+        try {
+            this.con = new DbConnection();
+            PreparedStatement sta = con.getPreparedStatement("SELECT * FROM users WHERE storeid LIKE ?");
+            sta.setString(1, SqlUtils.escapeString(storeID));
+            ResultSet result = sta.executeQuery();
 
             if (result == null || !result.isBeforeFirst()) {
                 throw new UserNotFoundException();
@@ -136,18 +137,18 @@ public class User {
      * creation fails
      */
     public static User addNewUser(String storeID) throws UserCreationException {
-        try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile()) {
-            try (PreparedStatement statement = conn.prepareStatement("INSERT INTO users(storeid)VALUES (?)")) {
-                storeID = SqlUtils.escapeString(storeID);
-                statement.setString(1, storeID);
-                statement.executeUpdate();
-            }
-            return getUser(storeID);
-        } catch (Exception ex) {
+        try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); PreparedStatement statement = conn.prepareStatement("INSERT INTO users(storeid)VALUES (?)")) {
+            storeID = SqlUtils.escapeString(storeID);
+            statement.setString(1, storeID);
+            statement.executeUpdate();
+            return new User(storeID);
+        } catch (SQLException | UserNotFoundException | UserCreationException | DbConnectionException ex) {
             Log.logWarning("Could not create user for storeid \"" + storeID + "\" - rootcause: " + ex);
             throw new UserCreationException();
         }
     }
+
+    
 
     public int getID() {
         return this.id;
@@ -184,7 +185,7 @@ public class User {
     }
 
     public void setPublicKey(String key) {
-        this.publicKey=key;
+        this.publicKey = key;
         updateUserValue("publickey", key);
     }
 
@@ -198,15 +199,15 @@ public class User {
 
     private void changeStatusTo(int i) {
         if (i < 0) {
-                this.isBanned = true;
-            } else {
-                this.isBanned = false;
-            }
-            if (i > 0) {
-                this.isVerified = true;
-            } else {
-                this.isVerified = false;
-            }
+            this.isBanned = true;
+        } else {
+            this.isBanned = false;
+        }
+        if (i > 0) {
+            this.isVerified = true;
+        } else {
+            this.isVerified = false;
+        }
         updateUserValue("status", i);
     }
 
@@ -218,12 +219,11 @@ public class User {
      */
     private void updateUserValue(String key, String value) {
         try {
-            try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); PreparedStatement sta = conn.prepareStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
-                sta.setString(1, SqlUtils.escapeString(value));
-                sta.execute();
-                sta.close();
-            }
-        } catch (SQLException | DbConnectionException ex) {
+            PreparedStatement sta = con.getPreparedStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id);
+            sta.setString(1, SqlUtils.escapeString(value));
+            sta.execute();
+            sta.close();
+        } catch (SQLException ex) {
             Log.logError("couldnt update user value \"" + key + "\" - rootcause:" + ex.getMessage());
         }
     }
@@ -235,11 +235,12 @@ public class User {
      * @param value value that should be inserted
      */
     private void updateUserValue(String key, int value) {
-        try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); PreparedStatement sta = conn.prepareStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
+        try {
+            PreparedStatement sta = con.getPreparedStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id);
             sta.setInt(1, value);
             sta.execute();
             sta.close();
-        } catch (SQLException | DbConnectionException ex) {
+        } catch (SQLException ex) {
             Log.logError("couldnt update user value \"" + key + "\" - rootcause:" + ex.getMessage());
         }
 
@@ -253,12 +254,10 @@ public class User {
      * deletes this user from the database
      */
     public void delete() {
-        try {
-            try (Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile(); PreparedStatement sta = conn.prepareStatement("DELETE FROM Users WHERE id = ?");) {
-                sta.setInt(1, this.id);
-                sta.executeUpdate();
-                sta.close();
-            }
+        try (PreparedStatement sta = con.getPreparedStatement("DELETE FROM Users WHERE id = ?")) {
+            sta.setInt(1, this.id);
+            sta.executeUpdate();
+
         } catch (Exception e) {
             Log.logWarning("Couldnt delete user \"" + this.id + "\" - rootcause:" + e);
         }

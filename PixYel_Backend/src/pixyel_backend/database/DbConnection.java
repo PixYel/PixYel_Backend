@@ -6,6 +6,7 @@
 package pixyel_backend.database;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import pixyel_backend.database.exceptions.DbConnectionException;
@@ -28,6 +29,10 @@ public class DbConnection {
 
     public Statement getStatenement() throws SQLException {
         return con.createStatement();
+    }
+    
+    public PreparedStatement getPreparedStatement(String sql) throws SQLException{
+        return this.con.prepareStatement(sql);
     }
     
     public void close() throws SQLException{

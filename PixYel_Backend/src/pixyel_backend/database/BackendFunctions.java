@@ -15,16 +15,18 @@ import pixyel_backend.database.objects.Comment;
 public class BackendFunctions {
 
     private final DbConnection con;
-    public BackendFunctions(DbConnection con){
+    private final int userId;
+    public BackendFunctions(DbConnection con, int userid){
         this.con = con;
+        this.userId=userid;
     }
     
     public Comment getComment(int commentId) throws CommentCreationException{
         return new Comment(commentId,this.con);
     }
     
-    public void newComment (int pictureID,int userId, String comment){
-        Comment.newComment(pictureID, userId, comment, this.con);
+    public void newComment (int pictureID,String comment){
+        Comment.newComment(pictureID, this.userId, comment, this.con);
     }
 
 }

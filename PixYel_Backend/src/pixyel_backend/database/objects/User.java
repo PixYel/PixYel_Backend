@@ -271,6 +271,6 @@ public class User {
     }
     
     public BackendFunctions getBackendFunctions(){
-        return new BackendFunctions(this.con);
+        return new BackendFunctions(this.con,this.id);
     }
 }

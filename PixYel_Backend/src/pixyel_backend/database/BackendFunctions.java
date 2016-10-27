@@ -26,7 +26,9 @@ public class BackendFunctions {
     }
     
     public void newComment (int pictureID,String comment){
+        System.out.println("test354");
         Comment.newComment(pictureID, this.userId, comment, this.con);
+        System.out.println("test355");
     }
 
 }

@@ -1,3 +1,4 @@
+/*
 package pixyel_backend.database;
 
 import java.sql.Connection;
@@ -10,10 +11,6 @@ import java.util.List;
 import static pixyel_backend.database.SqlUtils.listToSqlINString;
 import pixyel_backend.database.objects.Comment;
 
-/**
- *
- * @author Da_Groove
- */
 public class DatabaseFunctionsComment {
 
     private final Connection conn;
@@ -22,12 +19,6 @@ public class DatabaseFunctionsComment {
         this.conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
     }
 
-    /**
-     *
-     * @param id
-     * @return
-     * @throws SQLException
-     */
     public Comment getComment(int id) throws SQLException {
         Comment comment;
         ResultSet resultSet;
@@ -48,12 +39,6 @@ public class DatabaseFunctionsComment {
         return comment;
     }
 
-    /**
-     *
-     * @param ids
-     * @return
-     * @throws SQLException
-     */
     public HashMap<Integer, Comment> getCommentListFromCommentId(List ids) throws SQLException {
         HashMap commentList;
         ResultSet resultSet;
@@ -67,12 +52,6 @@ public class DatabaseFunctionsComment {
         return commentList;
     }
 
-    /**
-     *
-     * @param ids
-     * @return
-     * @throws SQLException
-     */
     public HashMap<Integer, Comment> getCommentListFromPictureId(List ids) throws SQLException {
         HashMap commentList;
         ResultSet resultSet;
@@ -86,12 +65,7 @@ public class DatabaseFunctionsComment {
         return commentList;
     }
 
-    /**
-     *
-     * @param commentResults
-     * @return
-     * @throws java.sql.SQLException
-     */
+
     public HashMap<Integer, Comment> getCommentList(ResultSet commentResults) throws SQLException {
         HashMap commentList = new HashMap();
         while (commentResults.next()) {
@@ -116,3 +90,4 @@ public class DatabaseFunctionsComment {
         }
     }
 }
+*/

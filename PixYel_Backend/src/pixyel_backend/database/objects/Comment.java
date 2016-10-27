@@ -8,6 +8,7 @@ package pixyel_backend.database.objects;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -51,10 +52,14 @@ public class Comment {
             this.userId = result.getInt("userid");
             this.comment = result.getString("comment");
             this.commentDate = result.getDate("comment_date");
-            String flaggedByAsString = result.getString("flags");
-            this.flaggedBy = Arrays.asList(flaggedByAsString);
-            this.flags = this.flaggedBy.size();
-
+            if (result.getString("flags") != null) {
+                String flaggedByAsString = result.getString("flags");
+                this.flaggedBy = Arrays.asList(flaggedByAsString);
+                this.flags = this.flaggedBy.size();
+            } else {
+                this.flaggedBy = new ArrayList();
+                this.flags = 0;
+            }
         } catch (SQLException ex) {
             Log.logError("Could not read Commentinformation from database - rootcause: " + ex.getMessage(), this);
             throw new CommentCreationException();
@@ -63,16 +68,19 @@ public class Comment {
 
     public static void newComment(int pictureId, int userId, String comment, DbConnection con) {
         PreparedStatement statement;
+        System.out.println("test oben");
         try {
-            statement = con.getPreparedStatement("INSERT INTO comments ('pictureid', 'userid', 'comment') VALUES(?,?,?)");
+            statement = con.getPreparedStatement("INSERT INTO comments (pictureid, userid, comment) VALUES(?,?,?)");
 
             if (comment != null && comment.length() >= 2) {
                 comment = SqlUtils.escapeString(comment);
                 statement.setInt(1, pictureId);
                 statement.setInt(2, userId);
                 statement.setString(3, comment);
+                statement.executeUpdate();
+                System.out.println("test");
             } else {
-                Log.logInfo("Failed to create comment for user \"" + userId + "\" - rootcause: Comment is NULL or to short",Comment.class);
+                Log.logInfo("Failed to create comment for user \"" + userId + "\" - rootcause: Comment is NULL or to short", Comment.class);
             }
         } catch (SQLException ex) {
             Log.logError("Could not read Commentinformation from database - rootcause: " + ex.getMessage(), Comment.class);

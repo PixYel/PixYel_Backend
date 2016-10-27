@@ -1,16 +1,16 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package pixyel_backend.connection.compression;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Base64;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.*;
 
-/**
- *
- * @author Josua Frank
- */
 public class Compression {
 
     /**
@@ -35,24 +35,26 @@ public class Compression {
      * @return The compressed String
      */
     public static String compress(String toCompress) {
-        try {
-            Deflater deflater = new Deflater();
-            byte[] input = toCompress.getBytes("UTF8");
-            deflater.setInput(input);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(input.length);
-            deflater.finish();
-            byte[] buffer = new byte[1024];
-            while (!deflater.finished()) {
-                int count = deflater.deflate(buffer); // returns the generated code... index
-                outputStream.write(buffer, 0, count);
-            }
-            outputStream.close();
-            byte[] output = outputStream.toByteArray();
-            return Base64.getEncoder().encodeToString(output);
-        } catch (IOException ex) {
-            System.err.println("Could not compress String: " + ex);
+        if (!isUTF8(toCompress)) {
+            System.err.println("Error, String to compress is not in UTF8!");
+            return "";
         }
-        return "";
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        GZIPOutputStream gzos = null;
+        try {
+            gzos = new GZIPOutputStream(baos);
+            gzos.write(toCompress.getBytes("UTF8"));
+        } catch (IOException e) {
+            System.err.println("Could not compress String: " + e);
+        } finally {
+            if (gzos != null) {
+                try {
+                    gzos.close();
+                } catch (IOException ignore) {
+                }
+            }
+        }
+        return Base64.getEncoder().encodeToString(baos.toByteArray());
     }
 
     /**
@@ -77,22 +79,59 @@ public class Compression {
      * @return The decompressed String
      */
     public static String decompress(String toDecompress) {
+        InputStreamReader isr = null;
         try {
-            Inflater inflater = new Inflater();
             byte[] input = Base64.getDecoder().decode(toDecompress);
-            inflater.setInput(input);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(input.length);
-            byte[] buffer = new byte[1024];
-            while (!inflater.finished()) {
-                int count = inflater.inflate(buffer);
-                outputStream.write(buffer, 0, count);
+            isr = new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(input)));
+            StringWriter sw = new StringWriter();
+            char[] chars = new char[1024];
+            for (int len; (len = isr.read(chars)) > 0;) {
+                sw.write(chars, 0, len);
             }
-            outputStream.close();
-            byte[] output = outputStream.toByteArray();
-            return new String(output, "UTF8");
-        } catch (IOException | DataFormatException ex) {
-            System.err.println("Cou,d not decompress String: " + ex);
+            return sw.toString();
+        } catch (IOException ex) {
+            Logger.getLogger(Compression.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                isr.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Compression.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return "";
+    }
+
+    private static boolean isUTF8(String toCheck) {
+        byte[] pText = toCheck.getBytes();
+        int expectedLength;
+
+        for (int i = 0; i < pText.length; i++) {
+            if ((pText[i] & 0b10000000) == 0b00000000) {
+                expectedLength = 1;
+            } else if ((pText[i] & 0b11100000) == 0b11000000) {
+                expectedLength = 2;
+            } else if ((pText[i] & 0b11110000) == 0b11100000) {
+                expectedLength = 3;
+            } else if ((pText[i] & 0b11111000) == 0b11110000) {
+                expectedLength = 4;
+            } else if ((pText[i] & 0b11111100) == 0b11111000) {
+                expectedLength = 5;
+            } else if ((pText[i] & 0b11111110) == 0b11111100) {
+                expectedLength = 6;
+            } else {
+                return false;
+            }
+
+            while (--expectedLength > 0) {
+                if (++i >= pText.length) {
+                    return false;
+                }
+                if ((pText[i] & 0b11000000) != 0b10000000) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

@@ -62,7 +62,7 @@ public class PixYel_Client {
                 listener = new ServerInputListener();
                 new Thread(listener).start();
                 System.out.println("Sende Echo...");
-                PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+                PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
                 raus.println("echo");
                 raus.flush();
             } catch (UnknownHostException e) {
@@ -130,7 +130,7 @@ public class PixYel_Client {
         try {
             String compressed = Compression.compress(toSend);
             String encrypted = Encryption.encrypt(compressed, serverPublicKey);
-            PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+            PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
             raus.println(encrypted);
             raus.flush();
             System.out.println("Erfolgreich \"" + toSend + "\" gesendet!");
@@ -158,7 +158,7 @@ public class PixYel_Client {
             String string;
             while (!socket.isClosed() && socket.isConnected() && socket.isBound() && run) {
                 try {
-                    rein = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    rein = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
                     string = rein.readLine();
                     if (run) {
                         onStringReceived(string);

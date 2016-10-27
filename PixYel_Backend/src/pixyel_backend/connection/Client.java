@@ -71,54 +71,58 @@ public class Client implements Runnable {
     }
 
     /**
-     * This method is going to be called as soon as a string was send to this client
+     * This method is going to be called as soon as a string was send to this
+     * client
+     *
      * @param receivedString The received encrypted and compressed string
      */
     private void onStringReceived(String receivedString) {
-        if (receivedString != null) {
-            //------------TEMP-START-------------
-            if (receivedString.equals("echo")) {
-                PrintWriter raus;
-                try {
-                    raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-                    raus.println("echo zurueck " + new java.util.Date().toString());
-                    raus.flush();
-                } catch (IOException ex) {
-                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                return;
-            }
-            //--------------TEMP-END-------------
+        //------------TEMP-START-------------
+        if (receivedString.equals("echo")) {
+            PrintWriter raus;
             try {
-                String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
-                String decompressed = Compression.decompress(decrypted);
-                XML xml = XML.openXML(decompressed);
-                Command.onCommandReceived(this, xml);
-            } catch (XML.XMLException ex) {
-                Log.logError("Client has send an invalid XML: " + ex, this);
+                raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+                raus.println("echo zurueck " + new java.util.Date().toString());
+                raus.flush();
+            } catch (IOException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } else {
-            Log.logError("String is NULL", this);
+            return;
+        }
+        //--------------TEMP-END-------------
+        try {
+            String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
+            String decompressed = Compression.decompress(decrypted);
+            XML xml = XML.openXML(decompressed);
+            Command.onCommandReceived(this, xml);
+        } catch (XML.XMLException ex) {
+            Log.logError("Client has send an invalid XML: " + ex, this);
         }
     }
 
     /**
      * Call this method to disconnect the client from this server
+     *
      * @param expected Is the disconnect expected?
      */
     public void disconnect(boolean expected) {
-        userdata.closeDbConnection();
-        Connection.disconnect(socket.hashCode());
-        try {
-            socket.close();
-        } catch (Exception e) {
-            Log.logError("Could not close the clients socket", this);
+        if (userdata != null) {
+            userdata.closeDbConnection();
+            Connection.disconnect(socket.hashCode());
+            try {
+                socket.close();
+            } catch (Exception e) {
+                Log.logError("Could not close the clients socket", this);
+            }
         }
     }
 
     /**
-     * Returns the name (Store ID) of this client or the hash code of the socket, if its not yet logged in
-     * @return The name (Store ID) of this client or the hash code of the socket, if its not yet logged in
+     * Returns the name (Store ID) of this client or the hash code of the
+     * socket, if its not yet logged in
+     *
+     * @return The name (Store ID) of this client or the hash code of the
+     * socket, if its not yet logged in
      */
     public String getName() {
         if (userdata != null) {
@@ -142,7 +146,9 @@ public class Client implements Runnable {
                 try {
                     rein = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     string = rein.readLine();
-                    onStringReceived(string);
+                    if (string != null) {
+                        onStringReceived(string);
+                    }
                 } catch (IOException exe) {
                     switch (exe.toString()) {
                         case "java.net.SocketException: Connection reset":
@@ -162,7 +168,6 @@ public class Client implements Runnable {
                     }
                 }
             }
-            Log.logError("Out of the endless while!", this);
         }
 
     }

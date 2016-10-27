@@ -38,7 +38,7 @@ public class DatabaseInitializer {
                 + "upload_date      TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
                 + "upvotes          INT(6) DEFAULT '0', "
                 + "downvotes        INT(6) DEFAULT '0', "
-                + "flags            INT(6) DEFAULT '0', "
+                + "flags            TINYTEXT, "
                 + "userid           INT(6) NOT NULL, "
                 + "commentId        MEDIUMTEXT)"
         );
@@ -54,7 +54,7 @@ public class DatabaseInitializer {
                 + "userid           INT(6) NOT NULL, "
                 + "comment          VARCHAR(1200) NOT NULL, "
                 + "comment_date     TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-                + "flags            INT(6) DEFAULT '0')"
+                + "flags            TINYTEXT "
         );
         
         statements.close();

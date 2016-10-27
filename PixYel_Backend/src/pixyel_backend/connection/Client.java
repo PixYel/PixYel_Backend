@@ -108,12 +108,12 @@ public class Client implements Runnable {
     public void disconnect(boolean expected) {
         if (userdata != null) {
             userdata.closeDbConnection();
-            Connection.disconnect(socket.hashCode());
-            try {
-                socket.close();
-            } catch (Exception e) {
-                Log.logError("Could not close the clients socket", this);
-            }
+        }
+        Connection.disconnect(socket.hashCode());
+        try {
+            socket.close();
+        } catch (Exception e) {
+            Log.logError("Could not close the clients socket", this);
         }
     }
 

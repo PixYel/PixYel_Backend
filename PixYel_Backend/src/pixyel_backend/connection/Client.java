@@ -55,7 +55,7 @@ public class Client implements Runnable {
         try {
             String compressed = Compression.compress(toSend);
             String encrypted = Encryption.encrypt(compressed, userdata.getPublicKey());
-            PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+            PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
             raus.println(encrypted);
             raus.flush();
         } catch (Exception e) {
@@ -91,6 +91,7 @@ public class Client implements Runnable {
         }
         //--------------TEMP-END-------------
         try {
+            System.out.println("Received String: " + receivedString);
             String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
             String decompressed = Compression.decompress(decrypted);
             XML xml = XML.openXML(decompressed);
@@ -144,7 +145,7 @@ public class Client implements Runnable {
             String string;
             while (!socket.isClosed() && socket.isConnected() && socket.isBound() && !socket.isInputShutdown() && !socket.isOutputShutdown()) {
                 try {
-                    rein = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    rein = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
                     string = rein.readLine();
                     if (string != null) {
                         onStringReceived(string);

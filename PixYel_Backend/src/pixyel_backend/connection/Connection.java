@@ -121,7 +121,7 @@ public class Connection implements Runnable {
      * @param client The client which is connected
      */
     private static void onClientConnected(Client client) {
-        Log.logInfo("Client " + client.getName() + "connected", Connection.class);
+        Log.logInfo("Client " + client.getName() + " connected", Connection.class);
     }
 
     /**

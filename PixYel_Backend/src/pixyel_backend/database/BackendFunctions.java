@@ -5,6 +5,7 @@
  */
 package pixyel_backend.database;
 
+import java.util.List;
 import pixyel_backend.database.exceptions.CommentCreationException;
 import pixyel_backend.database.objects.Comment;
 
@@ -27,6 +28,10 @@ public class BackendFunctions {
     
     public void newComment (int pictureID,String comment){
         Comment.newComment(pictureID, this.userId, comment, this.con);
+    }
+    
+    public List<Comment> getCommentsForPicutre(int pictureId){
+        return Comment.getCommentsForPicutre(pictureId, this.con);
     }
 
 }

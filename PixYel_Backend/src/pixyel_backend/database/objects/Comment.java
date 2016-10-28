@@ -11,14 +11,12 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.DbConnection;
 import pixyel_backend.database.SqlUtils;
 import pixyel_backend.database.exceptions.CommentCreationException;
 import pixyel_backend.database.exceptions.CommentNotFoundException;
-import pixyel_backend.database.exceptions.DbConnectionException;
+import pixyel_backend.database.exceptions.NotImplementedException;
 
 /**
  *
@@ -56,7 +54,7 @@ public class Comment {
             this.flags = this.flaggedBy.size();
 
         } catch (SQLException ex) {
-            Log.logError("Could not read Commentinformation from database - rootcause: " + ex.getMessage(), this);
+            Log.logError("Could not read Commentinformation from database - rootcause: " + ex.getMessage(), Comment.class);
             throw new CommentCreationException();
         }
     }
@@ -144,5 +142,13 @@ public class Comment {
         } catch (SQLException ex) {
             Log.logError("couldnt update user value \"" + column + "\" - rootcause:" + ex.getMessage(), this);
         }
+    }
+    
+    public  static List getCommentsForPicutre(int pictureId, DbConnection con){
+        throw new NotImplementedException();
+    }
+    
+    public void deleteComment(){
+        throw new NotImplementedException();
     }
 }

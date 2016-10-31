@@ -110,7 +110,7 @@ public class Encryption {
             //Creates the Public Key from the String
             PublicKey pubKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey)));
             // Get an instance of the Cipher for RSA encryption/decryption
-            Cipher encrypter = Cipher.getInstance("RSA");
+            Cipher encrypter = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             // Initiate the Cipher, telling it that it is going to Encrypt, giving it the public key
             encrypter.init(Cipher.ENCRYPT_MODE, pubKey);
 
@@ -187,7 +187,7 @@ public class Encryption {
             //Generates the Private Key from the byteArray
             PrivateKey privKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey)));
             // Get an instance of the Cipher for RSA encryption/decryption
-            Cipher decrypter = Cipher.getInstance("RSA");
+            Cipher decrypter = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             // Initiate the Cipher, telling it that it is going to Decrypt, giving it the private key
             decrypter.init(Cipher.DECRYPT_MODE, privKey);
 

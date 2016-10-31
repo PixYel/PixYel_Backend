@@ -53,8 +53,10 @@ public class Encryption {
      * <p>
      * @return A StringArray which contains the first the public and second the
      * private key
+     * @throws EncryptionException If something went wrong during the generation
+     * of the RSA Keypair
      */
-    public static String[] generateKeyPair() {
+    public static String[] generateKeyPair() throws EncryptionException {
         String[] result = new String[2];
         try {
             // Get an instance of the RSA key generator
@@ -67,7 +69,7 @@ public class Encryption {
             result[0] = Base64.getEncoder().encodeToString(kp.getPublic().getEncoded());//PublicKey
             result[1] = Base64.getEncoder().encodeToString(kp.getPrivate().getEncoded());//PrivateKey
         } catch (NoSuchAlgorithmException ex) {
-            System.err.println("Could not create KeyPair: " + ex);
+            throw new EncryptionException("Your device doesnt support RSA: " + ex.getMessage());
         }
         return result;
     }
@@ -102,15 +104,15 @@ public class Encryption {
      * @param publicKey The public key from the KeyPair to encrypt with in
      * BASE64 encoded!!
      * @return The result of the encryption as a BASE64 encoded String
+     * @throws EncryptionException If something went wrong during the encryption
+     * process
      */
-    public static String encrypt(String toEncrypt, String publicKey) {
+    public static String encrypt(String toEncrypt, String publicKey) throws EncryptionException {
         if (toEncrypt == null || toEncrypt.isEmpty()) {
-            System.err.println("Error, toEncrypt is null or empty");
-            return "";
+            throw new EncryptionException("The String to be encrypted is null or empty");
         }
         if (publicKey == null || publicKey.isEmpty()) {
-            System.err.println("Error, publicKey is null or empty");
-            return "";
+            throw new EncryptionException("The private key to encrypt with is null or empty");
         }
         try {
             //Creates the Public Key from the String
@@ -151,11 +153,10 @@ public class Encryption {
             //Returns the encrypted byte array as a string
             return Base64.getEncoder().encodeToString(encrypted);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException ex) {
-            System.err.println("Could String not encrypt: " + ex);
+            throw new EncryptionException("Something went wrong during the encryption: " + ex.getMessage());
         } catch (UnsupportedEncodingException ex) {
-            System.err.println("UFT-8 not supported");
+            throw new EncryptionException("Your Device cant convert a String to UTF-8: " + ex.getMessage());
         }
-        return "";
     }
 
     /**
@@ -188,15 +189,15 @@ public class Encryption {
      * @param privateKey The private Key from the KeyPair (in BASE64!) to
      * decrypt with
      * @return The result of the decryption as String
+     * @throws EncryptionException If something went wrong during the decryption
+     * process
      */
-    public static String decrypt(String toDecrypt, String privateKey) {
-                if (toDecrypt == null || toDecrypt.isEmpty()) {
-            System.err.println("Error, toDecrypt is null or empty");
-            return "";
+    public static String decrypt(String toDecrypt, String privateKey) throws EncryptionException {
+        if (toDecrypt == null || toDecrypt.isEmpty()) {
+            throw new EncryptionException("The String to be decrypted is null or empty");
         }
         if (privateKey == null || privateKey.isEmpty()) {
-            System.err.println("Error, privateKey is null or empty");
-            return "";
+            throw new EncryptionException("The private key to decrypt with is null or empty");
         }
         try {
             //Generates the Private Key from the byteArray
@@ -243,11 +244,22 @@ public class Encryption {
             }
             return new String(textAsBytes, "UTF8");
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException ex) {
-            System.err.println("Could not decrypt byte-array: " + ex);
+            throw new EncryptionException("Something went wrong during the decryption: " + ex.getMessage());
         } catch (UnsupportedEncodingException ex) {
-            System.err.println("UTF-8 not supported!");
+            throw new EncryptionException("Your Device cant convert a String to UTF-8: " + ex.getMessage());
         }
-        return "";
+    }
+
+    public static class EncryptionException extends Exception {
+
+        public EncryptionException() {
+            super();
+        }
+
+        public EncryptionException(String message) {
+            super(message);
+        }
+
     }
 
 }

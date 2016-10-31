@@ -19,38 +19,44 @@ import pixyel_backend.xml.XML;
  */
 public class Command {
 
-    public static void onCommandReceived(Client connection, XML xml) {
-        Log.logInfo("Command received: \n" + xml, Command.class);
+    public static void onCommandReceived(Client client, XML xml) {
+        Log.logInfo("Command received: \n" + xml.toStringGraph(), Command.class);
         try {
             switch (xml.getName()) {
                 /*
                 Is for debugging reasons only
-                */
+                 */
                 case "echo":
                     DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
                     String date = " " + dateFormat.format(new Date()) + " ";
-                    connection.sendToClient(XML.createNewXML("echo_zurueck").addAttribute("Date", date).toXMLString());
+                    client.sendToClient(XML.createNewXML("echo_zurueck").addAttribute("Date", date).toString());
                     break;
-                    /*
+                /*
                     The client wants to disconnect
-                    */
+                 */
                 case "disconnect":
-                    connection.disconnect(true);
+                    client.disconnect(true);
                     break;
-                    /*
+                /*
                     The client wants to connect
-                    */
+                 */
                 case "login":
                     try {
-                        connection.userdata = User.getUser(xml.getFirstChild("storeid").getContent());
+                        client.userdata = User.getUser(xml.getFirstChild("storeid").getContent());
                     } catch (UserNotFoundException ex) {
-                        connection.userdata = User.addNewUser(xml.getFirstChild("storeid").getContent());
+                        client.userdata = User.addNewUser(xml.getFirstChild("storeid").getContent());
                     }
-                    connection.userdata.setPublicKey(xml.getFirstChild("publickey").getContent());
+                    client.userdata.setPublicKey(xml.getFirstChild("publickey").getContent());
+                    break;
+                /*
+                    The client replies to the alive message from the server (to avoid dead clients)
+                 */
+                case "alive":
+                    client.checkClientAlive(true);
                     break;
             }
         } catch (Exception e) {
-            Log.logError("Could not execute command: " + xml.getName() + ": " + e, Command.class);
+            Log.logWarning("Could not execute command: " + xml.getName() + ": " + e, Command.class);
         }
 
     }

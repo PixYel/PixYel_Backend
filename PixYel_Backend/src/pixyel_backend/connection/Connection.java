@@ -18,7 +18,7 @@ public class Connection implements Runnable {
 
     private static ServerSocket SERVER = null;
     private static final HashMap<Integer, Client> CONNECTEDCLIENTS = new HashMap<>();//All online clients
-    private static final ExecutorService clients = Executors.newCachedThreadPool();
+    private static final ExecutorService CLIENTTHREADPOOL = Executors.newCachedThreadPool();
 
     /**
      * Here the server is going to be started.
@@ -51,7 +51,7 @@ public class Connection implements Runnable {
                 //socket.setSoTimeout(5000);
                 Client client = new Client(socket);
                 CONNECTEDCLIENTS.put(socket.hashCode(), client);
-                clients.submit(client);
+                CLIENTTHREADPOOL.submit(client);
                 onClientConnected(client);
             } catch (Exception e) {
                 Log.logError("IO Error occured during the setup of the connection to the client: " + e, Connection.class);
@@ -68,6 +68,7 @@ public class Connection implements Runnable {
         if (SERVER != null) {
             try {
                 onServerClosing();
+                CLIENTTHREADPOOL.shutdown();
                 SERVER.close();
                 System.exit(0);
             } catch (IOException e) {
@@ -112,11 +113,8 @@ public class Connection implements Runnable {
                 @Override
                 public void run() {
                     CONNECTEDCLIENTS.forEach((hashcode, client) -> {
-                        if (!client.isConnected()) {
-                            client.disconnect(false);
-                        }
+                        client.checkClientAlive(false);
                     });
-                    Log.logInfo("Killed some connections of clients", Connection.class);
                 }
             }, 120000);
         });

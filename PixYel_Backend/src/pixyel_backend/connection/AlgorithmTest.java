@@ -15,8 +15,9 @@ import pixyel_democlient.compression.Compression;
  */
 public class AlgorithmTest {
     public static void main(String[] args) {
-        String pubKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtwvKYSo1pCjoy8uTSOvCdkOWApxyFjbWvM9orE7tJQ2S3P0or4/3GnT/XQPXVsstPEVkhZDrqu0LKZR9vkGAAOzFB0qQ+JISMqelHntyDNt4f5AhK7hCeuTNMPRAkfLMoZVhwjrjHswgRw5vB3JeGMvtK25u6UhbwoMDnpaGWs5pv493ZbLHy4qp/AX57SYDBE1xDdeaZxMfkKWATf/fIrP1CK5HrEFjIIVMbOplunzkUDUWE/NX+u3AXYDDsM0ahV2WaC09ALS9b+7/v7mhkT8U9/7dllElaVL/5awGSYGVP7eSGdNukgjfFnJLq3d/qdpxG7jtoQHtQ0xg3fOMRQIDAQAB";
-        String demo = "HALLO";
-        System.out.println(Encryption.encrypt(demo, pubKey));
+        String toCompress = "äüöß";
+        String compressed = Compression.compress(toCompress);
+        System.out.println(Compression.decompress(compressed));
+                
     }
 }

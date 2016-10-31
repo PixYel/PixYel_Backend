@@ -48,32 +48,30 @@ public class Log {
      */
     private static String getClassNameWithDate(Object clasS) {
         String result = "";
-        int tempLength;
+        int currentLengthOfClassName;
         String className = clasS.getClass().getTypeName();
         className = className.substring(className.lastIndexOf(".") + 1);
         if (className.contains("$")) {
             className = className.substring(0, className.lastIndexOf("$"));
         }
-        if ((tempLength = className.length()) > maxLengthOfClassName) {
-            maxLengthOfClassName = tempLength;
+        if ((currentLengthOfClassName = className.length()) > maxLengthOfClassName) {
+            maxLengthOfClassName = currentLengthOfClassName;
         }
+
+        for (int i = 0; i < (maxLengthOfClassName - currentLengthOfClassName) / 2; i++) {
+            result += (" ");
+        }
+        result += ("[" + className + "]");
         if (maxLengthOfClassName % 2 == 0) {
-            for (int i = 0; i < (maxLengthOfClassName - tempLength) / 2; i++) {
-                result += (" ");
-            }
-            result += ("[" + className + "]");
-            for (int i = 0; i < (maxLengthOfClassName - tempLength) / 2; i++) {
+            for (int i = 0; i < (maxLengthOfClassName - currentLengthOfClassName) / 2; i++) {
                 result += (" ");
             }
         } else {
-            for (int i = 0; i < ((maxLengthOfClassName - tempLength) / 2) - 1; i++) {
-                result += (" ");
-            }
-            result += ("[" + className + "]");
-            for (int i = 0; i < (maxLengthOfClassName - tempLength) / 2; i++) {
+            for (int i = 0; i < ((maxLengthOfClassName - currentLengthOfClassName) / 2) + 1; i++) {
                 result += (" ");
             }
         }
+
         DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         result += " [" + dateFormat.format(new Date()) + "] ";
         return result;

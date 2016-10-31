@@ -16,8 +16,6 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.util.Base64;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Josua Frank
@@ -100,12 +98,20 @@ public class Encryption {
      * {@code System.out.println("Entschlüsselt: " + decrypted);}
      * <p>
      * <p>
-     * @param text The text as String to encrypt
+     * @param toEncrypt The text as String to encrypt
      * @param publicKey The public key from the KeyPair to encrypt with in
      * BASE64 encoded!!
      * @return The result of the encryption as a BASE64 encoded String
      */
-    public static String encrypt(String text, String publicKey) {
+    public static String encrypt(String toEncrypt, String publicKey) {
+        if (toEncrypt == null || toEncrypt.isEmpty()) {
+            System.err.println("Error, toEncrypt is null or empty");
+            return "";
+        }
+        if (publicKey == null || publicKey.isEmpty()) {
+            System.err.println("Error, publicKey is null or empty");
+            return "";
+        }
         try {
             //Creates the Public Key from the String
             PublicKey pubKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey)));
@@ -114,7 +120,7 @@ public class Encryption {
             // Initiate the Cipher, telling it that it is going to Encrypt, giving it the public key
             encrypter.init(Cipher.ENCRYPT_MODE, pubKey);
 
-            byte[] textAsBytes = text.getBytes("UTF8");
+            byte[] textAsBytes = toEncrypt.getBytes("UTF8");
             //I dont know why but this is the max amount of encryption data
             int encryptedKeyLength = (keyLength / 8);
             int maxBytesToEncrypt = encryptedKeyLength - 11;
@@ -179,10 +185,19 @@ public class Encryption {
      * <p>
      * <p>
      * @param toDecrypt The String to be encrypted as a BASE64 String
-     * @param privateKey The private Key from the KeyPair (in BASE64!) to decrypt with
+     * @param privateKey The private Key from the KeyPair (in BASE64!) to
+     * decrypt with
      * @return The result of the decryption as String
      */
     public static String decrypt(String toDecrypt, String privateKey) {
+                if (toDecrypt == null || toDecrypt.isEmpty()) {
+            System.err.println("Error, toDecrypt is null or empty");
+            return "";
+        }
+        if (privateKey == null || privateKey.isEmpty()) {
+            System.err.println("Error, privateKey is null or empty");
+            return "";
+        }
         try {
             //Generates the Private Key from the byteArray
             PrivateKey privKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey)));

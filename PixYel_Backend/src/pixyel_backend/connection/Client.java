@@ -33,13 +33,10 @@ public class Client implements Runnable {
         this.socket = socket;
     }
 
-    ClientInputListener listener;
-
     @Override
     public void run() {
         Log.logInfo("Client " + socket.hashCode() + " started", this);
-        listener = new ClientInputListener();
-        new Thread(listener).start();
+        startInputListener();
     }
 
     /**
@@ -77,10 +74,15 @@ public class Client implements Runnable {
      * @param receivedString The received encrypted and compressed string
      */
     private void onStringReceived(String receivedString) {
+        if (receivedString.endsWith("\\n")) {
+            receivedString = receivedString.substring(0, receivedString.length() - 2);
+        }
+
         //------------TEMP-START-------------
         if (receivedString.equals("echo")) {
             PrintWriter raus;
             try {
+                Log.logInfo("Sending primitive Echo", this);
                 raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
                 raus.println("echo zurueck " + new java.util.Date().toString());
                 raus.flush();
@@ -133,19 +135,19 @@ public class Client implements Runnable {
         }
     }
 
-    /**
-     * The Class, which looks for Strings from the client
-     */
-    public class ClientInputListener implements Runnable {
+    public boolean isConnected() {
+        boolean disconnected = !socket.isConnected() || socket.isClosed() || !socket.isBound() || socket.isInputShutdown() || socket.isOutputShutdown();
+        return !disconnected;
+    }
 
-        @Override
-        public void run() {
+    public void startInputListener() {
+        Thread listener = new Thread(() -> {
             Log.logInfo("Inputlistener for Client " + socket.hashCode() + " started", this);
             BufferedReader rein;
             String string;
             while (!socket.isClosed() && socket.isConnected() && socket.isBound() && !socket.isInputShutdown() && !socket.isOutputShutdown()) {
                 try {
-                    rein = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+                    rein = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     string = rein.readLine();
                     if (string != null) {
                         onStringReceived(string);
@@ -169,8 +171,8 @@ public class Client implements Runnable {
                     }
                 }
             }
-        }
-
+        });
+        listener.start();
     }
 
 }

@@ -35,6 +35,10 @@ public class Compression {
      * @return The compressed String
      */
     public static String compress(String toCompress) {
+        if (toCompress == null || toCompress.isEmpty()) {
+            System.err.println("Error, String is null or empty");
+            return "";
+        }
         if (!isUTF8(toCompress)) {
             System.err.println("Error, String to compress is not in UTF8!");
             return "";
@@ -79,6 +83,10 @@ public class Compression {
      * @return The decompressed String
      */
     public static String decompress(String toDecompress) {
+        if (toDecompress == null || toDecompress.isEmpty()) {
+            System.err.println("Error, String is null ot empty");
+            return "";
+        }
         InputStreamReader isr = null;
         try {
             byte[] input = Base64.getDecoder().decode(toDecompress);

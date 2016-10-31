@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
 import pixyel_backend.Log;
 
 /**
@@ -43,6 +46,7 @@ public class Connection implements Runnable {
         while (loop) {
             try {
                 socket = SERVER.accept();
+                //socket.setSoTimeout(5000);
                 Client client = new Client(socket);
                 CONNECTEDCLIENTS.put(socket.hashCode(), client);
                 new Thread(client).start();
@@ -96,7 +100,24 @@ public class Connection implements Runnable {
             Log.logError("Server could not be started: " + ex.getMessage(), this);
         }
         onServerStarted();
+        startClientAliveScheduler();
         Connection.listenForClients();
+    }
+
+    public void startClientAliveScheduler() {
+        Executors.newFixedThreadPool(1).submit(() -> {
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    CONNECTEDCLIENTS.forEach((hashcode, client) -> {
+                        if (!client.isConnected()) {
+                            client.disconnect(false);
+                        }
+                    });
+                    Log.logInfo("Killed some connections of clients", Connection.class);
+                }
+            }, 120000);
+        });
     }
 
     /**
@@ -126,6 +147,7 @@ public class Connection implements Runnable {
 
     /**
      * Calls this method just before its closing the socket of the client
+     *
      * @param client The client which is going to be disconnected
      */
     private static void onClientDisconnected(Client client) {

@@ -9,7 +9,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import pixyel_backend.Log;
-import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.objects.User;
 import pixyel_backend.xml.XML;
@@ -44,12 +43,8 @@ public class Command {
                 case "login":
                     try {
                         connection.userdata = User.getUser(xml.getFirstChild("storeid").getContent());
-                    } catch (UserNotFoundException | UserCreationException ex) {
-                        try {
-                            connection.userdata = User.addNewUser(xml.getFirstChild("storeid").getContent());
-                        } catch (UserCreationException ex1) {
-                            Log.logError("Could not create User: " + ex1, Command.class);
-                        }
+                    } catch (UserNotFoundException ex) {
+                        connection.userdata = User.addNewUser(xml.getFirstChild("storeid").getContent());
                     }
                     connection.userdata.setPublicKey(xml.getFirstChild("publickey").getContent());
                     break;

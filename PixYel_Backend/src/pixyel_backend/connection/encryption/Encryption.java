@@ -58,7 +58,7 @@ public class Encryption {
         String[] result = new String[2];
         try {
             // Get an instance of the RSA key generator
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA/ECB/PKCS1Padding");
             //Initialize it with 2048 Bit Encryption (keysize)
             kpg.initialize(keyLength);
             // Generate the keys — might take sometime on slow computers
@@ -114,9 +114,9 @@ public class Encryption {
         }
         try {
             //Creates the Public Key from the String
-            PublicKey pubKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey)));
+            PublicKey pubKey = KeyFactory.getInstance("RSA/ECB/PKCS1Padding").generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey)));
             // Get an instance of the Cipher for RSA encryption/decryption
-            Cipher encrypter = Cipher.getInstance("RSA");
+            Cipher encrypter = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             // Initiate the Cipher, telling it that it is going to Encrypt, giving it the public key
             encrypter.init(Cipher.ENCRYPT_MODE, pubKey);
 
@@ -200,9 +200,9 @@ public class Encryption {
         }
         try {
             //Generates the Private Key from the byteArray
-            PrivateKey privKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey)));
+            PrivateKey privKey = KeyFactory.getInstance("RSA/ECB/PKCS1Padding").generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey)));
             // Get an instance of the Cipher for RSA encryption/decryption
-            Cipher decrypter = Cipher.getInstance("RSA");
+            Cipher decrypter = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             // Initiate the Cipher, telling it that it is going to Decrypt, giving it the private key
             decrypter.init(Cipher.DECRYPT_MODE, privKey);
 

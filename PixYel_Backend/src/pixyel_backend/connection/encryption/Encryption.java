@@ -58,7 +58,7 @@ public class Encryption {
         String[] result = new String[2];
         try {
             // Get an instance of the RSA key generator
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA/ECB/PKCS1Padding");
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
             //Initialize it with 2048 Bit Encryption (keysize)
             kpg.initialize(keyLength);
             // Generate the keys — might take sometime on slow computers
@@ -202,7 +202,7 @@ public class Encryption {
             //Generates the Private Key from the byteArray
             PrivateKey privKey = KeyFactory.getInstance("RSA/ECB/PKCS1Padding").generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey)));
             // Get an instance of the Cipher for RSA encryption/decryption
-            Cipher decrypter = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            Cipher decrypter = Cipher.getInstance("RSA/ECB/PKCS1Padding ");
             // Initiate the Cipher, telling it that it is going to Decrypt, giving it the private key
             decrypter.init(Cipher.DECRYPT_MODE, privKey);
 

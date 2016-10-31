@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import pixyel_backend.Log;
 
@@ -17,13 +18,14 @@ public class Connection implements Runnable {
 
     private static ServerSocket SERVER = null;
     private static final HashMap<Integer, Client> CONNECTEDCLIENTS = new HashMap<>();//All online clients
+    private static final ExecutorService clients = Executors.newCachedThreadPool();
 
     /**
      * Here the server is going to be started.
      *
      */
     public static void start() {
-        new Thread(new Connection()).start();
+        Executors.newFixedThreadPool(1).submit(new Connection());
     }
 
     /**
@@ -49,7 +51,7 @@ public class Connection implements Runnable {
                 //socket.setSoTimeout(5000);
                 Client client = new Client(socket);
                 CONNECTEDCLIENTS.put(socket.hashCode(), client);
-                new Thread(client).start();
+                clients.submit(client);
                 onClientConnected(client);
             } catch (Exception e) {
                 Log.logError("IO Error occured during the setup of the connection to the client: " + e, Connection.class);

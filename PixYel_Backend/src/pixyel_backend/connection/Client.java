@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import pixyel_backend.Log;
@@ -141,7 +142,7 @@ public class Client implements Runnable {
     }
 
     public void startInputListener() {
-        Thread listener = new Thread(() -> {
+        Executors.newFixedThreadPool(1).submit(() -> {
             Log.logInfo("Inputlistener for Client " + socket.hashCode() + " started", this);
             BufferedReader rein;
             String string;
@@ -172,7 +173,6 @@ public class Client implements Runnable {
                 }
             }
         });
-        listener.start();
     }
 
 }

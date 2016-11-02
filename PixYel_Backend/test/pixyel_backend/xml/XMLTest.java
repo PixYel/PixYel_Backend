@@ -385,7 +385,7 @@ public class XMLTest {
     public void testToXMLString_0args() {
         String expected = "<" + rootname + ">demo</" + rootname + ">";
         toTest.setContent("demo");
-        assertEquals(expected, toTest.toXMLString());
+        assertEquals(expected, toTest.toString());
         toTest.removeContent();
         assertFalse("Cannot restore original xml", toTest.hasContent());
     }
@@ -397,7 +397,7 @@ public class XMLTest {
     public void testToXMLString_boolean() {
         String expected = "<" + rootname + ">demo</" + rootname + ">";
         toTest.setContent("demo");
-        assertEquals(expected, toTest.toXMLString(true));
+        assertEquals(expected, toTest.toString(true));
         toTest.removeContent();
         assertFalse("Cannot restore original xml", toTest.hasContent());
     }
@@ -410,9 +410,8 @@ public class XMLTest {
         toTest.addChildren("demo");
         toTest.setContent("content");
         toTest.getChild("demo").get(0).setContent("content2");
-        String temp = toTest.toString();
         assertEquals("should be equal", "Name: \"Roottag\" ; Content: \"content\" ; Children: 1 \n"
-                + "├─Name: \"demo\" ; Content: \"content2\" ; Parent: \"Roottag\" ", toTest.toString());
+                + "├─Name: \"demo\" ; Content: \"content2\" ; Parent: \"Roottag\" ", toTest.toStringGraph());
         toTest.removeChildren("demo");
         toTest.removeContent();
 

@@ -61,7 +61,7 @@ public class User {
                 this.isVerified = false;
             }
         } catch (SQLException | DbConnectionException ex) {
-            Log.logError("Could not read userinformation from database - rootcause: " + ex.getMessage(), this);
+            Log.logError("Could not read userinformation from database - rootcause: " + ex.getMessage(), User.class);
             throw new UserCreationException();
         }
     }
@@ -102,7 +102,7 @@ public class User {
                 this.isVerified = false;
             }
         } catch (SQLException | DbConnectionException ex) {
-            Log.logError("Could not read userinformation from database - rootcause: " + ex.getMessage(), this);
+            Log.logError("Could not read userinformation from database - rootcause: " + ex.getMessage(), User.class);
             throw new UserCreationException();
         }
     }
@@ -217,11 +217,9 @@ public class User {
      * @param value value that should be inserted
      */
     private void updateUserValue(String key, String value) {
-        try {
-            PreparedStatement sta = con.getPreparedStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id);
+        try (PreparedStatement sta = con.getPreparedStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
             sta.setString(1, SqlUtils.escapeString(value));
             sta.execute();
-            sta.close();
         } catch (SQLException ex) {
             Log.logError("couldnt update user value \"" + key + "\" - rootcause:" + ex.getMessage(),this);
         }
@@ -234,11 +232,9 @@ public class User {
      * @param value value that should be inserted
      */
     private void updateUserValue(String key, int value) {
-        try {
-            PreparedStatement sta = con.getPreparedStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id);
+        try (PreparedStatement sta = con.getPreparedStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
             sta.setInt(1, value);
             sta.execute();
-            sta.close();
         } catch (SQLException ex) {
             Log.logError("couldnt update user value \"" + key + "\" - rootcause:" + ex.getMessage(),this);
         }
@@ -270,6 +266,10 @@ public class User {
         }
     }
     
+    /**
+     * Creates a new BackendFunctions Obj which contains the userID and uses the database-connection of the current user
+     * @return
+     */
     public BackendFunctions getBackendFunctions(){
         return new BackendFunctions(this.con,this.id);
     }

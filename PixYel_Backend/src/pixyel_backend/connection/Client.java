@@ -170,7 +170,7 @@ public class Client implements Runnable {
             try {
                 rein = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             } catch (IOException ex) {
-                Log.logError("Could not create InputStream for the client " + getName(), this);
+                Log.logError("Could not create InputStream for the client " + getName() + ": " + ex, this);
                 return;
             }
             String string;
@@ -180,6 +180,9 @@ public class Client implements Runnable {
                     string = rein.readLine();
                     if (string.startsWith("<EOF>")) {
                         string = string.substring(5);
+                    }
+                    if (string.endsWith("<EOF>")) {
+                        string = string.substring(0, string.length() - 5);
                     }
                     if (string != null) {
                         onStringReceived(string);

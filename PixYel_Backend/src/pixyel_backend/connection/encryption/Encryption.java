@@ -1,20 +1,14 @@
 package pixyel_backend.connection.encryption;
 
 import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.util.Base64;
 
 /**
@@ -68,7 +62,7 @@ public class Encryption {
             //Gets the encoded public and private Keys as String
             result[0] = Base64.getEncoder().encodeToString(kp.getPublic().getEncoded());//PublicKey
             result[1] = Base64.getEncoder().encodeToString(kp.getPrivate().getEncoded());//PrivateKey
-        } catch (NoSuchAlgorithmException ex) {
+        } catch (Exception ex) {
             throw new EncryptionException("Your device doesnt support RSA: " + ex.getMessage());
         }
         return result;
@@ -152,10 +146,10 @@ public class Encryption {
 
             //Returns the encrypted byte array as a string
             return Base64.getEncoder().encodeToString(encrypted);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException ex) {
-            throw new EncryptionException("Something went wrong during the encryption: " + ex.getMessage());
         } catch (UnsupportedEncodingException ex) {
             throw new EncryptionException("Your Device cant convert a String to UTF-8: " + ex.getMessage());
+        } catch (Exception ex) {
+            throw new EncryptionException("Something went wrong during the encryption: " + ex.getMessage());
         }
     }
 
@@ -243,10 +237,10 @@ public class Encryption {
                 }
             }
             return new String(textAsBytes, "UTF8");
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException ex) {
-            throw new EncryptionException("Something went wrong during the decryption: " + ex.getMessage());
         } catch (UnsupportedEncodingException ex) {
             throw new EncryptionException("Your Device cant convert a String to UTF-8: " + ex.getMessage());
+        } catch (Exception ex) {
+            throw new EncryptionException("Something went wrong during the decryption: " + ex.getMessage());
         }
     }
 

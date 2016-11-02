@@ -46,13 +46,13 @@ public class Compression {
         try {
             gzos = new GZIPOutputStream(baos);
             gzos.write(toCompress.getBytes("UTF8"));
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new CompressionException("Could not compress the string: "+e.getMessage());
         } finally {
             if (gzos != null) {
                 try {
                     gzos.close();
-                } catch (IOException ex) {
+                } catch (Exception ex) {
                     throw new CompressionException("Could not finish the compression: "+ex.getMessage());
                 }
             }
@@ -97,12 +97,12 @@ public class Compression {
                 sw.write(chars, 0, len);
             }
             return sw.toString();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             throw new CompressionException("Could not decompress string: " + ex.getMessage());
         } finally {
             try {
                 isr.close();
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 throw new CompressionException("Could not finish the decompression by closing the gzipstream: " + ex.getMessage());
             }
         }

@@ -97,7 +97,9 @@ public class Client implements Runnable {
         try {
             //System.out.println("Received String: " + receivedString);
             String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
+            System.out.println("Decrypted: " + decrypted);
             String decompressed = Compression.decompress(decrypted);
+            System.out.println("Decompressed: " + decompressed);
             XML xml = XML.openXML(decompressed);
             Command.onCommandReceived(this, xml);
         } catch (XML.XMLException ex) {
@@ -106,6 +108,8 @@ public class Client implements Runnable {
             Log.logWarning("Client " + getName() + " has send an invalid String to decrypt: " + ex, this);
         } catch (Compression.CompressionException ex) {
             Log.logWarning("Client " + getName() + " has send an invalid String to decompress: " + ex, this);
+        } catch (Exception ex) {
+            Log.logWarning("Client " + getName() + " has send an invalid String: " + ex, this);
         }
     }
 
@@ -174,6 +178,9 @@ public class Client implements Runnable {
                 try {
 
                     string = rein.readLine();
+                    if (string.startsWith("<EOF>")) {
+                        string = string.substring(5);
+                    }
                     if (string != null) {
                         onStringReceived(string);
                     } else {

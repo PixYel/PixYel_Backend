@@ -62,7 +62,7 @@ public class Log {
             result += (" ");
         }
         result += ("[" + className + "]");
-        if (maxLengthOfClassName % 2 == 0) {
+        if ((maxLengthOfClassName - currentLengthOfClassName) % 2 == 0) {
             for (int i = 0; i < (maxLengthOfClassName - currentLengthOfClassName) / 2; i++) {
                 result += (" ");
             }

@@ -38,7 +38,7 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
-        Log.logInfo("Client " + socket.hashCode() + " started", this);
+        //Log.logInfo("Client " + socket.hashCode() + " started", this);
         startInputListener();
     }
 
@@ -165,7 +165,7 @@ public class Client implements Runnable {
     public void startInputListener() {
         listener = Executors.newFixedThreadPool(1);
         listener.submit(() -> {
-            Log.logInfo("Inputlistener for Client " + getName() + " started", this);
+            //Log.logInfo("Inputlistener for Client " + getName() + " started", this);
             BufferedReader rein;
             try {
                 rein = new BufferedReader(new InputStreamReader(socket.getInputStream()));

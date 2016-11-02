@@ -7,8 +7,6 @@ package pixyel_democlient.compression;
 
 import java.io.*;
 import java.util.Base64;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.*;
 
 public class Compression {
@@ -33,24 +31,29 @@ public class Compression {
      * <p>
      * @param toCompress The String to be compressed
      * @return The compressed String
+     * @throws CompressionException If the string is not valid or something went
+     * wrong during the compression
      */
-    public static String compress(String toCompress) {
+    public static String compress(String toCompress) throws CompressionException {
+        if (toCompress == null || toCompress.isEmpty()) {
+            throw new CompressionException("The string to be decompressed is null or empty");
+        }
         if (!isUTF8(toCompress)) {
-            System.err.println("Error, String to compress is not in UTF8!");
-            return "";
+            throw new CompressionException("The string to encrypt has to be in UTF-8");
         }
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GZIPOutputStream gzos = null;
         try {
             gzos = new GZIPOutputStream(baos);
             gzos.write(toCompress.getBytes("UTF8"));
-        } catch (IOException e) {
-            System.err.println("Could not compress String: " + e);
+        } catch (Exception e) {
+            throw new CompressionException("Could not compress the string: "+e.getMessage());
         } finally {
             if (gzos != null) {
                 try {
                     gzos.close();
-                } catch (IOException ignore) {
+                } catch (Exception ex) {
+                    throw new CompressionException("Could not finish the compression: "+ex.getMessage());
                 }
             }
         }
@@ -77,8 +80,13 @@ public class Compression {
      * <p>
      * @param toDecompress The String to be decompressed
      * @return The decompressed String
+     * @throws CompressionException If the string is not valid or someting went
+     * wrong during the decompression
      */
-    public static String decompress(String toDecompress) {
+    public static String decompress(String toDecompress) throws CompressionException {
+        if (toDecompress == null || toDecompress.isEmpty()) {
+            throw new CompressionException("The string to be decompressed is null or empty");
+        }
         InputStreamReader isr = null;
         try {
             byte[] input = Base64.getDecoder().decode(toDecompress);
@@ -89,16 +97,15 @@ public class Compression {
                 sw.write(chars, 0, len);
             }
             return sw.toString();
-        } catch (IOException ex) {
-            Logger.getLogger(Compression.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            throw new CompressionException("Could not decompress string: " + ex.getMessage());
         } finally {
             try {
                 isr.close();
-            } catch (IOException ex) {
-                Logger.getLogger(Compression.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+                throw new CompressionException("Could not finish the decompression by closing the gzipstream: " + ex.getMessage());
             }
         }
-        return "";
     }
 
     private static boolean isUTF8(String toCheck) {
@@ -133,5 +140,17 @@ public class Compression {
         }
 
         return true;
+    }
+
+    public static class CompressionException extends Exception {
+
+        public CompressionException() {
+            super();
+        }
+
+        public CompressionException(String message) {
+            super(message);
+        }
+
     }
 }

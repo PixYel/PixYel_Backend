@@ -42,7 +42,7 @@ public class PixYel_Client {
         //Ping dient nur zum Überprüfen der Socketverbindung, NICHT zum Überprüfen der Verschlüsselung und Compression
         //ping();
         //**Verbindung zum Server herstellen ENTWEDER Ping ODER connect aufrufen!!!!!!!!!!!11!!!!!elf!!
-        connect("HanswurstID");
+        connect("DemoclientID");
         //**Beispiel: sendet ein xml mit dem node "echo" an den Server, der server schickt daraufhin selbiges zurück
         sendToServer(XML.createNewXML("echo").toXMLString());
         //**Wenn man die App schließt oder ähnliches, einfach die disconnect Methode aufrufen
@@ -58,17 +58,17 @@ public class PixYel_Client {
             try {
                 socket = new Socket();
                 socket.connect(new InetSocketAddress(serverIP, 7331), 500);
-                System.out.println("Erfolgreich verbunden");
+                System.out.println("Successful connected");
                 listener = new ServerInputListener();
                 new Thread(listener).start();
-                System.out.println("Sende Echo...");
+                System.out.println("Sending echo...");
                 PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
                 raus.println("echo");
                 raus.flush();
             } catch (UnknownHostException e) {
-                System.err.println("Unbekannter Host: " + e.getMessage());
+                System.err.println("Unknown host: " + e.getMessage());
             } catch (IOException e) {
-                System.err.println("Server konnte nicht erreicht werden: " + e.getMessage());
+                System.err.println("Server could not be reached: " + e.getMessage());
             }
         }
     }
@@ -81,35 +81,39 @@ public class PixYel_Client {
             try {
                 socket = new Socket();
                 socket.connect(new InetSocketAddress(serverIP, 7331), 500);
-                System.out.println("Erfolgreich verbunden");
+                System.out.println("Successful connected");
                 listener = new ServerInputListener();
                 new Thread(listener).start();
                 login(storeID);
             } catch (UnknownHostException e) {
-                System.err.println("Unbekannter Host: " + e.getMessage());
+                System.err.println("Unknown host: " + e.getMessage());
             } catch (IOException e) {
-                System.err.println("Server konnte nicht erreicht werden: " + e.getMessage());
+                System.err.println("Server could not be reached: " + e.getMessage());
             }
         }
     }
 
     public void login(String storeID) {
-        //Erzeuge Client Private und Public Key
-        String[] keyPair = Encryption.generateKeyPair();
-        //Speichere den Private Key für andere Methoden sichtbar
-        clientPrivateKey = keyPair[1];
-        //Erzeuge ein XML mit einem Tag namens publickey und einem tag namens storeid, siehe Spezifikation!
-        XML loginXML = XML.createNewXML("login").addChildren("storeid", "publickey");
-        loginXML.getFirstChild("storeid").setContent(storeID);
-        loginXML.getFirstChild("publickey").setContent(keyPair[0]);
-        //Übermittle dem Server meinen Public Key
-        sendToServer(loginXML.toXMLString());
+        try {
+            //Erzeuge Client Private und Public Key
+            String[] keyPair = Encryption.generateKeyPair();
+            //Speichere den Private Key für andere Methoden sichtbar
+            clientPrivateKey = keyPair[1];
+            //Erzeuge ein XML mit einem Tag namens publickey und einem tag namens storeid, siehe Spezifikation!
+            XML loginXML = XML.createNewXML("login").addChildren("storeid", "publickey");
+            loginXML.getFirstChild("storeid").setContent(storeID);
+            loginXML.getFirstChild("publickey").setContent(keyPair[0]);
+            //Übermittle dem Server meinen Public Key
+            sendToServer(loginXML.toXMLString());
+        } catch (Encryption.EncryptionException ex) {
+            System.err.println("Could not create KeyPair!");
+        }
     }
 
     public void disconnect() {
         //Unwahrscheinlicher Fall, dass der Socket sich unerwartet beendet hat
         if (socket == null) {
-            System.out.println("Server unerreichbar, beende daher sofort...");
+            System.out.println("Server unreachable, shutting down the program");
             System.exit(0);
         } else {
             try {
@@ -117,10 +121,10 @@ public class PixYel_Client {
                 listener.stop();
                 //"Kanal" zum Server schließen
                 socket.close();
-                System.out.println("Habe mich beim Server abgemeldet und beende mich jetzt...");
+                System.out.println("Signed out an shutting down...");
                 System.exit(0);
             } catch (IOException ex) {
-                System.out.println("Konnte Socket nicht schliessen!");
+                System.out.println("Could not close the socket!");
             }
 
         }
@@ -133,7 +137,7 @@ public class PixYel_Client {
             PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
             raus.println(encrypted);
             raus.flush();
-            System.out.println("Erfolgreich \"" + toSend + "\" gesendet!");
+            System.out.println("Successful \"" + toSend + "\" send!");
         } catch (Exception e) {
             if (e.toString().contains("Socket is closed")) {
                 System.err.println("Could not send String beacuase the socket is closed, closing the connection now: " + e);
@@ -153,7 +157,7 @@ public class PixYel_Client {
 
         @Override
         public void run() {
-            System.out.println("Listener für eingehende Nachrichten vom Server in eigenem Thread erfolgreich gestartet!");
+            System.out.println("Successfully started listener in its own Thread!");
             BufferedReader rein;
             String string;
             while (!socket.isClosed() && socket.isConnected() && socket.isBound() && run) {
@@ -187,24 +191,30 @@ public class PixYel_Client {
 
         public void stop() {
             run = false;
-            System.out.println("Listener für Nachrichten vom Server erfolgreich gestoppt!");
+            System.out.println("Successfully stopped listener for incoming messages!");
         }
     }
 
     public void onStringReceived(String string) {
         if (string.contains("echo")) {
-            System.out.println("Nachricht vom Server: " + string);
+            System.out.println("Message from the server: " + string);
             return;
         }
-        //Decomprimiere den String
-        String decrypted = Encryption.decrypt(string, clientPrivateKey);
-        String decompressed = Compression.decompress(decrypted);
         try {
+            //Decrypte den String
+            String decrypted = Encryption.decrypt(string, clientPrivateKey);
+            //Decomrimiere den String
+            String decompressed = Compression.decompress(decrypted);
             //Parse den String in ein XML
             XML receivedXML = XML.openXML(decompressed);
             //Beispielvorgehen: Zeige den XML Baum in der Ausgabe an
             System.out.println("Command received: \n" + receivedXML.toString());
-        } catch (Exception e) {
+        } catch (Encryption.EncryptionException ex) {
+            System.err.println("Error during the decryption: " + ex);
+        } catch (Compression.CompressionException ex) {
+            System.err.println("Error during the decompression: " + ex);
+        } catch (XML.XMLException ex) {
+            System.err.println("Error during the xml parsing: " + ex);
         }
     }
 

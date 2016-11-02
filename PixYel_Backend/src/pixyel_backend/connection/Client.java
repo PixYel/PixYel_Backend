@@ -212,8 +212,17 @@ public class Client implements Runnable {
             }
         });
     }
+
+    protected void setUserdata(User user){
+        this.userdata= user;
+        this.backendFunctions=user.getBackendFunctions();             
+    }
+            
+    protected User getUserdata(){
+        return this.userdata;           
+    }
     
-    private BackendFunctions getBackendFunctions(){
+    protected BackendFunctions getBackendFunctions() {
         return this.backendFunctions;
     }
 }

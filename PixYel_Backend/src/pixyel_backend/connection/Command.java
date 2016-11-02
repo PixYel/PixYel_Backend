@@ -9,6 +9,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import pixyel_backend.Log;
+import pixyel_backend.database.BackendFunctions;
 import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.objects.User;
 import pixyel_backend.xml.XML;
@@ -20,6 +21,7 @@ import pixyel_backend.xml.XML;
 public class Command {
 
     public static void onCommandReceived(Client client, XML xml) {
+        BackendFunctions backendFunctions = client.getBackendFunctions();
         //Log.logInfo("Command from " + client.getName() + " received: \n" + xml.toStringGraph(), Command.class);
         try {
             switch (xml.getName()) {
@@ -44,11 +46,11 @@ public class Command {
                 case "login":
                     try {
                         try {
-                            client.userdata = User.getUser(xml.getFirstChild("storeid").getContent());
+                            client.setUserdata(User.getUser(xml.getFirstChild("storeid").getContent()));
                         } catch (UserNotFoundException ex) {
-                            client.userdata = User.addNewUser(xml.getFirstChild("storeid").getContent());
+                            client.setUserdata(User.addNewUser(xml.getFirstChild("storeid").getContent()));
                         }
-                        client.userdata.setPublicKey(xml.getFirstChild("publickey").getContent());
+                        client.getUserdata().setPublicKey(xml.getFirstChild("publickey").getContent());
                         client.sendToClient(XML.createNewXML("loginsuccessful").toString());
                         Log.logInfo("Successfully logged " + client.getName() + " in", Command.class);
                     } catch (Exception e) {
@@ -61,6 +63,17 @@ public class Command {
                  */
                 case "alive":
                     client.checkClientAlive(true);
+                    break;
+
+                case "fotorequest":
+                    int xCordinate = Integer.valueOf(xml.getFirstChild("xcodinate").getContent());
+                    int yCordinate = Integer.valueOf(xml.getFirstChild("ycodinate").getContent());
+                    XML picturesXML = backendFunctions.getPictures(xCordinate,yCordinate);
+                    break;
+                case "commentforpicture":
+                    int pictureId = Integer.valueOf(xml.getAttribute("id"));
+                    XML allComments = backendFunctions.getCommentsForPicutre(pictureId);
+                    
                     break;
             }
         } catch (Exception e) {

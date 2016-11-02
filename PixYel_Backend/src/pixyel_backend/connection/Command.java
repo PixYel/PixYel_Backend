@@ -20,7 +20,7 @@ import pixyel_backend.xml.XML;
 public class Command {
 
     public static void onCommandReceived(Client client, XML xml) {
-        Log.logInfo("Command received: \n" + xml.toStringGraph(), Command.class);
+        Log.logInfo("Command from " + client.getName() + " received: \n" + xml.toStringGraph(), Command.class);
         try {
             switch (xml.getName()) {
                 /*

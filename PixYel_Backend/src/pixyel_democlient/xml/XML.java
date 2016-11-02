@@ -6,8 +6,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -24,7 +22,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import pixyel_backend.xml.XML.XMLException;
 
 /**
  *
@@ -992,17 +989,13 @@ public class XML {
         return p == null || (t != Node.ELEMENT_NODE && t != Node.TEXT_NODE);
     }
 
-    public String toXMLString() {
-        return toXMLString(true);
-    }
-
     /**
      * Returns the content of the current node
      *
      * @param inline Wether the output should be in one line or formatted
      * @return The content of the current node as String in XML language
      */
-    public String toXMLString(boolean inline) {
+    public String toString(boolean inline) {
         try {
             // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -1029,19 +1022,28 @@ public class XML {
     }
 
     /**
-     * Returns a fancy string representation of this XML-object
+     * Returns the content of the current node
      *
-     * @return A String representation of this XML-object
+     * @return The content of the current node as String in XML language
      */
     @Override
     public String toString() {
+        return toString(true);
+    }
+
+    /**
+     * Returns a fancy string graph of this XML-object
+     *
+     * @return A String graph of this XML-object
+     */
+    public String toStringGraph() {
         ArrayList<Boolean> uncles = new ArrayList<>();
-        return toString(0, uncles);
+        return toStringGraph(0, uncles);
     }
 
     private static final int WIDTHOFTHECHART = 3;
 
-    private String toString(int depth, ArrayList<Boolean> unclesAndGreatunclesASO) {//Geschwister meiner Eltern, deren Eltern, usw
+    private String toStringGraph(int depth, ArrayList<Boolean> unclesAndGreatunclesASO) {//Geschwister meiner Eltern, deren Eltern, usw
         //Funktioniert
         String string = "";
         //string += "[Depth: " + depth + "] [Size Of TRUE/FALSE: " + unclesAndGreatunclesASO.size() + "]";
@@ -1104,7 +1106,7 @@ public class XML {
             ArrayList<XML> childs;
             string += "; Children: " + (childs = getChildren()).size() + " ";
             for (int i = 0; i < childs.size(); i++) {
-                string += childs.get(i).toString(depth + 1, unclesAndGreatunclesASO);
+                string += childs.get(i).toStringGraph(depth + 1, unclesAndGreatunclesASO);
             }
         }
         if (isLastChild()) {

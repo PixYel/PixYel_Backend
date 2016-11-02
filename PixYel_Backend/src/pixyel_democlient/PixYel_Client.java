@@ -44,7 +44,7 @@ public class PixYel_Client {
         //**Verbindung zum Server herstellen ENTWEDER Ping ODER connect aufrufen!!!!!!!!!!!11!!!!!elf!!
         connect("DemoclientID");
         //**Beispiel: sendet ein xml mit dem node "echo" an den Server, der server schickt daraufhin selbiges zurück
-        sendToServer(XML.createNewXML("echo").toXMLString());
+        sendToServer(XML.createNewXML("echo").toString());
         //**Wenn man die App schließt oder ähnliches, einfach die disconnect Methode aufrufen
         Thread.sleep(1000);
         disconnect();
@@ -104,7 +104,7 @@ public class PixYel_Client {
             loginXML.getFirstChild("storeid").setContent(storeID);
             loginXML.getFirstChild("publickey").setContent(keyPair[0]);
             //Übermittle dem Server meinen Public Key
-            sendToServer(loginXML.toXMLString());
+            sendToServer(loginXML.toString());
         } catch (Encryption.EncryptionException ex) {
             System.err.println("Could not create KeyPair!");
         }
@@ -117,7 +117,7 @@ public class PixYel_Client {
             System.exit(0);
         } else {
             try {
-                sendToServer(XML.createNewXML("disconnect").toXMLString());
+                sendToServer(XML.createNewXML("disconnect").toString());
                 listener.stop();
                 //"Kanal" zum Server schließen
                 socket.close();
@@ -208,7 +208,7 @@ public class PixYel_Client {
             //Parse den String in ein XML
             XML receivedXML = XML.openXML(decompressed);
             //Beispielvorgehen: Zeige den XML Baum in der Ausgabe an
-            System.out.println("Command received: \n" + receivedXML.toString());
+            System.out.println("Command received: \n" + receivedXML.toStringGraph());
         } catch (Encryption.EncryptionException ex) {
             System.err.println("Error during the decryption: " + ex);
         } catch (Compression.CompressionException ex) {

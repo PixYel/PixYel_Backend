@@ -97,9 +97,9 @@ public class Client implements Runnable {
         try {
             //System.out.println("Received String: " + receivedString);
             String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
-            System.out.println("Decrypted: " + decrypted);
+            Log.logDebug("Decrypted: " + decrypted, this);
             String decompressed = Compression.decompress(decrypted);
-            System.out.println("Decompressed: " + decompressed);
+            Log.logDebug("Decompressed: " + decompressed, this);
             XML xml = XML.openXML(decompressed);
             Command.onCommandReceived(this, xml);
         } catch (XML.XMLException ex) {

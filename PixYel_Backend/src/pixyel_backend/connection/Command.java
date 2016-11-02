@@ -47,6 +47,7 @@ public class Command {
                         client.userdata = User.addNewUser(xml.getFirstChild("storeid").getContent());
                     }
                     client.userdata.setPublicKey(xml.getFirstChild("publickey").getContent());
+                    client.sendToClient(XML.createNewXML("loginsuccessful").toString());
                     break;
                 /*
                     The client replies to the alive message from the server (to avoid dead clients)

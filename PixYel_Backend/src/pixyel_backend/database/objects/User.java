@@ -270,6 +270,10 @@ public class User {
         }
     }
     
+    /**
+     * Creates a new BackendFunctions Obj which contains the userID and uses the database-connection of the current user
+     * @return
+     */
     public BackendFunctions getBackendFunctions(){
         return new BackendFunctions(this.con,this.id);
     }

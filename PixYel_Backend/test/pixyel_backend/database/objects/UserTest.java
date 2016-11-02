@@ -35,6 +35,7 @@ public class UserTest {
 
     /**
      * Test of addNewUser method, of class User.
+     * @throws pixyel_backend.database.exceptions.UserCreationException
      */
     @Test
     public void testAddNewUser() throws UserCreationException {
@@ -44,6 +45,7 @@ public class UserTest {
 
     /**
      * Test of getUser method, of class User.
+     * @throws java.lang.Exception
      */
     @Test
     public void testGetUser_int() throws Exception {
@@ -54,6 +56,7 @@ public class UserTest {
 
     /**
      * Test of getUser method, of class User.
+     * @throws java.lang.Exception
      */
     @Test
     public void testGetUser_String() throws Exception {
@@ -96,9 +99,10 @@ public class UserTest {
 
     /**
      * Test of getPublicKey method, of class User.
+     * @throws pixyel_backend.connection.encryption.Encryption.EncryptionException
      */
     @Test
-    public void testGetPublicKey() {
+    public void testGetPublicKey() throws Encryption.EncryptionException {
         String[] keys = Encryption.generateKeyPair();
         testuser.setPublicKey(keys[0]);
         assertEquals(keys[0], testuser.getPublicKey());
@@ -106,15 +110,17 @@ public class UserTest {
 
     /**
      * Test of setPublicKey method, of class User.
+     * @throws pixyel_backend.connection.encryption.Encryption.EncryptionException
      */
     @Test
-    public void testSetPublicKey() {
+    public void testSetPublicKey() throws Encryption.EncryptionException {
         String[] keys = Encryption.generateKeyPair();
         testuser.setPublicKey(keys[0]);
         assertEquals(keys[0], testuser.getPublicKey());    }
 
     /**
      * Test of getStoreID method, of class User.
+     * @throws pixyel_backend.database.exceptions.UserCreationException
      */
     @Test
     public void testGetStoreID() throws UserNotFoundException, UserCreationException {
@@ -134,6 +140,7 @@ public class UserTest {
 
     /**
      * Test of delete method, of class User.
+     * @throws pixyel_backend.database.exceptions.UserCreationException
      */
     @Test
     public void testDelete() throws UserNotFoundException, UserCreationException {

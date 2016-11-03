@@ -26,7 +26,7 @@ public class Command {
         try {
             switch (xml.getName()) {
                 /*
-                Is for debugging reasons only
+                    Is for debugging reasons only
                  */
                 case "echo":
                     DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
@@ -68,13 +68,32 @@ public class Command {
                 case "fotorequest":
                     int xCordinate = Integer.valueOf(xml.getFirstChild("xcodinate").getContent());
                     int yCordinate = Integer.valueOf(xml.getFirstChild("ycodinate").getContent());
-                    XML picturesXML = backendFunctions.getPictures(xCordinate,yCordinate);
+                    XML picturesXML = backendFunctions.getPictures(xCordinate, yCordinate);
+                    client.sendToClient(picturesXML.toString());
                     break;
                 case "commentforpicture":
                     int pictureId = Integer.valueOf(xml.getAttribute("id"));
                     XML allComments = backendFunctions.getCommentsForPicutre(pictureId);
-                    
+                    client.sendToClient(allComments.toString());
                     break;
+                case "flagpicture":
+                    pictureId = Integer.valueOf(xml.getAttribute("id"));
+                    backendFunctions.flagPicture(pictureId);
+                    break;
+                case "flagcomment":
+                    int commentId = Integer.valueOf(xml.getAttribute("id"));
+                    backendFunctions.flagComment(commentId);
+                    break;
+                case "addnewcomment":
+                    String text = xml.getFirstChild("text").getContent();
+                    int refersToPicuture = Integer.valueOf(xml.getAttribute("pictureId"));
+                    backendFunctions.addNewComment(text, refersToPicuture);
+                    break;
+                case "uploadpicture":
+                    String picturedata = xml.getFirstChild("data").getContent();
+                    backendFunctions.uploadPicture(picturedata);
+                    break;
+
             }
         } catch (Exception e) {
             Log.logWarning("Could not execute command: " + xml.getName() + ": " + e, Command.class);

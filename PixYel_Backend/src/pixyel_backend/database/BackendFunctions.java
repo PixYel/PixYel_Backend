@@ -17,28 +17,27 @@ import pixyel_backend.xml.XML;
  */
 public class BackendFunctions {
 
-    private final DbConnection con;
+    private static final DbConnection con = new DbConnection();
     private final int userId;
 
-    public BackendFunctions(DbConnection con, int userid) {
-        this.con = con;
+    public BackendFunctions(int userid) {
         this.userId = userid;
     }
 
     public Comment getComment(int commentId) throws CommentCreationException {
-        return new Comment(commentId, this.con);
+        return new Comment(commentId);
     }
 
     public void newComment(int pictureID, String comment) {
         System.out.println("test354");
-        Comment.newComment(pictureID, this.userId, comment, this.con);
+        Comment.newComment(pictureID, this.userId, comment);
         System.out.println("test355");
     }
 
     public XML getCommentsForPicutre(int pictureId) throws SQLException, CommentCreationException {
         XML out = XML.createNewXML("commentsforpicture");
         out.addAttribute("pictureId", String.valueOf(pictureId));
-        List<Comment> allComments = Comment.getCommentsForPicutre(pictureId, this.con);
+        List<Comment> allComments = Comment.getCommentsForPicutre(pictureId);
         int iterator = 0;
         for (Comment currentComment : allComments) {
             out.addChild("comment");
@@ -61,15 +60,13 @@ public class BackendFunctions {
     public void uploadPicture(String picturedata) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     public void flagComment(int commentId) {
-        
+
     }
 
     public void addNewComment(String text, int refersToPicuture) {
-        Comment.newComment(refersToPicuture, userId, text, con);
+        Comment.newComment(refersToPicuture, userId, text);
     }
-
-    
 
 }

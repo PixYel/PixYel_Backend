@@ -12,16 +12,20 @@ import pixyel_backend.database.exceptions.DbConnectionException;
 public class MysqlConnector {
 
     /**
-     * Connection to the productiv database which was set up by using the
+     * Connection to a database 
+     * Default is a connection to the Productiv db which was set up by using the
      * properties file
      */
-    public static final Connection CONNECTION = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
+    private static Connection CONNECTION = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
 
-    /**
-     * Connection to the testdatabase which was set up by using the properties
-     * file
-     */
-    public static final Connection TESTCONNECTION = MysqlConnector.connectToTestDatabaseUsingPropertiesFile();
+    
+    public static Connection getConnection() {
+        return CONNECTION;
+    }
+
+    public static void useTestDB() {
+        CONNECTION = MysqlConnector.connectToTestDatabaseUsingPropertiesFile();
+    }
 
     /**
      * Creates a connection to a database

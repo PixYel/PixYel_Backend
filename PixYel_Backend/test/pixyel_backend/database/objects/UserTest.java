@@ -8,9 +8,12 @@ package pixyel_backend.database.objects;
 import java.sql.Timestamp;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import pixyel_backend.connection.encryption.Encryption;
+import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.exceptions.DbConnectionException;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
@@ -23,12 +26,17 @@ public class UserTest {
 
     public User testuser;
 
+    @BeforeClass
+    public static void init(){
+            MysqlConnector.useTestDB();
+    }
+    
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-
+    
     public UserTest() throws DbConnectionException, Exception {
         try {
-            this.testuser = User.addNewTestUser("JUnit-Test-User-" + System.currentTimeMillis());
+            this.testuser = User.addNewUser("JUnit-Test-User-" + System.currentTimeMillis());
         } catch (UserCreationException ex) {
             System.err.println("Could not create testuser");
         }
@@ -42,7 +50,7 @@ public class UserTest {
     @Test
     public void testAddNewUser() throws UserCreationException {
         thrown.expect(UserCreationException.class);
-        User.addNewTestUser(testuser.getStoreID());
+        User.addNewUser(testuser.getStoreID());
     }
 
     /**
@@ -54,7 +62,7 @@ public class UserTest {
     public void testGetUser_int() throws Exception {
         int id = testuser.getID();
         String storeid = testuser.getStoreID();
-        assertEquals(storeid, User.getTestUser(id).getStoreID());
+        assertEquals(storeid, User.getUser(id).getStoreID());
     }
 
     /**
@@ -65,7 +73,7 @@ public class UserTest {
     @Test
     public void testGetUser_String() throws Exception {
         String storeid = testuser.getStoreID();
-        assertEquals(storeid, User.getTestUser(storeid).getStoreID());
+        assertEquals(storeid, User.getUser(storeid).getStoreID());
     }
 
     /**
@@ -135,7 +143,7 @@ public class UserTest {
     @Test
     public void testGetStoreID() throws UserNotFoundException, UserCreationException {
         String storeid = testuser.getStoreID();
-        assertEquals(storeid, User.getTestUser(storeid).getStoreID());
+        assertEquals(storeid, User.getUser(storeid).getStoreID());
     }
 
     /**
@@ -157,7 +165,7 @@ public class UserTest {
         int id = testuser.getID();
         testuser.delete();
         thrown.expect(UserNotFoundException.class);
-        User.getTestUser(id);
+        User.getUser(id);
     }
 
 }

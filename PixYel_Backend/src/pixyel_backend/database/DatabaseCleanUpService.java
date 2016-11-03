@@ -23,7 +23,7 @@ public class DatabaseCleanUpService implements Runnable {
     public void CleanUnregistratedUsers() {
         Log.logInfo("Cleaning usertable", this);
         try {
-            try (Statement sta = MysqlConnector.CONNECTION.createStatement()) {
+            try (Statement sta = MysqlConnector.getConnection().createStatement()) {
                 Instant instant = Instant.now().minus(3, ChronoUnit.DAYS);
                 Timestamp currentTimestamp = Timestamp.from(instant);
                 sta.executeLargeUpdate("DELETE FROM Users WHERE status = 0 AND reg_date < '" + currentTimestamp + "'");

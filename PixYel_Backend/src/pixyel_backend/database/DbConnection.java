@@ -9,7 +9,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import pixyel_backend.database.exceptions.DbConnectionException;
 
 /**
  *
@@ -17,16 +16,10 @@ import pixyel_backend.database.exceptions.DbConnectionException;
  */
 public class DbConnection {
 
-    private Connection con;
+    private final Connection con;
 
-    public DbConnection() throws DbConnectionException {
-        this.con = MysqlConnector.CONNECTION;
-    }
-
-    public DbConnection(boolean connectToTestDb) throws DbConnectionException {              
-        if (connectToTestDb) {
-            this.con = MysqlConnector.TESTCONNECTION;
-        } 
+    public DbConnection(){
+        this.con = MysqlConnector.getConnection();
     }
 
     public Connection getConnection() {

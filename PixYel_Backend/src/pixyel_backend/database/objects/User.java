@@ -1,6 +1,5 @@
 package pixyel_backend.database.objects;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,15 +7,13 @@ import java.sql.Timestamp;
 import pixyel_backend.Log;
 import pixyel_backend.database.BackendFunctions;
 import pixyel_backend.database.DbConnection;
-import pixyel_backend.database.exceptions.DbConnectionException;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.SqlUtils;
 
 public class User {
 
-    
-    private DbConnection con;
+    private static final DbConnection con = new DbConnection();
     private final int id;
     private final String storeID;
     private String publicKey;
@@ -28,15 +25,13 @@ public class User {
      * the db
      *
      * @param id
-     * @param con
      * @throws UserNotFoundException
      * @throws pixyel_backend.database.exceptions.UserCreationException
      *
      */
-    public User(int id, DbConnection con) throws UserNotFoundException, UserCreationException {
+    public User(int id) throws UserNotFoundException, UserCreationException {
     
         try {
-            this.con = con;
             PreparedStatement sta = con.getPreparedStatement("SELECT * FROM users WHERE id LIKE ?");
             sta.setInt(1, id);
             ResultSet result = sta.executeQuery();
@@ -63,16 +58,14 @@ public class User {
 
     /**
      * creates a user which by reading out all information about the user from
-     * the db by using a given dbConnection
+     * the db
      *
      * @param storeID
-     * @param con
      * @throws UserNotFoundException
      * @throws pixyel_backend.database.exceptions.UserCreationException
      */
-    public User(String storeID, DbConnection con) throws UserNotFoundException, UserCreationException {
+    public User(String storeID) throws UserNotFoundException, UserCreationException {
         try {
-            this.con = con;
             PreparedStatement sta = con.getPreparedStatement("SELECT * FROM users WHERE storeid LIKE ?");
             sta.setString(1, SqlUtils.escapeString(storeID));
             ResultSet result = sta.executeQuery();
@@ -106,13 +99,7 @@ public class User {
      * @throws UserCreationException
      */
     public static User getUser(int id) throws UserNotFoundException, UserCreationException {
-        try {
-        DbConnection con = new DbConnection();
-        return new User(id,con);
-         } catch (DbConnectionException ex) {
-            Log.logError(ex.getMessage(), User.class);
-        }
-        return null;
+        return new User(id);
     }
 
     /**
@@ -123,47 +110,7 @@ public class User {
      * @throws UserCreationException
      */
     public static User getUser(String storeID) throws UserNotFoundException, UserCreationException {
-        try {
-            DbConnection con = new DbConnection();
-            return new User(storeID,con);
-        } catch (DbConnectionException ex) {
-            Log.logError(ex.getMessage(), User.class);
-        }
-        return null;
-    }
-    
-    /**
-     * static methode to get a TestUser
-     *
-     * @param id
-     * @return
-     * @throws UserCreationException
-     */
-    public static User getTestUser(int id) throws UserNotFoundException, UserCreationException {
-        try{
-        DbConnection con = new DbConnection(true);
-        return new User(id,con);
-        } catch (DbConnectionException ex) {
-            Log.logError(ex.getMessage(), User.class);
-        }
-        return null;
-    }
-
-    /**
-     * static methode to get a TestUser
-     *
-     * @param storeID
-     * @return
-     * @throws UserCreationException
-     */
-    public static User getTestUser(String storeID) throws UserNotFoundException, UserCreationException {
-         try{
-        DbConnection con = new DbConnection(true);
-        return new User(storeID,con);
-        } catch (DbConnectionException ex) {
-            Log.logError(ex.getMessage(), User.class);
-        }
-        return null;
+            return new User(storeID);
     }
 
     /**
@@ -175,41 +122,14 @@ public class User {
      * creation fails
      */
     public static User addNewUser(String storeID) throws UserCreationException {
-        try {
-            DbConnection con = new DbConnection();
-            addUserToDb(storeID,con.getConnection());
-            return new User(storeID,con);
-        } catch (DbConnectionException ex) {
-            Log.logWarning("Could not create user for storeid \"" + storeID + "\" - rootcause: " + ex, User.class);
-            throw new UserCreationException();
-        }
+            return new User(storeID);
     }
     
-        /**
-     * Adds a user to the productiv Database
-     *
-     * @param storeID storeId of the client should not be null
-     * @return the User that was created
-     * @throws pixyel_backend.database.exceptions.UserCreationException if
-     * creation fails
-     */
-    public static User addNewTestUser(String storeID) throws UserCreationException {
-        try {
-            DbConnection con = new DbConnection(true);
-            addUserToDb(storeID,con.getConnection());
-            return new User(storeID,con);
-        } catch (DbConnectionException ex) {
-            Log.logWarning("Could not create user for storeid \"" + storeID + "\" - rootcause: " + ex, User.class);
-            throw new UserCreationException();
-        }
-        
-    }
-
     /**
      * Adds a user to a Database
      */
-    private static void addUserToDb(String storeID, Connection con) throws UserCreationException {
-        try (PreparedStatement statement = con.prepareStatement("INSERT INTO users(storeid)VALUES (?)")) {
+    private static void addUserToDb(String storeID) throws UserCreationException {
+        try (PreparedStatement statement = con.getConnection().prepareStatement("INSERT INTO users(storeid)VALUES (?)")) {
             storeID = SqlUtils.escapeString(storeID);
             statement.setString(1, storeID);
             statement.executeUpdate();
@@ -314,6 +234,6 @@ public class User {
      * @return
      */
     public BackendFunctions getBackendFunctions() {
-        return new BackendFunctions(this.con, this.id);
+        return new BackendFunctions(this.id);
     }
 }

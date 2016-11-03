@@ -23,13 +23,11 @@ public class DatabaseCleanUpService implements Runnable {
     public void CleanUnregistratedUsers() {
         Log.logInfo("Cleaning usertable", this);
         try {
-            Connection conn = MysqlConnector.CONNECTION;
-            Statement sta = conn.createStatement();
-            Instant instant = Instant.now().minus(3, ChronoUnit.DAYS);
-            Timestamp currentTimestamp = Timestamp.from(instant);
-            sta.executeLargeUpdate("DELETE FROM Users WHERE status = 0 AND reg_date < '" + currentTimestamp + "'");
-            sta.close();
-            conn.close();
+            try (Statement sta = MysqlConnector.CONNECTION.createStatement()) {
+                Instant instant = Instant.now().minus(3, ChronoUnit.DAYS);
+                Timestamp currentTimestamp = Timestamp.from(instant);
+                sta.executeLargeUpdate("DELETE FROM Users WHERE status = 0 AND reg_date < '" + currentTimestamp + "'");
+            }
         } catch (SQLException ex) {
             Log.logWarning("Could not clean up unregistered users - root cause: " + ex, this);
         }

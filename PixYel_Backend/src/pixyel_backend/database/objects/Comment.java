@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import pixyel_backend.Log;
 import pixyel_backend.database.DbConnection;
@@ -35,7 +36,6 @@ public class Comment {
     private DbConnection con;
 
     public Comment(int commentId, DbConnection con) throws CommentCreationException {
-
         try {
             this.con = con;
             PreparedStatement statement = con.getPreparedStatement("SELECT * FROM comments WHERE commentid LIKE ?");
@@ -62,6 +62,27 @@ public class Comment {
             Log.logError("Could not read Commentinformation from database - rootcause: " + ex.getMessage(), Comment.class);
             throw new CommentCreationException();
         }
+    }
+    /**
+     * IMPORTANT: ResultSet Pointer must already point at an entry, won't go to next result by itself
+     * @param result
+     * @throws SQLException 
+     */
+    public Comment(ResultSet result) throws SQLException {
+        this.commentId = result.getInt("commentid");
+        this.pictureId = result.getInt("pictureid");
+        this.userId = result.getInt("userid");
+        this.comment = result.getString("comment");
+        this.commentDate = result.getDate("comment_date");
+        if (result.getString("flags") != null) {
+            String flaggedByAsString = result.getString("flags");
+            this.flaggedBy = Arrays.asList(flaggedByAsString);
+            this.flags = this.flaggedBy.size();
+        } else {
+            this.flaggedBy = new ArrayList();
+            this.flags = 0;
+        }
+
     }
 
     public static void newComment(int pictureId, int userId, String comment, DbConnection con) {
@@ -128,11 +149,12 @@ public class Comment {
     public void addFlag(int userid) {
         this.flags++;
         this.flaggedBy.add(Integer.toString(userid));
-        StringBuffer flaggedByAsString = new StringBuffer();
-        for(String currentString:this.flaggedBy){
-            flaggedByAsString.append(currentString);
+        StringBuffer flaggedByAsStringBuffer = new StringBuffer();
+        for (String currentString : this.flaggedBy) {
+            flaggedByAsStringBuffer.append(currentString);
         }
-        updateCommentValue("flags", flaggedByAsString.toString());
+        String flaggedByAsString = SqlUtils.escapeString(flaggedByAsStringBuffer.toString());
+        updateCommentValue("flags", flaggedByAsString);
     }
 
     public boolean isFlaggedBy(int userid) {
@@ -154,7 +176,7 @@ public class Comment {
             Log.logError("couldnt update user value \"" + column + "\" - rootcause:" + ex.getMessage(), this);
         }
     }
-    
+
     private void updateCommentValue(String column, String toValue) {
         try {
             PreparedStatement sta = con.getPreparedStatement("UPDATE users SET " + column + " = ? WHERE id LIKE " + this.commentId);
@@ -165,12 +187,29 @@ public class Comment {
             Log.logError("couldnt update user value \"" + column + "\" - rootcause:" + ex.getMessage(), this);
         }
     }
-    
-    public  static List getCommentsForPicutre(int pictureId, DbConnection con){
-        throw new NotImplementedException();
+    /** 
+     * 
+     * @param pictureId
+     * @param con
+     * @return commentList -> all comments that match the PictureId in order to their insertion date.
+     * @throws SQLException
+     * @throws CommentCreationException 
+     */
+    public static List<Comment> getCommentsForPicutre(int pictureId, DbConnection con) throws SQLException, CommentCreationException {
+        PreparedStatement sta = con.getPreparedStatement("SELECT * FROM comment WHERE pictureid LIKE ? ORDER BY comment_date ASC");
+        sta.setInt(1, pictureId);
+        ResultSet resultSet = sta.executeQuery();
+        List<Comment> commentList = new LinkedList();
+        while (resultSet.next()) {
+            Comment comment = new Comment(resultSet);
+            commentList.add(comment);
+        }
+        return commentList;
     }
-    
-    public void deleteComment(){
-        throw new NotImplementedException();
+
+    public static void deleteComment(int commentId, DbConnection con) throws SQLException {
+        PreparedStatement sta = con.getPreparedStatement("DELETE FROM comments WHERE commentid LIKE ?");
+        sta.setInt(1, commentId);
+        sta.executeQuery();
     }
 }

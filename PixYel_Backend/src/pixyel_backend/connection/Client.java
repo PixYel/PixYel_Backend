@@ -62,12 +62,12 @@ public class Client implements Runnable {
             raus.flush();
         } catch (Compression.CompressionException | Encryption.EncryptionException | IOException e) {
             if (e.toString().contains("Socket is closed")) {
-                Log.logWarning("Could not send String beacuase the socket is closed, closing the connection now: " + e, this);
+                Log.logWarning("Could not send String beacuase the socket is closed, closing the connection to " + getName() + " now: " + e, this);
                 this.disconnect(false);
             } else if (e.toString().contains("socket write error")) {
-                Log.logWarning("Could not write on Socket: " + e, this);
+                Log.logWarning("Could not write on Socket from " + getName() + ": " + e, this);
             } else {
-                Log.logWarning("String(" + toSend + ") could not be send: " + e, this);
+                Log.logWarning("String(" + toSend + ") could not be send to " + getName() + ": " + e, this);
             }
         }
     }
@@ -158,7 +158,7 @@ public class Client implements Runnable {
             online = false;
             sendToClient(XML.createNewXML("alive").toString());
         } else {//If its time to check if the client is online and he hasnt responsed in the last period
-            Log.logWarning("Client has lost the connection", this);
+            Log.logWarning("Client " + getName() + " has lost the connection", this);
             //disconnect(true);
         }
     }
@@ -195,16 +195,16 @@ public class Client implements Runnable {
                         case "java.net.SocketException: Connection reset":
                         case "java.net.SocketException: Socket closed":
                         case "java.net.SocketException: Software caused connection abort: recv failed":
-                            Log.logWarning("Client has lost Connection: " + exe + ", shuting down the connection to the client", this);
+                            Log.logWarning("Client " + getName() + " has lost Connection: " + exe + ", shuting down the connection to the client", this);
                             disconnect(true);
                             return;
                         case "invalid stream header":
                             //Jemand sendet zu lange Strings
-                            Log.logError("Steam header too long, received String too long??!?: " + exe, this);
+                            Log.logError("Steam header too long, received String from " + getName() + " too long??!?: " + exe, this);
                             disconnect(true);
                             return;
                         default:
-                            Log.logError("Could not read incomming message: " + exe, this);
+                            Log.logError("Could not read incomming message from " + getName() + ": " + exe, this);
                             break;
                     }
                 }
@@ -212,15 +212,15 @@ public class Client implements Runnable {
         });
     }
 
-    protected void setUserdata(User user){
-        this.userdata= user;
-        this.backendFunctions=user.getBackendFunctions();             
+    protected void setUserdata(User user) {
+        this.userdata = user;
+        this.backendFunctions = user.getBackendFunctions();
     }
-            
-    protected User getUserdata(){
-        return this.userdata;           
+
+    protected User getUserdata() {
+        return this.userdata;
     }
-    
+
     protected BackendFunctions getBackendFunctions() {
         return this.backendFunctions;
     }

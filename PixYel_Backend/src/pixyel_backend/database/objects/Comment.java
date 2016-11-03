@@ -196,7 +196,7 @@ public class Comment {
      * @throws CommentCreationException 
      */
     public static List<Comment> getCommentsForPicutre(int pictureId, DbConnection con) throws SQLException, CommentCreationException {
-        PreparedStatement sta = con.getPreparedStatement("SELECT * FROM comment WHERE pictureid IN ? ORDER BY comment_date ASC");
+        PreparedStatement sta = con.getPreparedStatement("SELECT * FROM comment WHERE pictureid LIKE ? ORDER BY comment_date ASC");
         sta.setInt(1, pictureId);
         ResultSet resultSet = sta.executeQuery();
         List<Comment> commentList = new LinkedList();
@@ -207,7 +207,9 @@ public class Comment {
         return commentList;
     }
 
-    public void deleteComment() {
-        throw new NotImplementedException();
+    public static void deleteComment(int commentId, DbConnection con) throws SQLException {
+        PreparedStatement sta = con.getPreparedStatement("DELETE FROM comments WHERE commentid LIKE ?");
+        sta.setInt(1, commentId);
+        sta.executeQuery();
     }
 }

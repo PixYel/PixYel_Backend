@@ -6,6 +6,8 @@
 package pixyel_backend.database;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pixyel_backend.database.exceptions.CommentCreationException;
 import pixyel_backend.database.objects.Comment;
 import pixyel_backend.xml.XML;
@@ -52,5 +54,27 @@ public class BackendFunctions {
     public XML getPictures(int xCordinate, int yCordinate) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    public void flagPicture(int pictureId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void uploadPicture(String picturedata) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    public void flagComment(int commentId) {
+        try {
+            getComment(commentId).addFlag(this.userId);
+        } catch (CommentCreationException ex) {
+            Logger.getLogger(BackendFunctions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void addNewComment(String text, int refersToPicuture) {
+        Comment.newComment(refersToPicuture, userId, text, con);
+    }
+
+    
 
 }

@@ -19,7 +19,7 @@ public class DatabaseFunctionsPicture {
     private final Connection conn;
     
     public DatabaseFunctionsPicture() throws Exception{
-        this.conn=MysqlConnector.connectToDatabaseUsingPropertiesFile();
+        this.conn=MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
     }
     
     /**

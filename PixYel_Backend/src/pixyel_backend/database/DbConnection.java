@@ -20,7 +20,15 @@ public class DbConnection {
     private final Connection con;
 
     public DbConnection() throws DbConnectionException {
-        this.con = MysqlConnector.connectToDatabaseUsingPropertiesFile();
+        this.con = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
+    }
+
+    public DbConnection(boolean connectToTestDb) throws DbConnectionException {              
+        if (connectToTestDb) {
+            this.con = MysqlConnector.connectToTestDatabaseUsingPropertiesFile();
+        } else {
+            this.con = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
+        }
     }
 
     public Connection getConnection() {
@@ -30,12 +38,12 @@ public class DbConnection {
     public Statement getStatenement() throws SQLException {
         return con.createStatement();
     }
-    
-    public PreparedStatement getPreparedStatement(String sql) throws SQLException{
+
+    public PreparedStatement getPreparedStatement(String sql) throws SQLException {
         return this.con.prepareStatement(sql);
     }
-    
-    public void close() throws SQLException{
+
+    public void close() throws SQLException {
         con.close();
     }
 }

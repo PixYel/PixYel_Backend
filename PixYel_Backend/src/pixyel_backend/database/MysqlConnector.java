@@ -43,14 +43,51 @@ public class MysqlConnector {
      * @return
      * @throws DbConnectionException if can not connect to database
      */
-    public static Connection connectToDatabaseUsingPropertiesFile() throws DbConnectionException {
+    public static Connection connectToProductivDatabaseUsingPropertiesFile() throws DbConnectionException {
         try {
             Properties properties = DbAccessPropertiesReader.getProperties();
             String host = properties.getProperty("mysqlhost");
-            String database = properties.getProperty("mysqldatabase");
+            String database = properties.getProperty("mysqlproductivdatabase");
             String user = properties.getProperty("mysqluser");
             String passwd = properties.getProperty("mysqlpassword");
             return getConnection(host, database, user, passwd);
+        } catch (Exception ex) {
+            System.out.println(ex);
+            throw new DbConnectionException();
+        }
+    }
+
+    public static Connection connectToTestDatabaseUsingPropertiesFile() throws DbConnectionException {
+        try {
+            Properties properties = DbAccessPropertiesReader.getProperties();
+            String host = properties.getProperty("mysqlhost");
+            String database = properties.getProperty("mysqltestdatabase");
+            String user = properties.getProperty("mysqluser");
+            String passwd = properties.getProperty("mysqlpassword");
+            return getConnection(host, database, user, passwd);
+        } catch (Exception ex) {
+            System.out.println(ex);
+            throw new DbConnectionException();
+        }
+    }
+
+    /**
+     * Creates a connection to the databasesystem without using a speciall
+     * Database
+     *
+     * @return
+     * @throws DbConnectionException if can not connect to database
+     */
+    public static Connection connectToDatabaseSystem() throws DbConnectionException {
+        try {
+            Properties properties = DbAccessPropertiesReader.getProperties();
+            String host = properties.getProperty("mysqlhost");
+            String user = properties.getProperty("mysqluser");
+            String passwd = properties.getProperty("mysqlpassword");
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            String connectionCommand = "jdbc:mysql://" + host + "?user=" + user + "&password=" + passwd;
+            Connection connection = DriverManager.getConnection(connectionCommand);
+            return connection;
         } catch (Exception ex) {
             System.out.println(ex);
             throw new DbConnectionException();

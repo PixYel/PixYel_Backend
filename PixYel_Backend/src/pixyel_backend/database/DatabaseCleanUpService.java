@@ -23,7 +23,7 @@ public class DatabaseCleanUpService implements Runnable {
     public void CleanUnregistratedUsers() {
         Log.logInfo("Cleaning usertable", this);
         try {
-            Connection conn = MysqlConnector.connectToDatabaseUsingPropertiesFile();
+            Connection conn = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
             Statement sta = conn.createStatement();
             Instant instant = Instant.now().minus(3, ChronoUnit.DAYS);
             Timestamp currentTimestamp = Timestamp.from(instant);

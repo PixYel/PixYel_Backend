@@ -11,6 +11,7 @@ import static org.junit.Assert.*;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import pixyel_backend.connection.encryption.Encryption;
+import pixyel_backend.database.exceptions.DbConnectionException;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
 
@@ -25,9 +26,9 @@ public class UserTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    public UserTest() {
+    public UserTest() throws DbConnectionException, Exception {
         try {
-            this.testuser = User.addNewUser("JUnit-Test-User-"+System.currentTimeMillis());
+            this.testuser = User.addNewTestUser("JUnit-Test-User-" + System.currentTimeMillis());
         } catch (UserCreationException ex) {
             System.err.println("Could not create testuser");
         }
@@ -35,33 +36,36 @@ public class UserTest {
 
     /**
      * Test of addNewUser method, of class User.
+     *
      * @throws pixyel_backend.database.exceptions.UserCreationException
      */
     @Test
     public void testAddNewUser() throws UserCreationException {
         thrown.expect(UserCreationException.class);
-        User.addNewUser(testuser.getStoreID());
+        User.addNewTestUser(testuser.getStoreID());
     }
 
     /**
      * Test of getUser method, of class User.
+     *
      * @throws java.lang.Exception
      */
     @Test
     public void testGetUser_int() throws Exception {
         int id = testuser.getID();
         String storeid = testuser.getStoreID();
-        assertEquals(storeid, User.getUser(id).getStoreID());
+        assertEquals(storeid, User.getTestUser(id).getStoreID());
     }
 
     /**
      * Test of getUser method, of class User.
+     *
      * @throws java.lang.Exception
      */
     @Test
     public void testGetUser_String() throws Exception {
         String storeid = testuser.getStoreID();
-        assertEquals(storeid, User.getUser(storeid).getStoreID());
+        assertEquals(storeid, User.getTestUser(storeid).getStoreID());
     }
 
     /**
@@ -81,7 +85,7 @@ public class UserTest {
         assertFalse(testuser.isBanned());
         testuser.setBanned(true);
         assertTrue(testuser.isBanned());
-        testuser.setBanned(false);       
+        testuser.setBanned(false);
         assertFalse(testuser.isBanned());
     }
 
@@ -93,13 +97,15 @@ public class UserTest {
         assertFalse(testuser.isBanned());
         testuser.setBanned(true);
         assertTrue(testuser.isBanned());
-        testuser.setBanned(false);       
+        testuser.setBanned(false);
         assertFalse(testuser.isBanned());
     }
 
     /**
      * Test of getPublicKey method, of class User.
-     * @throws pixyel_backend.connection.encryption.Encryption.EncryptionException
+     *
+     * @throws
+     * pixyel_backend.connection.encryption.Encryption.EncryptionException
      */
     @Test
     public void testGetPublicKey() throws Encryption.EncryptionException {
@@ -110,24 +116,27 @@ public class UserTest {
 
     /**
      * Test of setPublicKey method, of class User.
-     * @throws pixyel_backend.connection.encryption.Encryption.EncryptionException
+     *
+     * @throws
+     * pixyel_backend.connection.encryption.Encryption.EncryptionException
      */
     @Test
     public void testSetPublicKey() throws Encryption.EncryptionException {
         String[] keys = Encryption.generateKeyPair();
         testuser.setPublicKey(keys[0]);
-        assertEquals(keys[0], testuser.getPublicKey());    }
+        assertEquals(keys[0], testuser.getPublicKey());
+    }
 
     /**
      * Test of getStoreID method, of class User.
+     *
      * @throws pixyel_backend.database.exceptions.UserCreationException
      */
     @Test
     public void testGetStoreID() throws UserNotFoundException, UserCreationException {
         String storeid = testuser.getStoreID();
-        assertEquals(storeid, User.getUser(storeid).getStoreID());
+        assertEquals(storeid, User.getTestUser(storeid).getStoreID());
     }
-
 
     /**
      * Test of getRegistrationDate method, of class User.
@@ -140,6 +149,7 @@ public class UserTest {
 
     /**
      * Test of delete method, of class User.
+     *
      * @throws pixyel_backend.database.exceptions.UserCreationException
      */
     @Test
@@ -147,7 +157,7 @@ public class UserTest {
         int id = testuser.getID();
         testuser.delete();
         thrown.expect(UserNotFoundException.class);
-        User.getUser(id);
+        User.getTestUser(id);
     }
 
 }

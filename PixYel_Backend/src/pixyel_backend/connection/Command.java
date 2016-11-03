@@ -34,19 +34,19 @@ public class Command {
                     break;
                 case "getItem":
                     int id = Integer.valueOf(xml.getFirstChild().getContent());
-                    
+
                     break;
                 case "getItemStats":
                     int id1 = Integer.valueOf(xml.getFirstChild().getContent());
-                    
+
                     break;
                 case "login":
                     try {
-                        try {
-                            client.setUserdata(User.getUser(xml.getFirstChild("storeid").getContent()));
-                        } catch (UserNotFoundException ex) {
-                            client.setUserdata(User.addNewUser(xml.getFirstChild("storeid").getContent()));
-                        }
+                        client.setUserdata(User.getUser(xml.getFirstChild("storeid").getContent()));
+                    } catch (UserNotFoundException ex) {
+                        client.setUserdata(User.addNewUser(xml.getFirstChild("storeid").getContent()));
+                    }
+                    try {
                         client.getUserdata().setPublicKey(xml.getFirstChild("publickey").getContent());
                         client.sendToClient(XML.createNewXML("loginsuccessful").toString());
                         Log.logInfo("Successfully logged " + client.getName() + " in", Command.class);
@@ -64,21 +64,21 @@ public class Command {
                 case "vote":
                     int id2 = Integer.valueOf(xml.getFirstChild("id").getContent());
                     boolean upvote = Boolean.valueOf(xml.getFirstChild("upvote").getContent());
-                    
+
                     break;
                 case "upload":
                     String data = xml.getFirstChild("xml").getContent();
                     int longt1 = Integer.valueOf(xml.getFirstChild("long").getContent());
                     int lat1 = Integer.valueOf(xml.getFirstChild("lat").getContent());
-                    
+
                     break;
                 case "flag":
                     int id3 = Integer.valueOf(xml.getFirstChild("id").getContent());
-                    
+
                     break;
                 case "getComments":
                     int id4 = Integer.valueOf(xml.getFirstChild("id").getContent());
-                    
+
                     break;
                 case "disconnect":
                     client.disconnect(true);
@@ -89,7 +89,7 @@ public class Command {
                 case "alive":
                     client.checkClientAlive(true);
                     break;
-/*
+                /*
                 case "fotorequest":
                     int xCordinate = Integer.valueOf(xml.getFirstChild("xcodinate").getContent());
                     int yCordinate = Integer.valueOf(xml.getFirstChild("ycodinate").getContent());
@@ -118,7 +118,7 @@ public class Command {
                     String picturedata = xml.getFirstChild("data").getContent();
                     backendFunctions.uploadPicture(picturedata);
                     break;
-*/
+                 */
             }
         } catch (Exception e) {
             Log.logWarning("Could not execute command: " + xml.getName() + ": " + e, Command.class);

@@ -56,7 +56,7 @@ public class DatabaseInitializer {
                 + "downvotes        INT(6) DEFAULT '0', "
                 + "flags            TINYTEXT, "
                 + "userid           INT(6) NOT NULL, "
-                + "commentIds       TINYTEXT)"
+                + "commentids       TINYTEXT)"
         );
 
         statements.executeUpdate("CREATE TABLE picturesData ("

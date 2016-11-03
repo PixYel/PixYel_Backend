@@ -51,7 +51,7 @@ public class Client implements Runnable {
      */
     public void sendToClient(String toSend) {
         if (userdata == null || userdata.getPublicKey() == null || userdata.getPublicKey().isEmpty()) {
-            Log.logWarning("Client" + getName() + "needs to be logged in first!", this);
+            Log.logWarning("Client" + getName() + " needs to be logged in first!", this);
             return;
         }
         try {

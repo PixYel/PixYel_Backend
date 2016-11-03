@@ -31,7 +31,7 @@ public class Comment {
     private final String comment;
     private final Date commentDate;
     private int flags;
-    private List<String> flaggedBy;
+    private List<String> flaggedBy;     //Contains userIds that flagged the comment
     private DbConnection con;
 
     public Comment(int commentId, DbConnection con) throws CommentCreationException {
@@ -66,7 +66,6 @@ public class Comment {
 
     public static void newComment(int pictureId, int userId, String comment, DbConnection con) {
         PreparedStatement statement;
-        System.out.println("test oben");
         try {
             statement = con.getPreparedStatement("INSERT INTO comments (pictureid, userid, comment) VALUES(?,?,?)");
 
@@ -76,7 +75,6 @@ public class Comment {
                 statement.setInt(2, userId);
                 statement.setString(3, comment);
                 statement.executeUpdate();
-                System.out.println("test");
             } else {
                 Log.logInfo("Failed to create comment for user \"" + userId + "\" - rootcause: Comment is NULL or to short", Comment.class);
             }
@@ -127,9 +125,14 @@ public class Comment {
         return flags;
     }
 
-    public void addFlag() {
+    public void addFlag(int userid) {
         this.flags++;
-        updateCommentValue("flags", this.flags);
+        this.flaggedBy.add(Integer.toString(userid));
+        StringBuffer flaggedByAsString = new StringBuffer();
+        for(String currentString:this.flaggedBy){
+            flaggedByAsString.append(currentString);
+        }
+        updateCommentValue("flags", flaggedByAsString.toString());
     }
 
     public boolean isFlaggedBy(int userid) {
@@ -145,6 +148,17 @@ public class Comment {
         try {
             PreparedStatement sta = con.getPreparedStatement("UPDATE users SET " + column + " = ? WHERE id LIKE " + this.commentId);
             sta.setInt(1, toValue);
+            sta.execute();
+            sta.close();
+        } catch (SQLException ex) {
+            Log.logError("couldnt update user value \"" + column + "\" - rootcause:" + ex.getMessage(), this);
+        }
+    }
+    
+    private void updateCommentValue(String column, String toValue) {
+        try {
+            PreparedStatement sta = con.getPreparedStatement("UPDATE users SET " + column + " = ? WHERE id LIKE " + this.commentId);
+            sta.setString(1, toValue);
             sta.execute();
             sta.close();
         } catch (SQLException ex) {

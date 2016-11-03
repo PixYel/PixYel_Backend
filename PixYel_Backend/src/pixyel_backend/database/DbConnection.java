@@ -17,18 +17,16 @@ import pixyel_backend.database.exceptions.DbConnectionException;
  */
 public class DbConnection {
 
-    private final Connection con;
+    private Connection con;
 
     public DbConnection() throws DbConnectionException {
-        this.con = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
+        this.con = MysqlConnector.CONNECTION;
     }
 
     public DbConnection(boolean connectToTestDb) throws DbConnectionException {              
         if (connectToTestDb) {
-            this.con = MysqlConnector.connectToTestDatabaseUsingPropertiesFile();
-        } else {
-            this.con = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
-        }
+            this.con = MysqlConnector.TESTCONNECTION;
+        } 
     }
 
     public Connection getConnection() {
@@ -41,9 +39,5 @@ public class DbConnection {
 
     public PreparedStatement getPreparedStatement(String sql) throws SQLException {
         return this.con.prepareStatement(sql);
-    }
-
-    public void close() throws SQLException {
-        con.close();
     }
 }

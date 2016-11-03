@@ -5,9 +5,8 @@
  */
 package pixyel_backend.database;
 
+import java.sql.SQLException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import pixyel_backend.database.exceptions.CommentCreationException;
 import pixyel_backend.database.objects.Comment;
 import pixyel_backend.xml.XML;
@@ -36,7 +35,7 @@ public class BackendFunctions {
         System.out.println("test355");
     }
 
-    public XML getCommentsForPicutre(int pictureId) {
+    public XML getCommentsForPicutre(int pictureId) throws SQLException, CommentCreationException {
         XML out = XML.createNewXML("commentsforpicture");
         out.addAttribute("pictureId", String.valueOf(pictureId));
         List<Comment> allComments = Comment.getCommentsForPicutre(pictureId, this.con);
@@ -64,11 +63,7 @@ public class BackendFunctions {
     }
     
     public void flagComment(int commentId) {
-        try {
-            getComment(commentId).addFlag(this.userId);
-        } catch (CommentCreationException ex) {
-            Logger.getLogger(BackendFunctions.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
     }
 
     public void addNewComment(String text, int refersToPicuture) {

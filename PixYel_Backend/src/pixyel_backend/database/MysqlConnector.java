@@ -12,6 +12,18 @@ import pixyel_backend.database.exceptions.DbConnectionException;
 public class MysqlConnector {
 
     /**
+     * Connection to the productiv database which was set up by using the
+     * properties file
+     */
+    public static final Connection CONNECTION = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
+
+    /**
+     * Connection to the testdatabase which was set up by using the properties
+     * file
+     */
+    public static final Connection TESTCONNECTION = MysqlConnector.connectToTestDatabaseUsingPropertiesFile();
+
+    /**
      * Creates a connection to a database
      *
      * @param host
@@ -41,9 +53,8 @@ public class MysqlConnector {
      * Creates a connection to a database
      *
      * @return
-     * @throws DbConnectionException if can not connect to database
      */
-    public static Connection connectToProductivDatabaseUsingPropertiesFile() throws DbConnectionException {
+    public static Connection connectToProductivDatabaseUsingPropertiesFile() {
         try {
             Properties properties = DbAccessPropertiesReader.getProperties();
             String host = properties.getProperty("mysqlhost");
@@ -53,11 +64,11 @@ public class MysqlConnector {
             return getConnection(host, database, user, passwd);
         } catch (Exception ex) {
             System.out.println(ex);
-            throw new DbConnectionException();
         }
+        return null;
     }
 
-    public static Connection connectToTestDatabaseUsingPropertiesFile() throws DbConnectionException {
+    public static Connection connectToTestDatabaseUsingPropertiesFile() {
         try {
             Properties properties = DbAccessPropertiesReader.getProperties();
             String host = properties.getProperty("mysqlhost");
@@ -67,8 +78,8 @@ public class MysqlConnector {
             return getConnection(host, database, user, passwd);
         } catch (Exception ex) {
             System.out.println(ex);
-            throw new DbConnectionException();
         }
+        return null;
     }
 
     /**

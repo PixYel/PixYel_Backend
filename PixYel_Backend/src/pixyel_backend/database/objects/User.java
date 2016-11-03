@@ -15,6 +15,7 @@ import pixyel_backend.database.SqlUtils;
 
 public class User {
 
+    
     private DbConnection con;
     private final int id;
     private final String storeID;
@@ -33,7 +34,7 @@ public class User {
      *
      */
     public User(int id, DbConnection con) throws UserNotFoundException, UserCreationException {
-
+    
         try {
             this.con = con;
             PreparedStatement sta = con.getPreparedStatement("SELECT * FROM users WHERE id LIKE ?");
@@ -305,13 +306,6 @@ public class User {
         }
     }
 
-    public void closeDbConnection() {
-        try {
-            this.con.close();
-        } catch (SQLException ex) {
-            Log.logWarning("Error while closing connection for user \"" + this.id + "\" - rootcause: " + ex, this);
-        }
-    }
 
     /**
      * Creates a new BackendFunctions Obj which contains the userID and uses the

@@ -122,7 +122,6 @@ public class Client implements Runnable {
      */
     public void disconnect(boolean expected) {
         if (userdata != null) {
-            userdata.closeDbConnection();
         }
         if (listener != null) {
             listener.shutdown();

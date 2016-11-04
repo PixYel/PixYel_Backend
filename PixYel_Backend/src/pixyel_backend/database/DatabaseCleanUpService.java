@@ -9,7 +9,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Timer;
 import java.util.TimerTask;
 import pixyel_backend.Log;
-import pixyel_backend.database.exceptions.DbConnectionException;
 
 /**
  * @author Yannick

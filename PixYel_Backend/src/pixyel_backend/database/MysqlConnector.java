@@ -91,7 +91,7 @@ public class MysqlConnector {
      * Database
      *
      * @return
-     * @throws DbConnectionException if can not connect to database
+     * @throws ConnectionException if can not connect to database
      */
     public static Connection connectToDatabaseSystem() throws DbConnectionException {
         try {

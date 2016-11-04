@@ -100,7 +100,7 @@ public class UserTest {
     /**
      * Test of setBanned method, of class User.
      */
-    @Test
+    @Test 
     public void testSetBanned() {
         assertFalse(testuser.isBanned());
         testuser.setBanned(true);

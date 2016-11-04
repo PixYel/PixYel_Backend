@@ -12,7 +12,7 @@ public class DatabaseInitializer {
     /**
      * Initializes the whole productiv db 
      * @throws SQLException
-     * @throws DbConnectionException
+     * @throws ConnectionException
      * @throws Exception 
      */
     public static void initProductivDatabase() throws SQLException, DbConnectionException, Exception {
@@ -28,7 +28,7 @@ public class DatabaseInitializer {
     /**
      * Initializes the whole test db 
      * @throws SQLException
-     * @throws DbConnectionException
+     * @throws ConnectionException
      * @throws Exception 
      */
     public static void initTestDatabase() throws SQLException, DbConnectionException, Exception {

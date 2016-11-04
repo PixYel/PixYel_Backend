@@ -1,5 +1,6 @@
 package pixyel_backend.database.objects;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,7 +10,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import pixyel_backend.Log;
-import pixyel_backend.database.DbConnection;
+import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.SqlUtils;
 import pixyel_backend.database.exceptions.CommentCreationException;
 import pixyel_backend.database.exceptions.CommentNotFoundException;
@@ -27,12 +28,12 @@ public class Comment {
     private final Date commentDate;
     private int flags;
     private List<String> flaggedBy;     //Contains userIds that flagged the comment
-    private DbConnection con;
+    private Connection con;
 
     public Comment(int commentId) throws CommentCreationException {
         try {
-            this.con = new DbConnection();
-            PreparedStatement statement = con.getPreparedStatement("SELECT * FROM comments WHERE commentid LIKE ?");
+            this.con = MysqlConnector.getConnection();
+            PreparedStatement statement = con.prepareStatement("SELECT * FROM comments WHERE commentid LIKE ?");
             statement.setInt(1, commentId);
             ResultSet result = statement.executeQuery();
             statement.close();
@@ -84,10 +85,10 @@ public class Comment {
     }
 
     public static void newComment(int pictureId, int userId, String comment) {
-        DbConnection con = new DbConnection();
+        Connection con = MysqlConnector.getConnection();
         PreparedStatement statement;
         try {
-            statement = con.getPreparedStatement("INSERT INTO comments (pictureid, userid, comment) VALUES(?,?,?)");
+            statement = con.prepareStatement("INSERT INTO comments (pictureid, userid, comment) VALUES(?,?,?)");
 
             if (comment != null && comment.length() >= 2) {
                 comment = SqlUtils.escapeString(comment);
@@ -147,8 +148,8 @@ public class Comment {
     }
 
     public static void addFlag(int userid, int commentid) throws SQLException {
-        DbConnection con = new DbConnection();
-        PreparedStatement sta = con.getPreparedStatement("SELECT flags FROM comments WHERE commentid LIKE ?");
+        Connection con = MysqlConnector.getConnection();
+        PreparedStatement sta = con.prepareStatement("SELECT flags FROM comments WHERE commentid LIKE ?");
         sta.setInt(1, commentid);
         ResultSet result = sta.executeQuery();
         sta.close();
@@ -182,7 +183,7 @@ public class Comment {
      */
     private void updateCommentValue(String column, int toValue) {
         try {
-            PreparedStatement sta = con.getPreparedStatement("UPDATE users SET " + column + " = ? WHERE id LIKE " + this.commentId);
+            PreparedStatement sta = con.prepareStatement("UPDATE users SET " + column + " = ? WHERE id LIKE " + this.commentId);
             sta.setInt(1, toValue);
             sta.execute();
             sta.close();
@@ -193,7 +194,7 @@ public class Comment {
 
     private void updateCommentValue(String column, String toValue) {
         try {
-            PreparedStatement sta = con.getPreparedStatement("UPDATE users SET " + column + " = ? WHERE id LIKE " + this.commentId);
+            PreparedStatement sta = con.prepareStatement("UPDATE users SET " + column + " = ? WHERE id LIKE " + this.commentId);
             sta.setString(1, toValue);
             sta.execute();
             sta.close();
@@ -204,8 +205,8 @@ public class Comment {
     
     private static void updateCommentValue(String column, String toValue, int commentId) {
         try {
-            DbConnection con = new DbConnection();
-            PreparedStatement sta = con.getPreparedStatement("UPDATE users SET " + column + " = ? WHERE id LIKE " + commentId);
+            Connection con = MysqlConnector.getConnection();
+            PreparedStatement sta = con.prepareStatement("UPDATE users SET " + column + " = ? WHERE id LIKE " + commentId);
             sta.setString(1, toValue);
             sta.execute();
             sta.close();
@@ -224,8 +225,8 @@ public class Comment {
      * @throws CommentCreationException
      */
     public static List<Comment> getCommentsForPicutre(int pictureId) throws SQLException, CommentCreationException {
-        DbConnection con = new DbConnection();
-        PreparedStatement sta = con.getPreparedStatement("SELECT * FROM comment WHERE pictureid LIKE ? ORDER BY comment_date ASC");
+        Connection con = MysqlConnector.getConnection();
+        PreparedStatement sta = con.prepareStatement("SELECT * FROM comment WHERE pictureid LIKE ? ORDER BY comment_date ASC");
         sta.setInt(1, pictureId);
         ResultSet resultSet = sta.executeQuery();
         List<Comment> commentList = new LinkedList();
@@ -237,8 +238,8 @@ public class Comment {
     }
 
     public static void deleteComment(int commentId) throws SQLException {
-        DbConnection con = new DbConnection();
-        PreparedStatement sta = con.getPreparedStatement("DELETE FROM comments WHERE commentid LIKE ?");
+        Connection con = MysqlConnector.getConnection();
+        PreparedStatement sta = con.prepareStatement("DELETE FROM comments WHERE commentid LIKE ?");
         sta.setInt(1, commentId);
         sta.executeQuery();
     }

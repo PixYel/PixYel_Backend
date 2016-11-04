@@ -33,7 +33,8 @@ public class Command {
                     XML location = xml.getFirstChild();
                     int longt = Integer.valueOf(location.getFirstChild("long").getContent());
                     int lat = Integer.valueOf(location.getFirstChild("lat").getContent());
-
+                    XML picturesXML = backendFunctions.getPictures(longt, lat);
+                    client.sendToClient(picturesXML.toString());
                     break;
                 case "getItem":
                     int id = Integer.valueOf(xml.getFirstChild().getContent());
@@ -73,55 +74,32 @@ public class Command {
                     String data = xml.getFirstChild("xml").getContent();
                     int longt1 = Integer.valueOf(xml.getFirstChild("long").getContent());
                     int lat1 = Integer.valueOf(xml.getFirstChild("lat").getContent());
-
+                    backendFunctions.uploadPicture(data);//TODO coordinates have to be in there too
                     break;
-                case "flag":
+                case "flagItem":
                     int id3 = Integer.valueOf(xml.getFirstChild("id").getContent());
-
+                    backendFunctions.flagPicture(id3);
+                    break;
+                case "flagComment":
+                    int commentId = Integer.valueOf(xml.getFirstChild("id").getContent());
+                    backendFunctions.flagComment(commentId);
                     break;
                 case "getComments":
                     int id4 = Integer.valueOf(xml.getFirstChild("id").getContent());
-
+                    XML allComments = backendFunctions.getCommentsForPicutre(id4);
+                    client.sendToClient(allComments.toString());
+                    break;
+                case "addComment":
+                    int id5 = Integer.valueOf(xml.getFirstChild("id").getContent());
+                    String content = xml.getFirstChild("content").getContent();
+                    backendFunctions.addNewComment(content, id5);
                     break;
                 case "disconnect":
                     client.disconnect(true);
                     break;
-                /*
-                    The client replies to the alive message from the server (to avoid dead clients)
-                 */
                 case "alive":
                     client.checkClientAlive(true);
                     break;
-                /*
-                case "fotorequest":
-                    int xCordinate = Integer.valueOf(xml.getFirstChild("xcodinate").getContent());
-                    int yCordinate = Integer.valueOf(xml.getFirstChild("ycodinate").getContent());
-                    XML picturesXML = backendFunctions.getPictures(xCordinate, yCordinate);
-                    client.sendToClient(picturesXML.toString());
-                    break;
-                case "commentforpicture":
-                    int pictureId = Integer.valueOf(xml.getAttribute("id"));
-                    XML allComments = backendFunctions.getCommentsForPicutre(pictureId);
-                    client.sendToClient(allComments.toString());
-                    break;
-                case "flagpicture":
-                    pictureId = Integer.valueOf(xml.getAttribute("id"));
-                    backendFunctions.flagPicture(pictureId);
-                    break;
-                case "flagcomment":
-                    int commentId = Integer.valueOf(xml.getAttribute("id"));
-                    backendFunctions.flagComment(commentId);
-                    break;
-                case "addnewcomment":
-                    String text = xml.getFirstChild("text").getContent();
-                    int refersToPicuture = Integer.valueOf(xml.getAttribute("pictureId"));
-                    backendFunctions.addNewComment(text, refersToPicuture);
-                    break;
-                case "uploadpicture":
-                    String picturedata = xml.getFirstChild("data").getContent();
-                    backendFunctions.uploadPicture(picturedata);
-                    break;
-                 */
             }
         } catch (Exception e) {
             Log.logWarning("Could not execute command: " + xml.getName() + ": " + e, Command.class);

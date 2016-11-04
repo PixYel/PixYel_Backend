@@ -24,7 +24,10 @@ public class Command {
         BackendFunctions backendFunctions = client.getBackendFunctions();
         //Log.logInfo("Command from " + client.getName() + " received: \n" + xml.toStringGraph(), Command.class);
         try {
-            switch ((xml = xml.getFirstChild()).getName()) {
+            if (!xml.getFirstChild().getName().equals("request")) {
+                Log.logWarning("Command from " + client.getName() + " does not start with \"request\": " + xml.getName(), Command.class);
+            }
+            switch ((xml = xml.getFirstChild()).getName()) {//Cuts off the "request"
 
                 case "getItemList":
                     XML location = xml.getFirstChild();
@@ -48,10 +51,10 @@ public class Command {
                     }
                     try {
                         client.getUserdata().setPublicKey(xml.getFirstChild("publickey").getContent());
-                        client.sendToClient(XML.createNewXML("loginsuccessful").toString());
+                        client.sendToClient(XML.createNewXML("loginsuccessful"));
                         Log.logInfo("Successfully logged " + client.getName() + " in", Command.class);
                     } catch (Exception e) {
-                        client.sendToClient(XML.createNewXML("loginunsuccessful").toString());
+                        client.sendToClient(XML.createNewXML("loginunsuccessful"));
                         Log.logWarning("Failed to log " + client.getName() + " in: " + e, Command.class);
                     }
                     break;
@@ -59,7 +62,7 @@ public class Command {
                     DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
                     String date = " " + dateFormat.format(new Date()) + " ";
                     Log.logInfo("Sending echo to client " + client.getName(), Command.class);
-                    client.sendToClient(XML.createNewXML("echo_zurueck").addAttribute("Date", date).toString());
+                    client.sendToClient(XML.createNewXML("echo_zurueck").addAttribute("Date", date));
                     break;
                 case "vote":
                     int id2 = Integer.valueOf(xml.getFirstChild("id").getContent());

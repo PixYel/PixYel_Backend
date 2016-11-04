@@ -47,15 +47,18 @@ public class Client implements Runnable {
     /**
      * Sends a String to the Client
      *
-     * @param toSend The String to be send, not allowed to be
+     * @param toSend The XML to be send, the first "reply" tag can be left out
      */
-    public void sendToClient(String toSend) {
+    public void sendToClient(XML toSend) {
         if (userdata == null || userdata.getPublicKey() == null || userdata.getPublicKey().isEmpty()) {
             Log.logWarning("Client" + getName() + " needs to be logged in first!", this);
             return;
         }
+        if (!toSend.getName().equals("reply")) {
+            toSend = XML.createNewXML("reply").addChild(toSend);
+        }
         try {
-            String compressed = Compression.compress(toSend);
+            String compressed = Compression.compress(toSend.toString());
             String encrypted = Encryption.encrypt(compressed, userdata.getPublicKey());
             PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
             raus.println(encrypted);
@@ -156,7 +159,7 @@ public class Client implements Runnable {
             online = true;
         } else if (online) {//If its time to check if the client is online and he has responsed in the last periode
             online = false;
-            sendToClient(XML.createNewXML("alive").toString());
+            sendToClient(XML.createNewXML("alive"));
         } else {//If its time to check if the client is online and he hasnt responsed in the last period
             Log.logWarning("Client " + getName() + " has lost the connection", this);
             //disconnect(true);

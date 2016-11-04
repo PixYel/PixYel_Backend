@@ -3,6 +3,7 @@ package pixyel_backend.connection;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -78,14 +79,16 @@ public class Connection implements Runnable {
     }
 
     /**
-     * Sends a strig to everyone who is connected
+     * Returns all online Clients
      *
-     * @param stringToSend
+     * @return A ArrayList containing all online Clients
      */
-    public static void sendToEveryone(String stringToSend) {
+    public static ArrayList<Client> getAllOnlineClients() {
+        ArrayList<Client> result = new ArrayList<>();
         CONNECTEDCLIENTS.entrySet().stream().forEach((clientIdPair) -> {
-            clientIdPair.getValue().sendToClient(stringToSend);
+            result.add(clientIdPair.getValue());
         });
+        return result;
     }
 
     /**

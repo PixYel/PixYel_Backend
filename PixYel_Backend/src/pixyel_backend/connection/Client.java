@@ -76,6 +76,14 @@ public class Client implements Runnable {
     }
 
     /**
+     * Sends a XML to everyone who is online and connected
+     * @param toSend The XML to be send to everyone
+     */
+    public void sendToEveryone(XML toSend) {
+        Connection.getAllOnlineClients().forEach((Client client) -> client.sendToClient(toSend));
+    }
+
+    /**
      * This method is going to be called as soon as a string was send to this
      * client
      *

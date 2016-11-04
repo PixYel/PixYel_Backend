@@ -6,6 +6,7 @@
 package pixyel_backend.database;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import pixyel_backend.database.exceptions.CommentCreationException;
 import pixyel_backend.database.objects.Comment;
@@ -17,7 +18,6 @@ import pixyel_backend.xml.XML;
  */
 public class BackendFunctions {
 
-    private static final DbConnection con = new DbConnection();
     private final int userId;
 
     public BackendFunctions(int userid) {
@@ -26,12 +26,6 @@ public class BackendFunctions {
 
     public Comment getComment(int commentId) throws CommentCreationException {
         return new Comment(commentId);
-    }
-
-    public void newComment(int pictureID, String comment) {
-        System.out.println("test354");
-        Comment.newComment(pictureID, this.userId, comment);
-        System.out.println("test355");
     }
 
     public XML getCommentsForPicutre(int pictureId) throws SQLException, CommentCreationException {
@@ -49,18 +43,6 @@ public class BackendFunctions {
         return out;
     }
 
-    public XML getPictures(int xCordinate, int yCordinate) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public void flagPicture(int pictureId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public void uploadPicture(String picturedata) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     public void flagComment(int commentId) {
 
     }
@@ -68,5 +50,27 @@ public class BackendFunctions {
     public void addNewComment(String text, int refersToPicuture) {
         Comment.newComment(refersToPicuture, userId, text);
     }
+
+    public XML getPicturesList(int xCordinate, int yCordinate) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public XML getPicturesData(String listAsString){
+        List<String> allRequestedPictures = Arrays.asList(listAsString);
+        for (String currentPictureIdAsString:allRequestedPictures){
+            ////Picutres holen zu XML hinzufügen 
+        }
+        return null;
+    }
+    
+    public void flagPicture(int pictureId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void uploadPicture(String picturedata) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
 
 }

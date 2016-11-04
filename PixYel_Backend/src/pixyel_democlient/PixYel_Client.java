@@ -93,6 +93,9 @@ public class PixYel_Client {
                 System.err.println("Server konnte nicht erreicht werden: " + e.getMessage());
             }
         }
+        if (attempts == 0) {
+            disconnect();
+        }
     }
 
     public void login(String storeID) {
@@ -115,7 +118,7 @@ public class PixYel_Client {
 
     public void disconnect() {
         //Unwahrscheinlicher Fall, dass der Socket sich unerwartet beendet hat
-        if (socket == null) {
+        if (socket == null || !socket.isConnected()) {
             System.out.println("Server unerreichbar, beende daher sofort...");
             System.exit(0);
         } else {

@@ -24,17 +24,14 @@ public class Command {
         BackendFunctions backendFunctions = client.getBackendFunctions();
         //Log.logInfo("Command from " + client.getName() + " received: \n" + xml.toStringGraph(), Command.class);
         try {
-            if (!xml.getFirstChild().getName().equals("request")) {
-                Log.logWarning("Command from " + client.getName() + " does not start with \"request\": " + xml.getName(), Command.class);
-            }
-            switch ((xml = xml.getFirstChild()).getName()) {//Cuts off the "request"
+            switch ((xml = xml.getFirstChild()).getName()) {
 
                 case "getItemList":
                     XML location = xml.getFirstChild();
                     int longt = Integer.valueOf(location.getFirstChild("long").getContent());
                     int lat = Integer.valueOf(location.getFirstChild("lat").getContent());
                     XML picturesXML = backendFunctions.getPictures(longt, lat);
-                    client.sendToClient(picturesXML.toString());
+                    client.sendToClient(picturesXML);
                     break;
                 case "getItem":
                     int id = Integer.valueOf(xml.getFirstChild().getContent());
@@ -87,7 +84,7 @@ public class Command {
                 case "getComments":
                     int id4 = Integer.valueOf(xml.getFirstChild("id").getContent());
                     XML allComments = backendFunctions.getCommentsForPicutre(id4);
-                    client.sendToClient(allComments.toString());
+                    client.sendToClient(allComments);
                     break;
                 case "addComment":
                     int id5 = Integer.valueOf(xml.getFirstChild("id").getContent());

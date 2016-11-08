@@ -24,18 +24,21 @@ public class Command {
         BackendFunctions backendFunctions = client.getBackendFunctions();
         //Log.logInfo("Command from " + client.getName() + " received: \n" + xml.toStringGraph(), Command.class);
         try {
-            switch ((xml = xml.getFirstChild()).getName()) {
+            if (!xml.getFirstChild().getName().equals("request")) {
+                Log.logWarning("Command from " + client.getName() + " does not start with \"request\": " + xml.getName(), Command.class);
+            }
+            switch ((xml = xml.getFirstChild()).getName()) {//Cuts off the "request"
 
                 case "getItemList":
                     XML location = xml.getFirstChild();
                     int longt = Integer.valueOf(location.getFirstChild("long").getContent());
                     int lat = Integer.valueOf(location.getFirstChild("lat").getContent());
-                    XML picturesXML = backendFunctions.getPictures(longt, lat);
+                    XML picturesXML = backendFunctions.getPicturesList(longt, lat);
                     client.sendToClient(picturesXML);
                     break;
                 case "getItem":
                     int id = Integer.valueOf(xml.getFirstChild().getContent());
-
+                    //backendFunctions.getPicturesData(listAsString)
                     break;
                 case "getItemStats":
                     int id1 = Integer.valueOf(xml.getFirstChild().getContent());
@@ -65,7 +68,7 @@ public class Command {
                 case "vote":
                     int id2 = Integer.valueOf(xml.getFirstChild("id").getContent());
                     boolean upvote = Boolean.valueOf(xml.getFirstChild("upvote").getContent());
-
+                    //backendFunctions.
                     break;
                 case "upload":
                     String data = xml.getFirstChild("xml").getContent();

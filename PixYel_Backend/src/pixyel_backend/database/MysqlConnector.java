@@ -2,28 +2,49 @@ package pixyel_backend.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
+import pixyel_backend.Log;
 import pixyel_backend.database.exceptions.DbConnectionException;
 
 /**
  * @author Yannick
- *
  */
 public class MysqlConnector {
 
     /**
-     * Connection to a database 
-     * Default is a connection to the Productiv db which was set up by using the
-     * properties file
+     * Connection to a database Default is a connection to the Productiv db
+     * which was set up by using the properties file
      */
     private static Connection CONNECTION = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
+    private static boolean shouldUseTestDb = false;
 
-    
+    /**
+     * Returns the Connection pixyel_backend.database.MysqlConnector.CONNECTION
+     * and reopens it if its closed
+     *
+     * @return
+     */
     public static Connection getConnection() {
+        try {
+            if (CONNECTION.isClosed()) {
+                if (shouldUseTestDb) {
+                    CONNECTION = MysqlConnector.connectToTestDatabaseUsingPropertiesFile();
+                } else {
+                    CONNECTION = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
+                }
+            }
+        } catch (SQLException ex) {
+            Log.logError("Connection to Database failed - rootcause: " + ex, MysqlConnector.class);
+        }
         return CONNECTION;
     }
 
+    /**
+     * Changes the used database to the test-database
+     */
     public static void useTestDB() {
+        shouldUseTestDb = true;
         CONNECTION = MysqlConnector.connectToTestDatabaseUsingPropertiesFile();
     }
 
@@ -46,7 +67,17 @@ public class MysqlConnector {
         }
     }
 
-    private static Connection getConnection(String host, String database, String user, String passwd) throws Exception {
+    /**
+     * Creates a Connection to a database by using the given parameters
+     *
+     * @param host
+     * @param database
+     * @param user
+     * @param passwd
+     * @return The connection that was opened
+     * @throws Exception
+     */
+    private static Connection getConnection(String host, String database, String user, String passwd) throws ClassNotFoundException, InstantiationException, SQLException, IllegalAccessException {
         Class.forName("com.mysql.jdbc.Driver").newInstance();
         String connectionCommand = "jdbc:mysql://" + host + "/" + database + "?user=" + user + "&password=" + passwd;
         Connection connection = DriverManager.getConnection(connectionCommand);
@@ -54,9 +85,10 @@ public class MysqlConnector {
     }
 
     /**
-     * Creates a connection to a database
+     * Creates a connection to the productiv-database by using the properties
+     * given by pixyel_backend.database.DbAccessPropertiesReader.getProperties()
      *
-     * @return
+     * @return a Connection to the productiv-database
      */
     public static Connection connectToProductivDatabaseUsingPropertiesFile() {
         try {
@@ -72,6 +104,12 @@ public class MysqlConnector {
         return null;
     }
 
+    /**
+     * Creates a connection to the test-database by using the properties given
+     * by pixyel_backend.database.DbAccessPropertiesReader.getProperties()
+     *
+     * @return a Connection to the test-database
+     */
     public static Connection connectToTestDatabaseUsingPropertiesFile() {
         try {
             Properties properties = DbAccessPropertiesReader.getProperties();
@@ -88,10 +126,10 @@ public class MysqlConnector {
 
     /**
      * Creates a connection to the databasesystem without using a speciall
-     * Database
+     * database
      *
      * @return
-     * @throws ConnectionException if can not connect to database
+     * @throws DbConnectionException if can not connect to database
      */
     public static Connection connectToDatabaseSystem() throws DbConnectionException {
         try {

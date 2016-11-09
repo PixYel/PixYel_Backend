@@ -147,7 +147,7 @@ public class Comment {
         return flags;
     }
 
-    public static void addFlag(int userid, int commentid) throws SQLException {
+    public static synchronized void addFlag(int userid, int commentid) throws SQLException {
         Connection con = MysqlConnector.getConnection();
         PreparedStatement sta = con.prepareStatement("SELECT flags FROM comments WHERE commentid LIKE ?");
         sta.setInt(1, commentid);

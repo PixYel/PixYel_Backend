@@ -74,7 +74,7 @@ public class Command {
                     String data = xml.getFirstChild("xml").getContent();
                     int longt1 = Integer.valueOf(xml.getFirstChild("long").getContent());
                     int lat1 = Integer.valueOf(xml.getFirstChild("lat").getContent());
-                    backendFunctions.uploadPicture(data, long1, lat1);
+                    backendFunctions.uploadPicture(data, longt1, lat1);
                     break;
                 case "flagItem":
                     int id3 = Integer.valueOf(xml.getFirstChild("id").getContent());

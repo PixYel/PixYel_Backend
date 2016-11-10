@@ -51,7 +51,13 @@ public class Client implements Runnable {
      */
     public void sendToClient(XML toSend) {
         if (userdata == null || userdata.getPublicKey() == null || userdata.getPublicKey().isEmpty()) {
-            Log.logWarning("Client" + getName() + " needs to be logged in first!", this);
+            if (userdata == null) {
+                Log.logWarning("Client "+getName()+" has no userdata, needs to log in first", this);
+            }else if (userdata.getPublicKey() == null) {
+                Log.logWarning("Client "+getName()+"s PublicKey is null , needs to log in first", this);
+            }else if (userdata.getPublicKey().isEmpty()) {
+                Log.logWarning("Client "+getName()+"s PublicKey is an empty String, needs to log in first", this);
+            }
             return;
         }
         if (!toSend.getName().equals("reply")) {
@@ -224,6 +230,9 @@ public class Client implements Runnable {
     }
 
     protected void setUserdata(User user) {
+        if (user == null) {
+            Log.logDebug("No User to be set", this);
+        }
         this.userdata = user;
         this.backendFunctions = user.getBackendFunctions();
     }

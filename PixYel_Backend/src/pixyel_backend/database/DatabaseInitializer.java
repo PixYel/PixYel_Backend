@@ -71,9 +71,8 @@ public class DatabaseInitializer {
                     + "upload_date      TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
                     + "upvotes          INT(6) DEFAULT '0', "
                     + "downvotes        INT(6) DEFAULT '0', "
-                    + "flags            TINYTEXT, "
-                    + "userid           INT(6) NOT NULL, "
-                    + "commentids       TINYTEXT)"
+                    + "flags            TINYTEXT NOT NULL, "
+                    + "userid           INT(6) NOT NULL)"
             );
             
             statements.executeUpdate("CREATE TABLE picturesData ("

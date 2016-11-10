@@ -42,10 +42,12 @@ public class Log {
     }
 
     public static void logDebug(String logMessage, Object clasS) {
-        String[] lines = logMessage.split("\\r?\\n");
-        String toPrint = getClassNameWithDate(clasS) + "DEBUG:   ";
-        for (String line : lines) {
-            System.out.println(toPrint + line);
+        if (Main.DEBUG) {
+            String[] lines = logMessage.split("\\r?\\n");
+            String toPrint = getClassNameWithDate(clasS) + "DEBUG:   ";
+            for (String line : lines) {
+                System.out.println(toPrint + line);
+            }
         }
     }
 

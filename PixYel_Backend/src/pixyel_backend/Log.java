@@ -15,8 +15,14 @@ import java.util.Date;
  */
 public class Log {
 
-    static int maxLengthOfClassName = 0;
+    private static int maxLengthOfClassName = 0;
 
+    /**
+     * It is logging the logMessage as a Info
+     *
+     * @param logMessage The message to be logged
+     * @param clasS The classname of the class of the message
+     */
     public static void logInfo(String logMessage, Object clasS) {
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "INFO:    ";
@@ -25,6 +31,12 @@ public class Log {
         }
     }
 
+    /**
+     * It is logging the logMessage as a error
+     *
+     * @param logMessage The message to be logged
+     * @param clasS The classname of the class of the message
+     */
     public static void logError(String logMessage, Object clasS) {
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "ERROR:   ";
@@ -33,6 +45,12 @@ public class Log {
         }
     }
 
+    /**
+     * It is logging the logMessage as a warning
+     *
+     * @param logMessage The message to be logged
+     * @param clasS The classname of the class of the message
+     */
     public static void logWarning(String logMessage, Object clasS) {
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "WARNING: ";
@@ -41,6 +59,13 @@ public class Log {
         }
     }
 
+    /**
+     * If the {@link Main.DEBUG} parameter is set to true, it is logging the
+     * logMessage
+     *
+     * @param logMessage The message to be logged
+     * @param clasS The classname of the class of the message
+     */
     public static void logDebug(String logMessage, Object clasS) {
         if (Main.DEBUG) {
             String[] lines = logMessage.split("\\r?\\n");
@@ -52,9 +77,10 @@ public class Log {
     }
 
     /**
+     * Returns the Classname with the Date, this String can only grow, so The
+     * text should be formatted well
      *
-     * @param clasS
-     * @param color 0 = black, 1 = red
+     * @param clasS The class to extract the classname from
      */
     private static String getClassNameWithDate(Object clasS) {
         String result = "";

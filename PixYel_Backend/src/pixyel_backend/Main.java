@@ -14,6 +14,9 @@ import pixyel_backend.database.DatabaseCleanUpService;
  */
 public class Main {
 
+    /**
+     * Setting for the Debug mode
+     */
     public static boolean DEBUG = true;
     
     public static void main(String[] args) {

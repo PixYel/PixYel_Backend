@@ -20,6 +20,11 @@ import pixyel_backend.xml.XML;
  */
 public class Command {
 
+    /**
+     * This method is being called when a command is arrived
+     * @param client The Client
+     * @param xml 
+     */
     public static void onCommandReceived(Client client, XML xml) {
         BackendFunctions backendFunctions = client.getBackendFunctions();
         Log.logDebug("Command from " + client.getName() + " received: \n" + xml.toStringGraph(), Command.class);

@@ -22,7 +22,7 @@ public class Command {
 
     public static void onCommandReceived(Client client, XML xml) {
         BackendFunctions backendFunctions = client.getBackendFunctions();
-        //Log.logInfo("Command from " + client.getName() + " received: \n" + xml.toStringGraph(), Command.class);
+        Log.logDebug("Command from " + client.getName() + " received: \n" + xml.toStringGraph(), Command.class);
         try {
             if (!xml.getName().equals("request")) {
                 Log.logWarning("Command from " + client.getName() + " does not start with \"request\": " + xml.getName(), Command.class);
@@ -74,7 +74,7 @@ public class Command {
                     String data = xml.getFirstChild("xml").getContent();
                     int longt1 = Integer.valueOf(xml.getFirstChild("long").getContent());
                     int lat1 = Integer.valueOf(xml.getFirstChild("lat").getContent());
-                    backendFunctions.uploadPicture(data);//TODO coordinates have to be in there too
+                    backendFunctions.uploadPicture(data, long1, lat1);
                     break;
                 case "flagItem":
                     int id3 = Integer.valueOf(xml.getFirstChild("id").getContent());

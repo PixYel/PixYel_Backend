@@ -40,7 +40,7 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
-        //Log.logInfo("Client " + socket.hashCode() + " started", this);
+        Log.logDebug("Client " + socket.hashCode() + " started", this);
         startInputListener();
     }
 
@@ -167,7 +167,10 @@ public class Client implements Runnable {
     }
 
     boolean online = true;
-
+/**
+ * Checks if the Client is still alive
+ * @param fromClient If true, this is a call from the client, if false, a call from the scheduler
+ */
     public void checkClientAlive(boolean fromClient) {
         if (fromClient) {//If the client has send an alive signal and confirmed, that he is online
             online = true;
@@ -180,6 +183,9 @@ public class Client implements Runnable {
         }
     }
 
+    /**
+     * Starts tht InputListener for the Input from the client
+     */
     public void startInputListener() {
         listener = Executors.newFixedThreadPool(1);
         listener.submit(() -> {
@@ -229,6 +235,10 @@ public class Client implements Runnable {
         });
     }
 
+    /**
+     * Sets the reference for the database for this user
+     * @param user 
+     */
     protected void setUserdata(User user) {
         if (user == null) {
             Log.logDebug("No User to be set", this);
@@ -237,10 +247,18 @@ public class Client implements Runnable {
         this.backendFunctions = user.getBackendFunctions();
     }
 
+    /**
+     * Returns the data from the database of this user
+     * @return The data from the database of this user
+     */
     protected User getUserdata() {
         return this.userdata;
     }
 
+    /**
+     * Returns the general Database functions for all users
+     * @return The general Database functions for all users
+     */
     protected BackendFunctions getBackendFunctions() {
         return this.backendFunctions;
     }

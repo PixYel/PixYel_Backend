@@ -110,6 +110,9 @@ public class Connection implements Runnable {
         Connection.listenForClients();
     }
 
+    /**
+     * Starts the Scheduler for the aliveCheck
+     */
     public void startClientAliveScheduler() {
         Executors.newFixedThreadPool(1).submit(() -> {
             new Timer().schedule(new TimerTask() {

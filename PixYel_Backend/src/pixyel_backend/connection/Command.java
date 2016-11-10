@@ -24,7 +24,7 @@ public class Command {
         BackendFunctions backendFunctions = client.getBackendFunctions();
         //Log.logInfo("Command from " + client.getName() + " received: \n" + xml.toStringGraph(), Command.class);
         try {
-            if (!xml.getFirstChild().getName().equals("request")) {
+            if (!xml.getName().equals("request")) {
                 Log.logWarning("Command from " + client.getName() + " does not start with \"request\": " + xml.getName(), Command.class);
             }
             switch ((xml = xml.getFirstChild()).getName()) {//Cuts off the "request"

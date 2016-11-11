@@ -5,12 +5,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.BackendFunctions;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.SqlUtils;
+import pixyel_backend.database.exceptions.PictureLoadException;
+import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 
 public class User {
 
@@ -231,12 +235,22 @@ public class User {
     }
 
     /**
-     * Creates a new BackendFunctions Obj which contains the userID and uses the
-     * database-connection of the current user
-     *
-     * @return
+     * @see pixyel_backend.database.objects.Comment.addFlag
      */
-    public BackendFunctions getBackendFunctions() {
-        return new BackendFunctions(this.id);
+    public void flagComment(int commentId) throws SQLException {
+        Comment.addFlag(this.id, commentId);
     }
+    
+    
+    /**
+     * @see pixyel_backend.database.objects.Comment
+     */
+    public void addNewComment(String text, int refersToPicuture) {
+        Comment.newComment(refersToPicuture, id, text);
+    }
+
+    public Picture uploadPicture(String data, double longitude, double latitude) throws PictureUploadExcpetion, PictureLoadException {
+        return Picture.addNewPicture(id, data, longitude, latitude);
+    }
+    
 }

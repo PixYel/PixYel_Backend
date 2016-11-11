@@ -8,9 +8,11 @@ package pixyel_backend.connection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import pixyel_backend.Log;
 import pixyel_backend.database.BackendFunctions;
 import pixyel_backend.database.exceptions.UserNotFoundException;
+import pixyel_backend.database.objects.Comment;
 import pixyel_backend.database.objects.User;
 import pixyel_backend.xml.XML;
 
@@ -22,8 +24,9 @@ public class Command {
 
     /**
      * This method is being called when a command is arrived
+     *
      * @param client The Client
-     * @param xml 
+     * @param xml
      */
     public static void onCommandReceived(Client client, XML xml) {
         BackendFunctions backendFunctions = client.getBackendFunctions();
@@ -38,8 +41,8 @@ public class Command {
                     XML location = xml.getFirstChild();
                     int longt = Integer.valueOf(location.getFirstChild("long").getContent());
                     int lat = Integer.valueOf(location.getFirstChild("lat").getContent());
-                    XML picturesXML = backendFunctions.getPicturesList(longt, lat);
-                    client.sendToClient(picturesXML);
+                    // XML picturesXML = backendFunctions.getPicturesList(longt, lat);
+                    // client.sendToClient(picturesXML);
                     break;
                 case "getItem":
                     int id = Integer.valueOf(xml.getFirstChild().getContent());
@@ -79,7 +82,7 @@ public class Command {
                     String data = xml.getFirstChild("xml").getContent();
                     int longt1 = Integer.valueOf(xml.getFirstChild("long").getContent());
                     int lat1 = Integer.valueOf(xml.getFirstChild("lat").getContent());
-                    backendFunctions.uploadPicture(data, longt1, lat1);
+                    client.userdata.uploadPicture(data, longt1, lat1);
                     break;
                 case "flagItem":
                     int id3 = Integer.valueOf(xml.getFirstChild("id").getContent());
@@ -87,17 +90,17 @@ public class Command {
                     break;
                 case "flagComment":
                     int commentId = Integer.valueOf(xml.getFirstChild("id").getContent());
-                    backendFunctions.flagComment(commentId);
+                    client.userdata.flagComment(commentId);
                     break;
                 case "getComments":
                     int id4 = Integer.valueOf(xml.getFirstChild("id").getContent());
-                    XML allComments = backendFunctions.getCommentsForPicutre(id4);
-                    client.sendToClient(allComments);
+                    List<Comment> allComments = BackendFunctions.getCommentsForPicutre(id4);
+                   // client.sendToClient(allComments);
                     break;
                 case "addComment":
                     int id5 = Integer.valueOf(xml.getFirstChild("id").getContent());
                     String content = xml.getFirstChild("content").getContent();
-                    backendFunctions.addNewComment(content, id5);
+                    client.userdata.addNewComment(content, id5);
                     break;
                 case "disconnect":
                     client.disconnect(true);

@@ -65,7 +65,7 @@ public class DatabaseInitializer {
             );
             
             statements.executeUpdate("CREATE TABLE picturesInfo ("
-                    + "pictureid        INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
+                    + "id               INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
                     + "longitude        DOUBLE NOT NULL, "
                     + "latitude         DOUBLE NOT NULL, "
                     + "upload_date      TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "

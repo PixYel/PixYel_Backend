@@ -244,7 +244,6 @@ public class Client implements Runnable {
             Log.logDebug("No User to be set", this);
         }
         this.userdata = user;
-        this.backendFunctions = user.getBackendFunctions();
     }
 
     /**

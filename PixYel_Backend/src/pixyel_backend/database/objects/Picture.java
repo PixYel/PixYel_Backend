@@ -38,44 +38,39 @@ public class Picture {
     private final int userId;
     private int rating;
 
-    public Picture(int pictureId) throws PictureLoadException{
+    public Picture(int pictureId) throws PictureLoadException {
         this.id = pictureId;
-        try{
-        //get Data
-        PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT data FROM picturesData WHERE pictureid LIKE ?");
-        sta.setInt(1, this.id);
-        ResultSet result = sta.executeQuery();
-        result.next();
-        this.data = result.getString("data");
+        try {
+            //get Data
+            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT data FROM picturesData WHERE pictureid LIKE ?");
+            sta.setInt(1, this.id);
+            ResultSet result = sta.executeQuery();
+            //result.next();
+            this.data ="asd";// result.getString("data");
 
-        //get Info
-        sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM picturesInfo WHERE pictureid LIKE ?");
-        sta.setInt(1, this.id);
-        result = sta.executeQuery();
-        result.next();
-        this.longitude = result.getDouble("longitude");
-        this.latitude = result.getDouble("latitude");
-        this.timestamp = result.getDate("upload_date");
-        this.upvotes = result.getInt("upvotes");
-        this.downvotes = result.getInt("downvotes");
-        this.userId = result.getInt("userid");
+            //get Info
+            sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM picturesInfo WHERE id LIKE ?");
+            sta.setInt(1, this.id);
+            result = sta.executeQuery();
+            result.next();
+            this.longitude = result.getDouble("longitude");
+            this.latitude = result.getDouble("latitude");
+            this.timestamp = result.getDate("upload_date");
+            this.upvotes = result.getInt("upvotes");
+            this.downvotes = result.getInt("downvotes");
+            this.userId = result.getInt("userid");
 
-        //get flags
-        if (result.getString("flags") != null) {
-            String flaggedByAsString = result.getString("flags");
-            this.flaggedBy = Arrays.asList(flaggedByAsString);
-            this.flags = this.flaggedBy.size();
-        } else {
-            this.flaggedBy = new ArrayList();
-            this.flags = 0;
-        }
-
-        //get commentIds
-        if (result.getString("commentids") != null) {
-            String commentedByAsString = result.getString("commentids");
-            //this.commentIds = Arrays.asList(commentedByAsString);
-        }
-        }catch(Exception ex){
+            //get flags
+            if (result.getString("flags") != null) {
+                String flaggedByAsString = result.getString("flags");
+                this.flaggedBy = Arrays.asList(flaggedByAsString);
+                this.flags = this.flaggedBy.size();
+            } else {
+                this.flaggedBy = new ArrayList();
+                this.flags = 0;
+            }
+        } catch (Exception ex) {
+            Log.logWarning("couldnt load picture for Id " + pictureId + "- rootcause:" + ex, Picture.class);
             throw new PictureLoadException();
         }
     }
@@ -86,12 +81,12 @@ public class Picture {
             Connection con = MysqlConnector.getConnection();
             PreparedStatement statement;
             if (pictureData != null && pictureData.length() >= 1) {
-                statement = con.prepareStatement("INSERT INTO picturesInfo (longditude, latitude, userid) VALUES(?,?,?)");
+                statement = con.prepareStatement("INSERT INTO picturesInfo (longitude, latitude, userid,flags) VALUES(?,?,?,'')");
                 statement.setDouble(1, longitude);
                 statement.setDouble(2, latitude);
                 statement.setInt(3, userId);
                 statement.executeUpdate();
-                ResultSet rs = statement.executeQuery("SELECT MAX(id) as maxid FROM pictureInfo");
+                ResultSet rs = statement.executeQuery("SELECT MAX(id) as maxid FROM picturesInfo");
                 //get Id as reference for the picturedata
                 rs.next();
                 pictureId = rs.getInt("maxid");
@@ -105,13 +100,13 @@ public class Picture {
                 throw new PictureUploadExcpetion();
             }
         } catch (SQLException ex) {
-            Log.logError("Could add new picture to database - rootcause: " + ex.getMessage(), Picture.class);
+            Log.logError("Could not add new picture to database - rootcause: " + ex.getMessage(), Picture.class);
             throw new PictureUploadExcpetion();
         }
         return new Picture(pictureId);
     }
-    
-    public static Picture getPictureById(int id) throws PictureLoadException{
+
+    public static Picture getPictureById(int id) throws PictureLoadException {
         return new Picture(id);
     }
 
@@ -200,6 +195,6 @@ public class Picture {
     }
 
     int getID() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.id;
     }
 }

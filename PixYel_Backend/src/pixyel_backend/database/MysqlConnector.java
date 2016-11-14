@@ -61,7 +61,7 @@ public class MysqlConnector {
     public static Connection connectToDatabase(String host, String database, String user, String passwd)
             throws Exception {
         try {
-            return getConnection(host, database, user, passwd);
+            return openConnection(host, database, user, passwd);
         } catch (Exception ex) {
             throw new Exception("Cant connect to Db \n rootcause : " + ex);
         }
@@ -77,7 +77,7 @@ public class MysqlConnector {
      * @return The connection that was opened
      * @throws Exception
      */
-    private static Connection getConnection(String host, String database, String user, String passwd) throws ClassNotFoundException, InstantiationException, SQLException, IllegalAccessException {
+    private static Connection openConnection(String host, String database, String user, String passwd) throws ClassNotFoundException, InstantiationException, SQLException, IllegalAccessException {
         Class.forName("com.mysql.jdbc.Driver").newInstance();
         String connectionCommand = "jdbc:mysql://" + host + "/" + database + "?user=" + user + "&password=" + passwd;
         Connection connection = DriverManager.getConnection(connectionCommand);
@@ -97,7 +97,7 @@ public class MysqlConnector {
             String database = properties.getProperty("mysqlproductivdatabase");
             String user = properties.getProperty("mysqluser");
             String passwd = properties.getProperty("mysqlpassword");
-            return getConnection(host, database, user, passwd);
+            return openConnection(host, database, user, passwd);
         } catch (Exception ex) {
             System.out.println(ex);
         }
@@ -117,7 +117,7 @@ public class MysqlConnector {
             String database = properties.getProperty("mysqltestdatabase");
             String user = properties.getProperty("mysqluser");
             String passwd = properties.getProperty("mysqlpassword");
-            return getConnection(host, database, user, passwd);
+            return openConnection(host, database, user, passwd);
         } catch (Exception ex) {
             System.out.println(ex);
         }

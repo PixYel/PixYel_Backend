@@ -17,8 +17,6 @@ import pixyel_backend.database.exceptions.PictureLoadException;
 import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 
 public class User {
-
-    private static final Connection CONNECTION = MysqlConnector.getConnection();
     private final int id;
     private final String storeID;
     private String publicKey;
@@ -37,7 +35,7 @@ public class User {
     public User(int id) throws UserNotFoundException, UserCreationException {
 
         try {
-            PreparedStatement sta = CONNECTION.prepareStatement("SELECT * FROM users WHERE id LIKE ?");
+            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM users WHERE id LIKE ?");
             sta.setInt(1, id);
             ResultSet result = sta.executeQuery();
             if (result == null || !result.isBeforeFirst()) {
@@ -71,7 +69,7 @@ public class User {
      */
     public User(String storeID) throws UserNotFoundException, UserCreationException {
         try {
-            PreparedStatement sta = CONNECTION.prepareStatement("SELECT * FROM users WHERE storeid LIKE ?");
+            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM users WHERE storeid LIKE ?");
             sta.setString(1, SqlUtils.escapeString(storeID));
             ResultSet result = sta.executeQuery();
 
@@ -193,7 +191,7 @@ public class User {
      * @param value value that should be inserted
      */
     private void updateUserValue(String key, String value) {
-        try (PreparedStatement sta = CONNECTION.prepareStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
             sta.setString(1, SqlUtils.escapeString(value));
             sta.execute();
         } catch (SQLException ex) {
@@ -208,7 +206,7 @@ public class User {
      * @param value value that should be inserted
      */
     private void updateUserValue(String key, int value) {
-        try (PreparedStatement sta = CONNECTION.prepareStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
             sta.setInt(1, value);
             sta.execute();
         } catch (SQLException ex) {
@@ -225,7 +223,7 @@ public class User {
      * deletes this user from the database
      */
     public void delete() {
-        try (PreparedStatement sta = CONNECTION.prepareStatement("DELETE FROM Users WHERE id = ?")) {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM Users WHERE id = ?")) {
             sta.setInt(1, this.id);
             sta.executeUpdate();
 

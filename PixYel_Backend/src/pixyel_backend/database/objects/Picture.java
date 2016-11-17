@@ -32,7 +32,7 @@ public class Picture {
     private int ranking;
     private final double longitude;
     private final double latitude;
-    private final double coordinate;
+    private final Coordinate coordinate;
     private final Date timestamp;
     private final int upvotes;
     private final int downvotes;
@@ -56,7 +56,7 @@ public class Picture {
             Log.logWarning("couldnt load picture for Id " + pictureId + "- rootcause:" + ex, Picture.class);
             throw new PictureLoadException();
         }
-        this.coordinate = new Coorinate(this.longitude, this.latitude);
+        this.coordinate = new Coordinate(this.longitude, this.latitude);
     }
     
     public static synchronized Picture addNewPicture(int userId, String pictureData, double longitude, double latitude) throws PictureUploadExcpetion, PictureLoadException {

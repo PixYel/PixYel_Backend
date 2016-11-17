@@ -1,5 +1,8 @@
 package pixyel_backend.database.objects;
 
+import java.util.List;
+import pixyel_backend.database.exceptions.NotImplementedException;
+
 /**
  *
  * @author Da_Groove
@@ -33,5 +36,8 @@ public class Coordinate {
         double differenceYaxis = 111.3 * (this.getLatitude() - toCoordinate.getLatitude());
         double distance = (Math.sqrt(Math.pow(differenceXaxis, 2) + Math.pow(differenceYaxis, 2)) * 1000);
         return (long) distance;
+    }
+    public List<Coordinate> getSearchArea(int distance){
+        throw new NotImplementedException();
     }
 }

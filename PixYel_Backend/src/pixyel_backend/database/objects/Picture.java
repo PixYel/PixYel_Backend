@@ -27,7 +27,8 @@ import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 public class Picture {
 
     private final int id;
-    private final String data;
+    private String data;
+    private int rank;
     private final double longitude;
     private final double latitude;
     private final Date timestamp;
@@ -41,17 +42,10 @@ public class Picture {
     public Picture(int pictureId) throws PictureLoadException {
         this.id = pictureId;
         try {
-            //get Data
-            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT data FROM picturesData WHERE pictureid LIKE ?");
+            //get Info
+            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM picturesInfo WHERE id LIKE ?");
             sta.setInt(1, this.id);
             ResultSet result = sta.executeQuery();
-            //result.next();
-            this.data ="asd";// result.getString("data");
-
-            //get Info
-            sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM picturesInfo WHERE id LIKE ?");
-            sta.setInt(1, this.id);
-            result = sta.executeQuery();
             result.next();
             this.longitude = result.getDouble("longitude");
             this.latitude = result.getDouble("latitude");
@@ -74,7 +68,7 @@ public class Picture {
             throw new PictureLoadException();
         }
     }
-
+    
     public static synchronized Picture addNewPicture(int userId, String pictureData, double longitude, double latitude) throws PictureUploadExcpetion, PictureLoadException {
         int pictureId;
         try {
@@ -91,9 +85,10 @@ public class Picture {
                 rs.next();
                 pictureId = rs.getInt("maxid");
                 pictureData = SqlUtils.escapeString(pictureData);
-                statement = con.prepareStatement("INSERT INTO picturesData (picutreid, data) VALUES(?,?)");
+                statement = con.prepareStatement("INSERT INTO picturesData (pictureid, data) VALUES(?,?)");
                 statement.setInt(1, pictureId);
                 statement.setString(2, pictureData);
+                statement.execute();
                 statement.close();
             } else {
                 Log.logInfo("Failed to add picture for user \"" + userId + "\" - rootcause: picturedata is NULL or to empty string", Picture.class);
@@ -104,6 +99,10 @@ public class Picture {
             throw new PictureUploadExcpetion();
         }
         return new Picture(pictureId);
+    }
+    
+    public static synchronized void addFlag(int userid, int pictureID) throws SQLException {
+        //todo
     }
 
     public static Picture getPictureById(int id) throws PictureLoadException {
@@ -121,7 +120,37 @@ public class Picture {
      * @return the data
      */
     public String getData() {
+        if (data == null){
+            //get Data
+            PreparedStatement sta;
+            try {
+                sta = MysqlConnector.getConnection().prepareStatement("SELECT data FROM picturesData WHERE pictureid LIKE ?");
+           
+            sta.setInt(1, this.id);
+            ResultSet result = sta.executeQuery();
+            result.next();
+            this.data = result.getString("data");
+             } catch (SQLException ex) {
+                Logger.getLogger(Picture.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         return data;
+    }
+    
+     public static String getDataForId(int id) throws PictureLoadException {
+            //get Data
+            PreparedStatement sta;
+            try {
+                sta = MysqlConnector.getConnection().prepareStatement("SELECT data FROM picturesData WHERE pictureid LIKE ?");
+           
+            sta.setInt(1, id);
+            ResultSet result = sta.executeQuery();
+            result.next();
+            return result.getString("data");
+             } catch (SQLException ex) {
+                Log.logWarning("couldnt load pictureData for Id " + id, Picture.class);
+                throw new PictureLoadException();
+            }
     }
 
     /**
@@ -196,5 +225,19 @@ public class Picture {
 
     int getID() {
         return this.id;
+    }
+
+    /**
+     * @return the rank
+     */
+    public int getRank() {
+        return rank;
+    }
+
+    /**
+     * @param rank the rank to set
+     */
+    public void setRank(int rank) {
+        this.rank = rank;
     }
 }

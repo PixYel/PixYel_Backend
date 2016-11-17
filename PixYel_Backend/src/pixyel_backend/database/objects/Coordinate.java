@@ -1,5 +1,6 @@
 package pixyel_backend.database.objects;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -48,5 +49,9 @@ public class Coordinate {
         Coordinate coordinate2;
         coordinate1 = new Coordinate(Math.sqrt(Math.pow(this.longitude, 2)-Math.pow(distance, 2)),Math.sqrt(Math.pow(this.longitude, 2)-Math.pow(distance, 2)));
         coordinate2 = new Coordinate(Math.sqrt(Math.pow(this.longitude, 2)-Math.pow((distance*(-1)), 2)),Math.sqrt(Math.pow(this.longitude, 2)-Math.pow((distance*(-1)), 2)));
+        List<Coordinate> returnList = new LinkedList();
+        returnList.add(coordinate1);
+        returnList.add(coordinate2);
+        return returnList;
     }
 }

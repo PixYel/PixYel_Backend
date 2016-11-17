@@ -1,14 +1,10 @@
 package pixyel_backend.database.objects;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import pixyel_backend.Log;
-import pixyel_backend.database.BackendFunctions;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
@@ -244,14 +240,29 @@ public class User {
     
     
     /**
+     * @param text
+     * @param refersToPicuture
      * @see pixyel_backend.database.objects.Comment
      */
     public void addNewComment(String text, int refersToPicuture) {
         Comment.newComment(refersToPicuture, id, text);
     }
 
+    /**
+     * @param data
+     * @param longitude
+     * @param latitude
+     * @return The pictureobject of the picture that was uploaded
+     * @throws pixyel_backend.database.exceptions.PictureUploadExcpetion
+     * @throws pixyel_backend.database.exceptions.PictureLoadException
+     * @see pixyel_backend.database.objects.Picture
+     */
     public Picture uploadPicture(String data, double longitude, double latitude) throws PictureUploadExcpetion, PictureLoadException {
         return Picture.addNewPicture(id, data, longitude, latitude);
+    }
+    
+    public void flagPicture(int pictureId) throws FlagFailedExcpetion{
+        Picture.flagPic(id, pictureId);
     }
     
 }

@@ -94,23 +94,23 @@ public class Picture {
      * Adds a flag
      *
      * @param userId
-     * @param commentId
+     * @param pictureId
      * @throws FlagFailedExcpetion
      */
-    public static synchronized void addFlag(int userId, int commentId) throws FlagFailedExcpetion {
+    public static synchronized void flagPic(int userId, int pictureId) throws FlagFailedExcpetion {
         try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT id FROM  pictureflags WHERE pictureid = ? AND  userid = ?")) {
-            statement.setInt(1, commentId);
+            statement.setInt(1, pictureId);
             statement.setInt(2, userId);
             ResultSet result = statement.executeQuery();
             if (result == null || !result.isBeforeFirst()) {
                 try (PreparedStatement instertStatement = MysqlConnector.getConnection().prepareStatement("INSERT INTO pictureflags (pictureid,userid) VALUES (?,?)")) {
-                    instertStatement.setInt(1, commentId);
+                    instertStatement.setInt(1, pictureId);
                     instertStatement.setInt(2, userId);
                     instertStatement.executeUpdate();
                 }
             }
         } catch (SQLException ex) {
-            Log.logWarning("Failed to flag picture " + commentId + " rootcause: - " + ex, Comment.class);
+            Log.logWarning("Failed to flag picture " + pictureId + " rootcause: - " + ex, Comment.class);
             throw new FlagFailedExcpetion();
 
         }

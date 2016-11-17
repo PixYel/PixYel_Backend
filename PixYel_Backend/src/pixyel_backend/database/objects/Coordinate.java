@@ -1,7 +1,6 @@
 package pixyel_backend.database.objects;
 
 import java.util.List;
-import pixyel_backend.database.exceptions.NotImplementedException;
 
 /**
  *
@@ -37,7 +36,17 @@ public class Coordinate {
         double distance = (Math.sqrt(Math.pow(differenceXaxis, 2) + Math.pow(differenceYaxis, 2)) * 1000);
         return (long) distance;
     }
+    
+    private Coordinate getManipulatedCoordinate(Coordinate coordinate, int distance){
+        
+        
+        return coordinate;
+    }
+    
     public List<Coordinate> getSearchArea(int distance){
-        throw new NotImplementedException();
+        Coordinate coordinate1;
+        Coordinate coordinate2;
+        coordinate1 = new Coordinate(Math.sqrt(Math.pow(this.longitude, 2)-Math.pow(distance, 2)),Math.sqrt(Math.pow(this.longitude, 2)-Math.pow(distance, 2)));
+        coordinate2 = new Coordinate(Math.sqrt(Math.pow(this.longitude, 2)-Math.pow((distance*(-1)), 2)),Math.sqrt(Math.pow(this.longitude, 2)-Math.pow((distance*(-1)), 2)));
     }
 }

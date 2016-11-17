@@ -13,6 +13,7 @@ import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.SqlUtils;
+import pixyel_backend.database.exceptions.FlagFailedExcpetion;
 import pixyel_backend.database.exceptions.PictureLoadException;
 import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 
@@ -233,9 +234,11 @@ public class User {
     }
 
     /**
+     * @param commentId
+     * @throws pixyel_backend.database.exceptions.FlagFailedExcpetion
      * @see pixyel_backend.database.objects.Comment.addFlag
      */
-    public void flagComment(int commentId) throws SQLException {
+    public void flagComment(int commentId) throws FlagFailedExcpetion {
         Comment.addFlag(this.id, commentId);
     }
     

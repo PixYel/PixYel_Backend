@@ -1,11 +1,10 @@
 package pixyel_backend.database.objects;
 
+import pixyel_backend.database.exceptions.FlagFailedExcpetion;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,17 +25,14 @@ public class Comment {
     private final int userId;
     private final String comment;
     private final Date commentDate;
-    private int flags;
-    private List<String> flaggedBy;     //Contains userIds that flagged the comment
-    private Connection con;
 
     public Comment(int commentId) throws CommentCreationException {
         try {
-            this.con = MysqlConnector.getConnection();
-            PreparedStatement statement = con.prepareStatement("SELECT * FROM comments WHERE commentid LIKE ?");
-            statement.setInt(1, commentId);
-            ResultSet result = statement.executeQuery();
-            statement.close();
+            ResultSet result;
+            try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT * FROM comments WHERE commentid = ?")) {
+                statement.setInt(1, commentId);
+                result = statement.executeQuery();
+            }
             if (result == null || !result.isBeforeFirst()) {
                 throw new CommentNotFoundException();
             }
@@ -46,14 +42,6 @@ public class Comment {
             this.userId = result.getInt("userid");
             this.comment = result.getString("comment");
             this.commentDate = result.getDate("comment_date");
-            if (result.getString("flags") != null) {
-                String flaggedByAsString = result.getString("flags");
-                this.flaggedBy = Arrays.asList(flaggedByAsString);
-                this.flags = this.flaggedBy.size();
-            } else {
-                this.flaggedBy = new ArrayList();
-                this.flags = 0;
-            }
         } catch (SQLException ex) {
             Log.logError("Could not read Commentinformation from database - rootcause: " + ex.getMessage(), Comment.class);
             throw new CommentCreationException();
@@ -73,15 +61,6 @@ public class Comment {
         this.userId = result.getInt("userid");
         this.comment = result.getString("comment");
         this.commentDate = result.getDate("comment_date");
-        if (result.getString("flags") != null) {
-            String flaggedByAsString = result.getString("flags");
-            this.flaggedBy = Arrays.asList(flaggedByAsString);
-            this.flags = this.flaggedBy.size();
-        } else {
-            this.flaggedBy = new ArrayList();
-            this.flags = 0;
-        }
-
     }
 
     public static void newComment(int pictureId, int userId, String comment) {
@@ -141,77 +120,28 @@ public class Comment {
     }
 
     /**
-     * @return the flags
-     */
-    public int getFlags() {
-        return flags;
-    }
-
-    public static synchronized void addFlag(int userid, int commentid) throws SQLException {
-        Connection con = MysqlConnector.getConnection();
-        PreparedStatement sta = con.prepareStatement("SELECT flags FROM comments WHERE commentid LIKE ?");
-        sta.setInt(1, commentid);
-        ResultSet result = sta.executeQuery();
-        sta.close();
-        result.next();
-
-        List<String> staticFlaggedBy;
-        //flaggedBy String to List
-        String flaggedByAsString;
-        if (result.getString("flags") != null) {
-            flaggedByAsString = result.getString("flags");
-            staticFlaggedBy = Arrays.asList(flaggedByAsString);
-        } else {
-            staticFlaggedBy = new ArrayList();
-        }
-        StringBuilder flaggedByAsStringBuilder = new StringBuilder();
-        for (String currentString : staticFlaggedBy) {
-            flaggedByAsStringBuilder.append(currentString);
-        }
-        flaggedByAsString = SqlUtils.escapeString(flaggedByAsStringBuilder.toString());
-        updateCommentValue("flags", flaggedByAsString, commentid);
-    }
-
-    public boolean isFlaggedBy(int userid) {
-        return (this.flaggedBy.contains(String.valueOf(userid)));
-    }
-
-    /**
+     * Adds a flag
      *
-     * @param column
-     * @param toValue
+     * @param userId
+     * @param commentId
+     * @throws FlagFailedExcpetion
      */
-    private void updateCommentValue(String column, int toValue) {
-        try {
-            PreparedStatement sta = con.prepareStatement("UPDATE users SET " + column + " = ? WHERE id LIKE " + this.commentId);
-            sta.setInt(1, toValue);
-            sta.execute();
-            sta.close();
+    public static synchronized void addFlag(int userId, int commentId) throws FlagFailedExcpetion {
+        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT id FROM commentflags WHERE commentid = ? AND  userid = ?")) {
+            statement.setInt(1, commentId);
+            statement.setInt(2, userId);
+            ResultSet result = statement.executeQuery();
+            if (result == null || !result.isBeforeFirst()) {
+                try (PreparedStatement instertStatement = MysqlConnector.getConnection().prepareStatement("INSERT INTO commentflags (commentid,userid) VALUES (?,?)")) {
+                    instertStatement.setInt(1, commentId);
+                    instertStatement.setInt(2, userId);
+                    instertStatement.executeUpdate();
+                }
+            }
         } catch (SQLException ex) {
-            Log.logError("couldnt update user value \"" + column + "\" - rootcause:" + ex.getMessage(), this);
-        }
-    }
+            Log.logWarning("Failed to flag comment " + commentId + " rootcause: - " + ex, Comment.class);
+            throw new FlagFailedExcpetion();
 
-    private void updateCommentValue(String column, String toValue) {
-        try {
-            PreparedStatement sta = con.prepareStatement("UPDATE users SET " + column + " = ? WHERE id LIKE " + this.commentId);
-            sta.setString(1, toValue);
-            sta.execute();
-            sta.close();
-        } catch (SQLException ex) {
-            Log.logError("couldnt update user value \"" + column + "\" - rootcause:" + ex.getMessage(), this);
-        }
-    }
-    
-    private static void updateCommentValue(String column, String toValue, int commentId) {
-        try {
-            Connection con = MysqlConnector.getConnection();
-            PreparedStatement sta = con.prepareStatement("UPDATE users SET " + column + " = ? WHERE id LIKE " + commentId);
-            sta.setString(1, toValue);
-            sta.execute();
-            sta.close();
-        } catch (SQLException ex) {
-            Log.logError("couldnt update user value \"" + column + "\" - rootcause:" + ex.getMessage(), commentId);
         }
     }
 

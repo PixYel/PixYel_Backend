@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.SqlUtils;
+import pixyel_backend.database.exceptions.FlagFailedExcpetion;
 import pixyel_backend.database.exceptions.PictureLoadException;
 import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 
@@ -34,8 +35,6 @@ public class Picture {
     private final Date timestamp;
     private final int upvotes;
     private final int downvotes;
-    private final int flags;
-    private final List<String> flaggedBy;
     private final int userId;
     private int rating;
 
@@ -53,16 +52,6 @@ public class Picture {
             this.upvotes = result.getInt("upvotes");
             this.downvotes = result.getInt("downvotes");
             this.userId = result.getInt("userid");
-
-            //get flags
-            if (result.getString("flags") != null) {
-                String flaggedByAsString = result.getString("flags");
-                this.flaggedBy = Arrays.asList(flaggedByAsString);
-                this.flags = this.flaggedBy.size();
-            } else {
-                this.flaggedBy = new ArrayList();
-                this.flags = 0;
-            }
         } catch (Exception ex) {
             Log.logWarning("couldnt load picture for Id " + pictureId + "- rootcause:" + ex, Picture.class);
             throw new PictureLoadException();
@@ -101,8 +90,30 @@ public class Picture {
         return new Picture(pictureId);
     }
     
-    public static synchronized void addFlag(int userid, int pictureID) throws SQLException {
-        //todo
+    /**
+     * Adds a flag
+     *
+     * @param userId
+     * @param commentId
+     * @throws FlagFailedExcpetion
+     */
+    public static synchronized void addFlag(int userId, int commentId) throws FlagFailedExcpetion {
+        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT id FROM  pictureflags WHERE pictureid = ? AND  userid = ?")) {
+            statement.setInt(1, commentId);
+            statement.setInt(2, userId);
+            ResultSet result = statement.executeQuery();
+            if (result == null || !result.isBeforeFirst()) {
+                try (PreparedStatement instertStatement = MysqlConnector.getConnection().prepareStatement("INSERT INTO pictureflags (pictureid,userid) VALUES (?,?)")) {
+                    instertStatement.setInt(1, commentId);
+                    instertStatement.setInt(2, userId);
+                    instertStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            Log.logWarning("Failed to flag picture " + commentId + " rootcause: - " + ex, Comment.class);
+            throw new FlagFailedExcpetion();
+
+        }
     }
 
     public static Picture getPictureById(int id) throws PictureLoadException {
@@ -187,21 +198,6 @@ public class Picture {
     public int getDownvotes() {
         return downvotes;
     }
-
-    /**
-     * @return the flags
-     */
-    public int getFlags() {
-        return flags;
-    }
-
-    /**
-     * @return the flaggedBy
-     */
-    public List<String> getFlaggedBy() {
-        return flaggedBy;
-    }
-
     /**
      * @return the userId
      */

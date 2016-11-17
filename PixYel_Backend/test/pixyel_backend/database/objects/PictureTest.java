@@ -51,7 +51,7 @@ public class PictureTest {
      */
     @Test
     public void testPictureById() throws Exception {
-        int id = testpicture.getID();
+        int id = testpicture.getId();
         String picData = Picture.getPictureById(id).getData();
         assertEquals(picData, testpicture.getData());
     }

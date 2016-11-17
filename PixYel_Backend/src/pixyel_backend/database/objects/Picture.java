@@ -29,7 +29,7 @@ public class Picture {
 
     private final int id;
     private String data;
-    private int rank;
+    private int ranking;
     private final double longitude;
     private final double latitude;
     private final double coordinate;
@@ -37,7 +37,6 @@ public class Picture {
     private final int upvotes;
     private final int downvotes;
     private final int userId;
-    private int rating;
 
     public Picture(int pictureId) throws PictureLoadException {
         this.id = pictureId;
@@ -208,34 +207,18 @@ public class Picture {
     }
 
     /**
-     * @return the rating
+     * @return the ranking
      */
-    public int getRating() {
-        return rating;
+    public int getRanking() {
+        return ranking;
     }
 
     /**
-     * @param rating the rating to set
+     * @param ranking the ranking to set
      */
-    public void setRating(int rating) {
-        this.rating = rating;
+    public void setRanking(int ranking) {
+        this.ranking = ranking;
     }
 
-    int getID() {
-        return this.id;
-    }
 
-    /**
-     * @return the rank
-     */
-    public int getRank() {
-        return rank;
-    }
-
-    /**
-     * @param rank the rank to set
-     */
-    public void setRank(int rank) {
-        this.rank = rank;
-    }
 }

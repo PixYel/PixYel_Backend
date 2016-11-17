@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.SqlUtils;
@@ -148,23 +150,28 @@ public class Comment {
     /**
      *
      * @param pictureId
-     * @param con
      * @return commentList -> all comments that match the PictureId in order to
      * their insertion date.
-     * @throws SQLException
-     * @throws CommentCreationException
      */
-    public static List<Comment> getCommentsForPicutre(int pictureId) throws SQLException, CommentCreationException {
+    public static List<Comment> getCommentsForPicutre(int pictureId) {
         Connection con = MysqlConnector.getConnection();
-        PreparedStatement sta = con.prepareStatement("SELECT * FROM comment WHERE pictureid LIKE ? ORDER BY comment_date ASC");
-        sta.setInt(1, pictureId);
-        ResultSet resultSet = sta.executeQuery();
+        PreparedStatement sta;
         List<Comment> commentList = new LinkedList();
-        while (resultSet.next()) {
-            Comment comment = new Comment(resultSet);
-            commentList.add(comment);
+        try {
+            sta = con.prepareStatement("SELECT * FROM comment WHERE pictureid LIKE ? ORDER BY comment_date ASC");
+
+            sta.setInt(1, pictureId);
+            ResultSet resultSet = sta.executeQuery();
+
+            while (resultSet.next()) {
+                Comment comment = new Comment(resultSet);
+                commentList.add(comment);
+            }
+        } catch (SQLException ex) {
+            Log.logError("Couldnt read picture Table", Comment.class);
         }
         return commentList;
+
     }
 
     public static void deleteComment(int commentId) throws SQLException {

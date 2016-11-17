@@ -10,15 +10,20 @@ import pixyel_backend.database.objects.Picture;
  * @author Da_Groove
  */
 public class RankingCalculation {
-
+    /**
+     * 
+     * @param picture
+     * @param userCoordinate
+     * @return 
+     */
     public static int calculateRanking(Picture picture, Coordinate userCoordinate) {
-        int timeRankingPercentage = 10;
-        int distanceRankingPercentage = 10;
-        int flagRankingPercentage = 10;
-        int upvotesRankingPercentage = 35;
-        int downvotesRankingPercentage = 35;
-        int ranking = 0;
-
+        int timeRankingPercentage = 30;
+        int distanceRankingPercentage = 30;
+        int votesRankingPercentage = 40;
+        int ranking;
+        ranking = timeRankingPercentage*getTimeRanking(picture.getTimestamp()) + 
+                  distanceRankingPercentage*getDistanceRanking(picture.getCoordinate(), userCoordinate) +
+                  votesRankingPercentage*getVoteRanking(picture.getUpvotes(), picture.getDownvotes());
         return ranking;
     }
 
@@ -30,13 +35,23 @@ public class RankingCalculation {
     }
 
     private static int getDistanceRanking(Coordinate coordinate, Coordinate userCoordinate) {
-        int distanceRanking;
+        int distanceRanking = 0;
         long distance = coordinate.getDistance(userCoordinate);
-        if (distance < 3017) {
-            distanceRanking = (int) (pow((-0.0000001 * distance), 2.5) + 50);       //f(x) = -0.0000001*dist^2.5+50
-        } else {
-            distanceRanking = (int) (-distance);
+        if (distance <= 1000) {
+            distanceRanking = (int) (-1000 * Math.log(0.001 * distance));       //f(x) = -1000*ln(0,001*distance)
+        }
+        if (distance < 3017 && distance > 1000) {
+            distanceRanking = (int) (pow((-0.0000001 * distance), 2.5));        //f(x) = -0.0000001*distance^2.5+50
+        }
+        if (distance >= 3017) {
+            distanceRanking = (int) (-distance);                                //f(x) = -distance
         }
         return distanceRanking;
+    }
+
+    private static int getVoteRanking(int upvotes, int downvotes) {
+        int voteRanking;
+        voteRanking = (int)(50+upvotes-Math.pow(downvotes,1.5));
+        return voteRanking;
     }
 }

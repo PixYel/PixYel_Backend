@@ -11,7 +11,7 @@ import pixyel_backend.database.objects.Picture;
  */
 public class RankingCalculation {
     /**
-     * 
+     * Used to calculate the Ranking of a picture.
      * @param picture
      * @param userCoordinate
      * @return 

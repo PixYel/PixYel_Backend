@@ -30,18 +30,11 @@ public class Coordinate {
     }
     
     public Long getDistance(Coordinate toCoordinate) {
-            //double longitude1, double latitude1, double longitude2, double latitude2
         double approximatelatitude = Math.toRadians((this.getLatitude() + toCoordinate.getLatitude()) / 2);
         double differenceXaxis = 111.3 * Math.cos(approximatelatitude) * (this.getLongitude() - toCoordinate.getLongitude());
         double differenceYaxis = 111.3 * (this.getLatitude() - toCoordinate.getLatitude());
         double distance = (Math.sqrt(Math.pow(differenceXaxis, 2) + Math.pow(differenceYaxis, 2)) * 1000);
         return (long) distance;
-    }
-    
-    private Coordinate getManipulatedCoordinate(Coordinate coordinate, int distance){
-        
-        
-        return coordinate;
     }
     
     public List<Coordinate> getSearchArea(int distance){

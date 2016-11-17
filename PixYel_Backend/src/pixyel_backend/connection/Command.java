@@ -80,10 +80,11 @@ public class Command {
                         //backendFunctions.
                         break;
                     case "upload":
-                        String data = xml.getFirstChild("xml").getContent();
+                        String data = xml.getFirstChild("data").getContent();
                         int longt1 = Integer.valueOf(xml.getFirstChild("long").getContent());
                         int lat1 = Integer.valueOf(xml.getFirstChild("lat").getContent());
                         client.userdata.uploadPicture(data, longt1, lat1);
+                        Log.logInfo("Successfully uploaded image by "+client.getName(), Command.class);
                         break;
                     case "flagItem":
                         int id3 = Integer.valueOf(xml.getFirstChild("id").getContent());

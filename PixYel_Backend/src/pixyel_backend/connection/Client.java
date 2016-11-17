@@ -40,7 +40,7 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
-        Log.logDebug("Client " + socket.hashCode() + " started", this);
+        Log.logDebug("Client " + getName() + " started", this);
         startInputListener();
     }
 
@@ -52,11 +52,11 @@ public class Client implements Runnable {
     public void sendToClient(XML toSend) {
         if (userdata == null || userdata.getPublicKey() == null || userdata.getPublicKey().isEmpty()) {
             if (userdata == null) {
-                Log.logWarning("Client "+getName()+" has no userdata, needs to log in first", this);
-            }else if (userdata.getPublicKey() == null) {
-                Log.logWarning("Client "+getName()+"s PublicKey is null , needs to log in first", this);
-            }else if (userdata.getPublicKey().isEmpty()) {
-                Log.logWarning("Client "+getName()+"s PublicKey is an empty String, needs to log in first", this);
+                Log.logWarning("Cant send XML: Client " + getName() + " has no userdata, needs to log in first", this);
+            } else if (userdata.getPublicKey() == null) {
+                Log.logWarning("Cant send XML: Client " + getName() + "s PublicKey is null , needs to log in first", this);
+            } else if (userdata.getPublicKey().isEmpty()) {
+                Log.logWarning("Cant send XML: Client " + getName() + "s PublicKey is an empty String, needs to log in first", this);
             }
             return;
         }
@@ -64,11 +64,15 @@ public class Client implements Runnable {
             toSend = XML.createNewXML("reply").addChild(toSend);
         }
         try {
+            Log.logDebug("PLAIN_TO_SEND: " + toSend, this);
             String compressed = Compression.compress(toSend.toString());
+            Log.logDebug("COMPRESSED_TO_SEND: " + compressed, this);
             String encrypted = Encryption.encrypt(compressed, userdata.getPublicKey());
+            Log.logDebug("ENCRYPTED_TO_SEND: " + encrypted, this);
             PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
             raus.println(encrypted);
             raus.flush();
+            Log.logDebug("Successfullly send XML", this);
         } catch (Compression.CompressionException | Encryption.EncryptionException | IOException e) {
             if (e.toString().contains("Socket is closed")) {
                 Log.logWarning("Could not send String beacuase the socket is closed, closing the connection to " + getName() + " now: " + e, this);
@@ -83,6 +87,7 @@ public class Client implements Runnable {
 
     /**
      * Sends a XML to everyone who is online and connected
+     *
      * @param toSend The XML to be send to everyone
      */
     public void sendToEveryone(XML toSend) {
@@ -116,9 +121,9 @@ public class Client implements Runnable {
         try {
             //System.out.println("Received String: " + receivedString);
             String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
-            Log.logDebug("Decrypted: " + decrypted, this);
+            //Log.logDebug("Decrypted: " + decrypted, this);
             String decompressed = Compression.decompress(decrypted);
-            Log.logDebug("Decompressed: " + decompressed, this);
+            //Log.logDebug("Decompressed: " + decompressed, this);
             XML xml = XML.openXML(decompressed);
             Command.onCommandReceived(this, xml);
         } catch (XML.XMLException ex) {
@@ -167,10 +172,13 @@ public class Client implements Runnable {
     }
 
     boolean online = true;
-/**
- * Checks if the Client is still alive
- * @param fromClient If true, this is a call from the client, if false, a call from the scheduler
- */
+
+    /**
+     * Checks if the Client is still alive
+     *
+     * @param fromClient If true, this is a call from the client, if false, a
+     * call from the scheduler
+     */
     public void checkClientAlive(boolean fromClient) {
         if (fromClient) {//If the client has send an alive signal and confirmed, that he is online
             online = true;
@@ -237,7 +245,8 @@ public class Client implements Runnable {
 
     /**
      * Sets the reference for the database for this user
-     * @param user 
+     *
+     * @param user
      */
     protected void setUserdata(User user) {
         if (user == null) {
@@ -248,6 +257,7 @@ public class Client implements Runnable {
 
     /**
      * Returns the data from the database of this user
+     *
      * @return The data from the database of this user
      */
     protected User getUserdata() {
@@ -256,6 +266,7 @@ public class Client implements Runnable {
 
     /**
      * Returns the general Database functions for all users
+     *
      * @return The general Database functions for all users
      */
     protected BackendFunctions getBackendFunctions() {

@@ -220,5 +220,12 @@ public class Picture {
         this.ranking = ranking;
     }
 
+    /**
+     * @return the coordinate
+     */
+    public Coordinate getCoordinate() {
+        return coordinate;
+    }
+
 
 }

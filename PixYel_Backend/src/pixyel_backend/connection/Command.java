@@ -87,7 +87,7 @@ public class Command {
                         break;
                     case "flagItem":
                         int id3 = Integer.valueOf(xml.getFirstChild("id").getContent());
-                        backendFunctions.flagPicture(id3);
+                        client.userdata.flagPicture(id3);
                         break;
                     case "flagComment":
                         int commentId = Integer.valueOf(xml.getFirstChild("id").getContent());

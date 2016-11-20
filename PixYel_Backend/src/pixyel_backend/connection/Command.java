@@ -32,8 +32,8 @@ public class Command {
         BackendFunctions backendFunctions = client.getBackendFunctions();
         Log.logDebug("Command from " + client.getName() + " received: \n" + xml.toStringGraph(), Command.class);
         try {
-            if (!(xml.getName().equals("request") || xml.getName().equals("backendUI"))) {
-                Log.logWarning("Command from " + client.getName() + " does not start with \"request\" or \"backendUI\": " + xml.getName(), Command.class);
+            if (!(xml.getName().equals("request"))) {
+                Log.logWarning("Command from " + client.getName() + " does not start with \"request\": " + xml.getName(), Command.class);
             }
             if (xml.getName().equals("request")) {
                 switch ((xml = xml.getFirstChild()).getName()) {//Cuts off the "request"
@@ -84,7 +84,7 @@ public class Command {
                         int longt1 = Integer.valueOf(xml.getFirstChild("long").getContent());
                         int lat1 = Integer.valueOf(xml.getFirstChild("lat").getContent());
                         client.userdata.uploadPicture(data, longt1, lat1);
-                        Log.logInfo("Successfully uploaded image by "+client.getName(), Command.class);
+                        Log.logInfo("Successfully uploaded image by " + client.getName(), Command.class);
                         break;
                     case "flagItem":
                         int id3 = Integer.valueOf(xml.getFirstChild("id").getContent());
@@ -109,29 +109,6 @@ public class Command {
                         break;
                     case "alive":
                         client.checkClientAlive(true);
-                        break;
-                }
-            } else if (xml.getName().equals("backendUI")) {
-                switch ((xml = xml.getFirstChild()).getName()) {//Cuts off the "backendUI"
-                    case "login":
-                        String username = xml.getFirstChild("username").getContent();
-                        String password = xml.getFirstChild("password").getContent();
-                        String publicKey = xml.getFirstChild("publickey").getContent();
-                        if (UI.login(client, username, password)) {
-                            try {
-                                client.setUserdata(User.getUser(username));
-                            } catch (UserNotFoundException ex) {
-                                client.setUserdata(User.addNewUser(username));
-                            }
-                            try {
-                                client.getUserdata().setPublicKey(publicKey);
-                                client.sendToClient(XML.createNewXML("loginsuccessful"));
-                                Log.logInfo("UI successfully accepted", Command.class);
-                            } catch (Exception e) {
-                                client.sendToClient(XML.createNewXML("loginunsuccessful"));
-                                Log.logWarning("Failed to accept UI: " + e, Command.class);
-                            }
-                        }
                         break;
                 }
             }

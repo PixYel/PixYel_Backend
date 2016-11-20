@@ -21,16 +21,18 @@ import java.util.concurrent.Executors;
 public class UI extends com.vaadin.ui.UI implements Runnable {
 
     private final static int PORT = 8080;
+    private final static boolean PRODUCTIONMODE = false;//Change to true to start vaadin NOT in Debug mode
 
+    /**
+     * To start the UI in general as a separate Thread
+     */
     public static void start() {
         Executors.newFixedThreadPool(1).submit(new UI());
     }
 
-    @Override
-    protected void init(VaadinRequest vaadinRequest) {
-        Login.show();
-    }
-
+    /**
+     * Here starts the seperate Thread working
+     */
     @Override
     public void run() {
         try {
@@ -47,11 +49,27 @@ public class UI extends com.vaadin.ui.UI implements Runnable {
         }
     }
 
-    @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
-    @VaadinServletConfiguration(ui = UI.class, productionMode = false)
-    public static class MyUIServlet extends VaadinServlet {
+    /**
+     * Here is the first UI being loaded
+     * @param vaadinRequest 
+     */
+    @Override
+    protected void init(VaadinRequest vaadinRequest) {
+        Login.show();
     }
 
+    /**
+     * Some settings for the VaadinServlet and other things
+     */
+    @WebServlet(urlPatterns = "/*", name = "PixYelUIServlet", asyncSupported = true)
+    @VaadinServletConfiguration(ui = UI.class, productionMode = PRODUCTIONMODE)
+    public static class PixYelUIServlet extends VaadinServlet {
+    }
+
+    /**
+     * ONLY for DEBUGGING Reasons
+     * @param args 
+     */
     public static void main(String[] args) {
         start();
     }

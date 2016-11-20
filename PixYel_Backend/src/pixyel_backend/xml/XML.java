@@ -461,6 +461,27 @@ public class XML {
         }
         return null;
     }
+
+    /**
+     * Returns the children which are having the requested attribute value
+     * @param attributeValue The attribute to look for
+     * @return The List of Children
+     */
+    public ArrayList<XML> getChildrenByAttribute(String attributeValue) {
+        ArrayList<XML> r = new ArrayList<>();
+        for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
+            chi = ch.item(i);
+            if (chi.getNodeType() == Node.ELEMENT_NODE) {
+                for (int j = 0; j < (a = chi.getAttributes()).getLength(); j++) {
+                    if (a.item(j).getNodeValue().equals(attributeValue)) {
+                        r.add(getXMLByElement((Element) chi));
+                    }
+                }
+            }
+        }
+        return r;
+    }
+
     ArrayList<XML> alreadyAppended = new ArrayList<>();
 
     /**
@@ -509,11 +530,13 @@ public class XML {
                     e.appendChild(doc.adoptNode((Node) child.e));
                 }
             } else//bla
-             if (doc.equals(child.e.getOwnerDocument())) {
+            {
+                if (doc.equals(child.e.getOwnerDocument())) {
                     e.appendChild(child.e.cloneNode(true));
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
+            }
             alreadyAppended.add(child);
         }
         if (autosave) {
@@ -537,11 +560,13 @@ public class XML {
                 e.appendChild(doc.adoptNode((Node) child.e));
             }
         } else//bla
-         if (doc.equals(child.e.getOwnerDocument())) {
+        {
+            if (doc.equals(child.e.getOwnerDocument())) {
                 e.appendChild(child.e.cloneNode(true));
             } else {
                 e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
             }
+        }
         alreadyAppended.add(child);
         if (autosave) {
             reloadFile();
@@ -568,11 +593,13 @@ public class XML {
                 }
                 alreadyAppended.add(child);
             } else//
-             if (doc.equals(child.e.getOwnerDocument())) {
+            {
+                if (doc.equals(child.e.getOwnerDocument())) {
                     e.appendChild(child.e.cloneNode(true));
                 } else {
                     e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
+            }
         }
         if (autosave) {
             reloadFile();
@@ -597,11 +624,13 @@ public class XML {
             }
             alreadyAppended.add(childXML);
         } else//
-         if (doc.equals(childXML.e.getOwnerDocument())) {
+        {
+            if (doc.equals(childXML.e.getOwnerDocument())) {
                 e.appendChild(childXML.e.cloneNode(true));
             } else {
                 e.appendChild(doc.adoptNode((Node) childXML.e.cloneNode(true)));
             }
+        }
         if (autosave) {
             reloadFile();
         }
@@ -926,6 +955,16 @@ public class XML {
         } catch (IOException | TransformerException ex) {
             System.err.println("Fehler: " + ex);
         }
+    }
+
+    /**
+     * Sets the autosave setting. Autosave saves after EVERY change
+     *
+     * @param flag The Autosave flag
+     */
+    public void setAutosave(boolean flag) {
+        autosave = flag;
+        save();
     }
 
     private Document getDoc() {

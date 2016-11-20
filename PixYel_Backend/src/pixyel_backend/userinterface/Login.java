@@ -1,5 +1,6 @@
 package pixyel_backend.userinterface;
 
+import pixyel_backend.userinterface.Desktop.Desktop;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.Resource;
 import com.vaadin.ui.Alignment;
@@ -7,7 +8,6 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Image;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
@@ -37,7 +37,7 @@ public class Login {
         final TextField txtUsername = new TextField("Username");
         final PasswordField txtPassword = new PasswordField("Password");
         final Button btnLogin = new Button("Login");
-        btnLogin.addClickListener((listener) -> Notification.show("Logged in"));
+        btnLogin.addClickListener((listener) -> Desktop.show());
 
         txtUsername.setRequired(true);
         txtPassword.setRequired(true);
@@ -66,8 +66,8 @@ public class Login {
 
     public static Component getVideo() {
         Video introVideo = new Video();
-        //File introVideoFile = new File("C:\\intro.mp4");
-        File introVideoFile = new File("C:\\neindochooh.mp4");
+        File introVideoFile = new File("C:\\intro.mp4");
+        //File introVideoFile = new File("C:\\neindochooh.mp4");
         final Resource mp4Resource = new FileResource(introVideoFile);
         introVideo.setSource(mp4Resource);
         introVideo.setSizeFull();

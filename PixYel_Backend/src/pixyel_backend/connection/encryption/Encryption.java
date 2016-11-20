@@ -18,7 +18,7 @@ import java.util.Base64;
 public class Encryption {
 
     static final int KEYLENGTH = 2048;
-    static final int BLOCKSIZE = (KEYLENGTH / 8) - 11;
+    static final int BLOCKSIZE = (KEYLENGTH / 8) - 16;
 
     /**
      * Generates the Key-Pair which contains the public and the private key<p>

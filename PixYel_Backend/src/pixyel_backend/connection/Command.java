@@ -55,16 +55,16 @@ public class Command {
                         break;
                     case "login":
                         try {
-                            client.setUserdata(User.getUser(xml.getFirstChild("storeid").getContent()));
+                            client.setUserdata(User.getUser(xml.getFirstChild("storeId").getContent()));
                         } catch (UserNotFoundException ex) {
-                            client.setUserdata(User.addNewUser(xml.getFirstChild("storeid").getContent()));
+                            client.setUserdata(User.addNewUser(xml.getFirstChild("storeId").getContent()));
                         }
                         try {
-                            client.getUserdata().setPublicKey(xml.getFirstChild("publickey").getContent());
-                            client.sendToClient(XML.createNewXML("loginsuccessful"));
+                            client.getUserdata().setPublicKey(xml.getFirstChild("publicKey").getContent());
+                            client.sendToClient(XML.createNewXML("loginSuccessful"));
                             Log.logInfo("Successfully logged " + client.getName() + " in", Command.class);
                         } catch (Exception e) {
-                            client.sendToClient(XML.createNewXML("loginunsuccessful"));
+                            client.sendToClient(XML.createNewXML("loginUnsuccessful"));
                             Log.logWarning("Failed to log " + client.getName() + " in: " + e, Command.class);
                         }
                         break;

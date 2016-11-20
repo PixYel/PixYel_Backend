@@ -6,6 +6,7 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import java.util.concurrent.Executors;
 
 /**
  * This UI is the application entry point. A UI may either represent a browser
@@ -17,11 +18,21 @@ import com.vaadin.server.VaadinServlet;
  * initialize non-component functionality.
  */
 @Theme("mytheme")
-public class UI extends com.vaadin.ui.UI {
+public class UI extends com.vaadin.ui.UI implements Runnable {
 
     private final static int PORT = 8080;
 
     public static void start() {
+        Executors.newFixedThreadPool(1).submit(new UI());
+    }
+
+    @Override
+    protected void init(VaadinRequest vaadinRequest) {
+        Login.show();
+    }
+
+    @Override
+    public void run() {
         try {
             VaadinJettyServer vaadinJettyServer = new VaadinJettyServer(8080, UI.class);
             vaadinJettyServer.start();
@@ -34,11 +45,6 @@ public class UI extends com.vaadin.ui.UI {
             }
 
         }
-    }
-
-    @Override
-    protected void init(VaadinRequest vaadinRequest) {
-        Login.show();
     }
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)

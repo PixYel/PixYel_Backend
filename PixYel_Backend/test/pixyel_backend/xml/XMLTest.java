@@ -5,6 +5,7 @@
  */
 package pixyel_backend.xml;
 
+import java.util.ArrayList;
 import pixyel_backend.xml.XML;
 import java.util.LinkedHashMap;
 import org.junit.Test;
@@ -493,6 +494,20 @@ public class XMLTest {
         assertEquals("Should have another name", "childxml", toTest.getFirstChild().getName());
         toTest.clearChildren();
         assertFalse("Could not recover XML", toTest.hasChildren());
+    }
+    
+    @Test
+    public void testGetChildrenByAttribute(){
+        ArrayList<XML> should = new ArrayList<>();
+        XML child1, child2;
+        toTest.addChild("child");
+        (child1 = toTest.getFirstChild()).addAttribute("name", "lisa").addAttribute("name", "thorsten").addAttribute("name", "lisa");
+        toTest.addChild("Child2");
+        (child2 = toTest.getFirstChild("Child2")).addAttribute("name", "lisa").addAttribute("name", "thorsten").addAttribute("name", "lisa");
+        ArrayList<XML> childrenByAttribute = toTest.getChildrenByAttribute("lisa");
+        should.add(child1);
+        should.add(child2);
+        assertEquals(should, childrenByAttribute);
     }
 
 }

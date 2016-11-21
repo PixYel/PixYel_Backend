@@ -22,7 +22,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import pixyel_backend.xml.XML.XMLException;
 
 /**
  *
@@ -464,6 +463,7 @@ public class XML {
 
     /**
      * Returns the children which are having the requested attribute value
+     *
      * @param attributeValue The attribute to look for
      * @return The List of Children
      */
@@ -518,123 +518,119 @@ public class XML {
      * Adds child nodes to this node
      *
      * @param children zero, one or more child nodes as XML-object to add
-     * @return This node (for convenience reasons)
+     * @return A ArrayList of the newly added children
      */
-    public XML addChildren(XML... children) {
+    public ArrayList<XML> addChildren(XML... children) {
         doc = getDoc();
+        ArrayList<XML> r = new ArrayList<>();
         for (XML child : children) {
             if (!alreadyAppended.contains(child)) {
                 if (child.e.getOwnerDocument().equals(doc)) {
-                    e.appendChild(child.e);
+                    chi = e.appendChild(child.e);
                 } else {
-                    e.appendChild(doc.adoptNode((Node) child.e));
+                    chi = e.appendChild(doc.adoptNode((Node) child.e));
                 }
+                alreadyAppended.add(child);
             } else//bla
-            {
-                if (doc.equals(child.e.getOwnerDocument())) {
-                    e.appendChild(child.e.cloneNode(true));
+             if (doc.equals(child.e.getOwnerDocument())) {
+                    chi = e.appendChild(child.e.cloneNode(true));
                 } else {
-                    e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
+                    chi = e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
-            }
-            alreadyAppended.add(child);
+            r.add(getXMLByElement((Element) chi));
         }
         if (autosave) {
             reloadFile();
         }
-        return this;
+        return r;
     }
 
     /**
      * Adds a child to this node
      *
      * @param child The new child to be added
-     * @return The parent of the new child (your current node)
+     * @return The newly added child as XML
      */
     public XML addChild(XML child) {
         doc = getDoc();
         if (!alreadyAppended.contains(child)) {
             if (child.e.getOwnerDocument().equals(doc)) {
-                e.appendChild(child.e);
+                chi = e.appendChild(child.e);
             } else {
-                e.appendChild(doc.adoptNode((Node) child.e));
+                chi = e.appendChild(doc.adoptNode((Node) child.e));
             }
+            alreadyAppended.add(child);
         } else//bla
-        {
-            if (doc.equals(child.e.getOwnerDocument())) {
-                e.appendChild(child.e.cloneNode(true));
+         if (doc.equals(child.e.getOwnerDocument())) {
+                chi = e.appendChild(child.e.cloneNode(true));
             } else {
-                e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
+                chi = e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
             }
-        }
-        alreadyAppended.add(child);
         if (autosave) {
             reloadFile();
         }
-        return this;
+        return getXMLByElement((Element) chi);
     }
 
     /**
      * Adds new children to this node
      *
      * @param children The zero, one or more names of the new children
-     * @return This node (for convenience reasons)
+     * @return A ArrayList of the newly added children
      */
-    public XML addChildren(String... children) {
+    public ArrayList<XML> addChildren(String... children) {
         doc = getDoc();
+        ArrayList<XML> r = new ArrayList<>();
         XML child;
         for (String childS : children) {
             child = new XML(childS);
             if (!alreadyAppended.contains(child)) {
                 if (child.e.getOwnerDocument().equals(doc)) {
-                    e.appendChild(child.e);
+                    chi = e.appendChild(child.e);
                 } else {
-                    e.appendChild(doc.adoptNode((Node) child.e));
+                    chi = e.appendChild(doc.adoptNode((Node) child.e));
                 }
                 alreadyAppended.add(child);
             } else//
-            {
-                if (doc.equals(child.e.getOwnerDocument())) {
-                    e.appendChild(child.e.cloneNode(true));
+             if (doc.equals(child.e.getOwnerDocument())) {
+                    chi = e.appendChild(child.e.cloneNode(true));
                 } else {
-                    e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
+                    chi = e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
                 }
-            }
+            r.add(getXMLByElement((Element) chi));
         }
         if (autosave) {
             reloadFile();
         }
-        return this;
+        return r;
     }
 
     /**
      * Adds a child to this node
      *
      * @param child The name of the new child to be added
-     * @return The parent of the new child (your current node)
+     * @return The newly added child as XML
      */
     public XML addChild(String child) {
         doc = getDoc();
         XML childXML = new XML(child);
         if (!alreadyAppended.contains(childXML)) {
             if (childXML.e.getOwnerDocument().equals(doc)) {
-                e.appendChild(childXML.e);
+                chi = e.appendChild(childXML.e);
             } else {
-                e.appendChild(doc.adoptNode((Node) childXML.e));
+                chi = e.appendChild(doc.adoptNode((Node) childXML.e));
             }
             alreadyAppended.add(childXML);
         } else//
-        {
-            if (doc.equals(childXML.e.getOwnerDocument())) {
-                e.appendChild(childXML.e.cloneNode(true));
+         if (doc.equals(childXML.e.getOwnerDocument())) {
+                chi = e.appendChild(childXML.e.cloneNode(true));
             } else {
-                e.appendChild(doc.adoptNode((Node) childXML.e.cloneNode(true)));
+                chi = e.appendChild(doc.adoptNode((Node) childXML.e.cloneNode(true)));
             }
-        }
         if (autosave) {
             reloadFile();
         }
-        return this;
+        return getXMLByElement((Element) chi);
     }
 
     /**
@@ -1032,23 +1028,17 @@ public class XML {
     /**
      * Returns the content of the current node
      *
-     * @param inline Wether the output should be in one line or formatted
      * @return The content of the current node as String in XML language
      */
-    public String toString(boolean inline) {
+    public String toStringOnlyThisNode() {
         try {
             // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");//removes this stuff: <?xml version='1.0' ?>
 
-            if (inline) {
-                transformer.setOutputProperty(OutputKeys.INDENT, "no");
-                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "0");
-            } else {
-                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-            }
+            transformer.setOutputProperty(OutputKeys.INDENT, "no");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "0");
 
             StreamResult streamResult = new StreamResult(new StringWriter());
             transformer.transform(new DOMSource(e), streamResult);
@@ -1062,13 +1052,16 @@ public class XML {
     }
 
     /**
-     * Returns the content of the current node
+     * Returns the content the whole XML
      *
-     * @return The content of the current node as String in XML language
+     * @return The content of the whole XML as String in XML language
      */
     @Override
     public String toString() {
-        return toString(true);
+        if (hasParent()) {
+            return getParent().toString();
+        }
+        return toStringOnlyThisNode();
     }
 
     /**

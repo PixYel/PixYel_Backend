@@ -398,7 +398,7 @@ public class XMLTest {
     public void testToXMLString_boolean() {
         String expected = "<" + rootname + ">demo</" + rootname + ">";
         toTest.setContent("demo");
-        assertEquals(expected, toTest.toString(true));
+        assertEquals(expected, toTest.toString());
         toTest.removeContent();
         assertFalse("Cannot restore original xml", toTest.hasContent());
     }
@@ -498,16 +498,14 @@ public class XMLTest {
     
     @Test
     public void testGetChildrenByAttribute(){
-        ArrayList<XML> should = new ArrayList<>();
         XML child1, child2;
         toTest.addChild("child");
         (child1 = toTest.getFirstChild()).addAttribute("name", "lisa").addAttribute("name", "thorsten").addAttribute("name", "lisa");
         toTest.addChild("Child2");
         (child2 = toTest.getFirstChild("Child2")).addAttribute("name", "lisa").addAttribute("name", "thorsten").addAttribute("name", "lisa");
         ArrayList<XML> childrenByAttribute = toTest.getChildrenByAttribute("lisa");
-        should.add(child1);
-        should.add(child2);
-        assertEquals(should, childrenByAttribute);
+        assertEquals(child1, childrenByAttribute.get(0));
+        assertEquals(child2, childrenByAttribute.get(1));
     }
 
 }

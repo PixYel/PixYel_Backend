@@ -15,6 +15,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Video;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
 import java.io.File;
 
 public class Login {
@@ -34,14 +35,17 @@ public class Login {
     private static void showLoginPanel() {
         Window loginWindow = new Window();
 
-        final TextField txtUsername = new TextField("Username");
-        final PasswordField txtPassword = new PasswordField("Password");
+        final TextField txtUsername = new TextField();
+        txtUsername.setInputPrompt("Username");
+        final PasswordField txtPassword = new PasswordField();
+        txtPassword.setInputPrompt("Password");
         final Button btnLogin = new Button("Login");
+        btnLogin.setStyleName(ValoTheme.BUTTON_PRIMARY);
         btnLogin.addClickListener((listener) -> Desktop.show());
 
-        txtUsername.setRequired(true);
-        txtPassword.setRequired(true);
-
+        //Sternchen ist hässlich
+        //txtUsername.setRequired(true);
+        //txtPassword.setRequired(true);
         final Panel loginPanel = new Panel();
         loginPanel.setWidth(null);
 
@@ -66,16 +70,13 @@ public class Login {
 
     public static Component getVideo() {
         Video introVideo = new Video();
-        File introVideoFile = new File("C:\\intro.mp4");
-        //File introVideoFile = new File("C:\\neindochooh.mp4");
+        File introVideoFile = new File(Login.class.getResource("/pixyel_backend/userinterface/ressources/login_background.mp4").getPath().replace("%20", " "));
         final Resource mp4Resource = new FileResource(introVideoFile);
         introVideo.setSource(mp4Resource);
         introVideo.setSizeFull();
         introVideo.setAutoplay(true);
         introVideo.setShowControls(false);
         introVideo.setAltText("Cannot start our introvideo");
-        Panel videoPanel = new Panel(introVideo);
-        videoPanel.setSizeUndefined();
-        return videoPanel;
+        return introVideo;
     }
 }

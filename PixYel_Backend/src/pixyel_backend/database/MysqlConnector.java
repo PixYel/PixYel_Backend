@@ -26,17 +26,6 @@ public class MysqlConnector {
      * @return
      */
     public static Connection getConnection() {
-        try {
-            if (CONNECTION.isClosed()) {
-                if (shouldUseTestDb) {
-                    CONNECTION = MysqlConnector.connectToTestDatabaseUsingPropertiesFile();
-                } else {
-                    CONNECTION = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
-                }
-            }
-        } catch (SQLException ex) {
-            Log.logError("Connection to Database failed - rootcause: " + ex, MysqlConnector.class);
-        }
         return CONNECTION;
     }
 

@@ -128,7 +128,7 @@ public class Comment {
      * @param commentId
      * @throws FlagFailedExcpetion
      */
-    public static synchronized void addFlag(int userId, int commentId) throws FlagFailedExcpetion {
+    public static void addFlag(int userId, int commentId) throws FlagFailedExcpetion {
         try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT id FROM commentflags WHERE commentid = ? AND  userid = ?")) {
             statement.setInt(1, commentId);
             statement.setInt(2, userId);

@@ -10,16 +10,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.dataProcessing.RankingCalculation;
-import pixyel_backend.database.exceptions.CommentNotFoundException;
 import pixyel_backend.database.exceptions.PictureLoadException;
 import pixyel_backend.database.objects.Comment;
 import pixyel_backend.database.objects.Coordinate;
@@ -36,7 +32,10 @@ public class BackendFunctions {
     }
 
     /**
-     * @param cord
+     * returns a list of max. 100 pictures by using the top ranked pictures
+     * inside a searchradius of 20km (headinformation only)
+     *
+     * @param cord current location of the user who requests the Photos
      * @return
      * @throws pixyel_backend.database.exceptions.NoPicturesFoundExcpetion
      */
@@ -45,6 +44,9 @@ public class BackendFunctions {
     }
 
     /**
+     * returns a list of max. 100 pictures by using the top ranked pictures
+     * inside a given searchradius
+     *
      * @param cord
      * @param searchDistance in km
      * @return
@@ -76,11 +78,15 @@ public class BackendFunctions {
             Log.logWarning(ex.getMessage(), BackendFunctions.class);
         }
         pictureList.sort((Picture pic1, Picture pic2) -> Integer.compare(pic1.getRanking(), pic2.getRanking()));
-        return pictureList;
+        if (pictureList.size() > 100) {
+            return pictureList.subList(0, 99);
+        } else {
+            return pictureList;
+        }
     }
 
     /**
-     *
+     * 
      * @param listAsString , separated list of all id example: 1,2,4,6
      * @return A map which contains all requested pictureData with their Id as
      * keys
@@ -97,6 +103,28 @@ public class BackendFunctions {
                 currentPictureData = null;
             }
             pictureList.put(currentPictureId, currentPictureData);
+        }
+        return pictureList;
+    }
+
+    /**
+     *
+     * @param listAsString , separated list of all id example: 1,2,4,6
+     * @return A map which contains all requested pictures with their Id as
+     * keys
+     */
+    public static Map<Integer, Picture> getPicturesStats(String listAsString) {
+        HashMap<Integer, Picture> pictureList = new HashMap<>();
+        List<String> allRequestedPictures = Arrays.asList(listAsString);
+        for (String currentPictureIdAsString : allRequestedPictures) {
+            Integer currentPictureId = Integer.valueOf(currentPictureIdAsString);
+            Picture currentPicture;
+            try {
+                currentPicture = Picture.getPictureById(currentPictureId);
+            } catch (PictureLoadException ex) {
+                currentPicture = null;
+            }
+            pictureList.put(currentPictureId, currentPicture);
         }
         return pictureList;
     }

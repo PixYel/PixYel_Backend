@@ -234,7 +234,7 @@ public class User {
      * @throws pixyel_backend.database.exceptions.FlagFailedExcpetion
      * @see pixyel_backend.database.objects.Comment.addFlag
      */
-    public void flagComment(int commentId) throws FlagFailedExcpetion {
+    public synchronized void flagComment(int commentId) throws FlagFailedExcpetion {
         Comment.addFlag(this.id, commentId);
     }
     
@@ -261,7 +261,7 @@ public class User {
         return Picture.addNewPicture(id, data, longitude, latitude);
     }
     
-    public void flagPicture(int pictureId) throws FlagFailedExcpetion{
+    public synchronized void flagPicture(int pictureId) throws FlagFailedExcpetion{
         Picture.flagPic(id, pictureId);
     }
     

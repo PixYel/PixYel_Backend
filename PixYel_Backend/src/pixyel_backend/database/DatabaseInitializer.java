@@ -13,7 +13,7 @@ public class DatabaseInitializer {
      * Initializes the whole productiv db
      *
      * @throws SQLException
-     * @throws ConnectionException
+     * @throws pixyel_backend.database.exceptions.DbConnectionException
      * @throws Exception
      */
     public static void initProductivDatabase() throws SQLException, DbConnectionException, Exception {
@@ -30,7 +30,7 @@ public class DatabaseInitializer {
      * Initializes the whole test db
      *
      * @throws SQLException
-     * @throws ConnectionException
+     * @throws DbConnectionException
      * @throws Exception
      */
     public static void initTestDatabase() throws SQLException, DbConnectionException, Exception {
@@ -52,7 +52,7 @@ public class DatabaseInitializer {
      */
     private static void runInit(String databaseName, Connection con) throws SQLException {
         try (Statement statements = con.createStatement()) {
-            Log.logInfo("Database-Initialization: deleting old Database", DatabaseInitializer.class);
+            Log.logInfo("Database-Initialization: deleting old Database - " + databaseName, DatabaseInitializer.class);
             statements.executeUpdate("DROP DATABASE IF EXISTS " + databaseName);
 
             Log.logInfo("Database-Initialization: creating new Databse", DatabaseInitializer.class);
@@ -72,9 +72,14 @@ public class DatabaseInitializer {
                     + "longitude        DOUBLE NOT NULL, "
                     + "latitude         DOUBLE NOT NULL, "
                     + "upload_date      TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-                    + "upvotes          INT(6) DEFAULT '0', "
-                    + "downvotes        INT(6) DEFAULT '0', "
                     + "userid           INT(6) NOT NULL)"
+            );
+
+            statements.executeUpdate("CREATE TABLE picturesVotes ("
+                    + "id               INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
+                    + "pictureId        INT(6) NOT NULL, "
+                    + "userId           INT(6) NOT NULL, "
+                    + "type             TINYINT(1) NOT NULL)" //1 für Upvote -1 für downvote
             );
 
             statements.executeUpdate("CREATE TABLE picturesData ("
@@ -96,7 +101,7 @@ public class DatabaseInitializer {
                     + "userid           INT(6) NOT NULL, "
                     + "creation_date    TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
             );
-            
+
             statements.executeUpdate("CREATE TABLE commentflags("
                     + "Id               INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
                     + "commentid        INT(6) NOT NULL, "

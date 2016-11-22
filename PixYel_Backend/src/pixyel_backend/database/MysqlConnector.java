@@ -21,7 +21,6 @@ public class MysqlConnector {
 
     /**
      * Returns the Connection pixyel_backend.database.MysqlConnector.CONNECTION
-     * and reopens it if its closed
      *
      * @return
      */

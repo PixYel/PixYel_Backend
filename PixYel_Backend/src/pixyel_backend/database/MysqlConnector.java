@@ -79,7 +79,7 @@ public class MysqlConnector {
      */
     private static Connection openConnection(String host, String database, String user, String passwd) throws ClassNotFoundException, InstantiationException, SQLException, IllegalAccessException {
         Class.forName("com.mysql.jdbc.Driver").newInstance();
-        String connectionCommand = "jdbc:mysql://" + host + "/" + database + "?user=" + user + "&password=" + passwd;
+        String connectionCommand = "jdbc:mysql://" + host + "/" + database + "?user=" + user + "&password=" + passwd + "&autoReconnect=true&useUnicode=yes";
         Connection connection = DriverManager.getConnection(connectionCommand);
         return connection;
     }
@@ -138,7 +138,7 @@ public class MysqlConnector {
             String user = properties.getProperty("mysqluser");
             String passwd = properties.getProperty("mysqlpassword");
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-            String connectionCommand = "jdbc:mysql://" + host + "?user=" + user + "&password=" + passwd;
+            String connectionCommand = "jdbc:mysql://" + host + "?user=" + user + "&password=" + passwd + "&autoReconnect=true&useUnicode=yes";
             Connection connection = DriverManager.getConnection(connectionCommand);
             return connection;
         } catch (Exception ex) {

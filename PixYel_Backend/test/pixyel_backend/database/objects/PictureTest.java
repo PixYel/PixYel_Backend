@@ -14,6 +14,7 @@ import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.exceptions.DbConnectionException;
 import pixyel_backend.database.exceptions.PictureLoadException;
 import pixyel_backend.database.exceptions.PictureUploadExcpetion;
+import pixyel_backend.database.exceptions.VoteFailedException;
 
 /**
  *
@@ -22,7 +23,7 @@ import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 public class PictureTest {
 
     public Picture testpicture;
-    private User user = User.addNewUser("JUnit-Test-User-" + System.currentTimeMillis());
+    private final User user = User.addNewUser("JUnit-Test-User-" + System.currentTimeMillis());
 
     @BeforeClass
     public static void init() {
@@ -38,6 +39,9 @@ public class PictureTest {
 
     /**
      * Test if upload throws an exception when picturedata = null
+     *
+     * @throws pixyel_backend.database.exceptions.PictureUploadExcpetion
+     * @throws pixyel_backend.database.exceptions.PictureLoadException
      */
     @Test
     public void testuploadPicture() throws PictureUploadExcpetion, PictureLoadException {
@@ -47,12 +51,32 @@ public class PictureTest {
     }
 
     /**
+     * tests the vote-mechanics
+     *
+     * @throws pixyel_backend.database.exceptions.PictureUploadExcpetion
+     * @throws pixyel_backend.database.exceptions.PictureLoadException
+     * @throws pixyel_backend.database.exceptions.VoteFailedException
+     */
+    @Test
+    public void testvotes() throws PictureUploadExcpetion, PictureLoadException, VoteFailedException {
+        Picture pic = user.uploadPicture("test", 0, 0);
+        assertEquals(0, pic.getVoteStatus());
+        assertEquals(0, pic.getDownvotes());
+        assertEquals(0, pic.getUpvotes());
+        user.downvotePicture(pic.getId());
+        pic = user.getPictureById(pic.getId());
+        assertEquals(-1, pic.getVoteStatus());
+        assertEquals(1, pic.getDownvotes());
+    }
+
+    /**
      * Test of getPicture, of class picutre.
+     * @throws java.lang.Exception
      */
     @Test
     public void testPictureById() throws Exception {
         int id = testpicture.getId();
-        String picData = Picture.getPictureById(id).getData();
+        String picData = Picture.getPictureById(id, user.getID()).getData();
         assertEquals(picData, testpicture.getData());
     }
 }

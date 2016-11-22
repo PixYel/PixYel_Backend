@@ -76,11 +76,11 @@ public class DatabaseInitializer {
             );
 
             statements.executeUpdate("CREATE TABLE picturesVotes ("
-                    + "id               INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
                     + "pictureId        INT(6) NOT NULL, "
                     + "userId           INT(6) NOT NULL, "
-                    + "type             TINYINT(1) NOT NULL)" //1 für Upvote -1 für downvote
+                    + "vote             TINYINT(1) NOT NULL)" //1 für Upvote -1 für downvote
             );
+            statements.executeUpdate("CREATE UNIQUE INDEX id ON picturesVotes (pictureId,userId)");
 
             statements.executeUpdate("CREATE TABLE picturesData ("
                     + "pictureid        INT(6) PRIMARY KEY, "
@@ -96,18 +96,18 @@ public class DatabaseInitializer {
             );
 
             statements.executeUpdate("CREATE TABLE pictureflags("
-                    + "Id               INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
                     + "pictureid        INT(6) NOT NULL, "
                     + "userid           INT(6) NOT NULL, "
                     + "creation_date    TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
             );
+            statements.executeUpdate("CREATE UNIQUE INDEX id ON pictureflags (pictureid,userid)");
 
             statements.executeUpdate("CREATE TABLE commentflags("
-                    + "Id               INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
                     + "commentid        INT(6) NOT NULL, "
                     + "userid           INT(6) NOT NULL, "
                     + "creation_date    TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
             );
+            statements.executeUpdate("CREATE UNIQUE INDEX id ON commentflags (commentid,userid)");
         }
     }
 }

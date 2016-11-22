@@ -4,14 +4,23 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import pixyel_backend.Log;
+import pixyel_backend.database.BackendFunctions;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.SqlUtils;
+import pixyel_backend.database.dataProcessing.RankingCalculation;
 import pixyel_backend.database.exceptions.FlagFailedExcpetion;
+import pixyel_backend.database.exceptions.NoPicturesFoundExcpetion;
 import pixyel_backend.database.exceptions.PictureLoadException;
 import pixyel_backend.database.exceptions.PictureUploadExcpetion;
+import pixyel_backend.database.exceptions.VoteFailedException;
 
 public class User {
     private final int id;
@@ -264,5 +273,92 @@ public class User {
     public synchronized void flagPicture(int pictureId) throws FlagFailedExcpetion{
         Picture.flagPic(id, pictureId);
     }
+    public List<Picture> getPicturesList(Coordinate cord, int searchDistance) throws NoPicturesFoundExcpetion {
+        List<Picture> pictureList = new LinkedList();
+        List<Coordinate> searchArea = cord.getSearchArea(searchDistance);
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT id FROM picturesInfo WHERE (longitude BETWEEN ? AND ?) AND (latitude BETWEEN ? AND ?)")) {
+            sta.setDouble(1, searchArea.get(0).getLongitude());
+            sta.setDouble(2, searchArea.get(1).getLongitude());
+            sta.setDouble(3, searchArea.get(0).getLatitude());
+            sta.setDouble(4, searchArea.get(1).getLatitude());
+            ResultSet result = sta.executeQuery();
+
+            if (result == null || !result.isBeforeFirst()) {
+                throw new NoPicturesFoundExcpetion();
+            } else {
+                while (result.next()) {
+                    Picture pic = Picture.getPictureById(result.getInt("id"),this.id);
+                    pic.setRanking(RankingCalculation.calculateRanking(pic, cord));
+                    pictureList.add(pic);
+                }
+            }
+        } catch (SQLException ex) {
+            Log.logWarning(ex.toString(), BackendFunctions.class);
+            throw new NoPicturesFoundExcpetion();
+        } catch (PictureLoadException ex) {
+            Log.logWarning(ex.getMessage(), BackendFunctions.class);
+        }
+        pictureList.sort((Picture pic1, Picture pic2) -> Integer.compare(pic1.getRanking(), pic2.getRanking()));
+        if (pictureList.size() > 100) {
+            return pictureList.subList(0, 99);
+        } else {
+            return pictureList;
+        }
+    }
     
+    /**
+     * returns a list of max. 100 pictures by using the top ranked pictures
+     * inside a searchradius of 20km (headinformation only)
+     *
+     * @param cord current location of the user who requests the Photos
+     * @return
+     * @throws pixyel_backend.database.exceptions.NoPicturesFoundExcpetion
+     */
+    public List<Picture> getPicturesList(Coordinate cord) throws NoPicturesFoundExcpetion {
+        return getPicturesList(cord, 20);
+    }
+    
+        /**
+     *
+     * @param listAsString , separated list of all id example: 1,2,4,6
+     * @return A map which contains all requested pictures with their Id as
+     * keys
+     */
+    public Map<Integer, Picture> getPicturesStats(String listAsString) {
+        HashMap<Integer, Picture> pictureList = new HashMap<>();
+        List<String> allRequestedPictures = Arrays.asList(listAsString);
+        for (String currentPictureIdAsString : allRequestedPictures) {
+            Integer currentPictureId = Integer.valueOf(currentPictureIdAsString);
+            Picture currentPicture;
+            try {
+                currentPicture = Picture.getPictureById(currentPictureId, this.id);
+            } catch (PictureLoadException ex) {
+                currentPicture = null;
+            }
+            pictureList.put(currentPictureId, currentPicture);
+        }
+        return pictureList;
+    }
+    
+    public synchronized void upvotePicture(int picId) throws VoteFailedException {
+        Picture.upvotePicture(picId, this.id);
+    }
+
+    public synchronized void downvotePicture(int picId) throws VoteFailedException {
+        Picture.downvotePicture(picId, this.id);
+    }
+    
+     /**
+     * Create an picture-object by reading out all information of the picture
+     * out of the database based on the given id
+     *
+     * @param picId
+     * @return the pictureobject
+     * @throws PictureLoadException if there is no picture in the database for
+     * the given id
+     */
+    public Picture getPictureById(int picId) throws PictureLoadException {
+        return Picture.getPictureById(picId, this.id);
+    }
+
 }

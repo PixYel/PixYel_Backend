@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
-import pixyel_backend.Log;
 import pixyel_backend.database.exceptions.DbConnectionException;
 
 /**
@@ -17,7 +16,6 @@ public class MysqlConnector {
      * which was set up by using the properties file
      */
     private static Connection CONNECTION = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
-    private static boolean shouldUseTestDb = false;
 
     /**
      * Returns the Connection pixyel_backend.database.MysqlConnector.CONNECTION
@@ -32,7 +30,6 @@ public class MysqlConnector {
      * Changes the used database to the test-database
      */
     public static void useTestDB() {
-        shouldUseTestDb = true;
         CONNECTION = MysqlConnector.connectToTestDatabaseUsingPropertiesFile();
     }
 

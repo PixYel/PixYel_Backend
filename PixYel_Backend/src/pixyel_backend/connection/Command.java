@@ -29,7 +29,6 @@ public class Command {
      * @param xml
      */
     public static void onCommandReceived(Client client, XML xml) {
-        BackendFunctions backendFunctions = client.getBackendFunctions();
         Log.logDebug("Command from " + client.getName() + " received: \n" + xml.toStringGraph(), Command.class);
         try {
             if (!(xml.getName().equals("request"))) {
@@ -39,15 +38,10 @@ public class Command {
                 switch ((xml = xml.getFirstChild()).getName()) {//Cuts off the "request"
 
                     case "getItemList":
-                        XML location = xml.getFirstChild();
-                        int longt = Integer.valueOf(location.getFirstChild("long").getContent());
-                        int lat = Integer.valueOf(location.getFirstChild("lat").getContent());
-                        // XML picturesXML = backendFunctions.getPicturesList(longt, lat);
-                        // client.sendToClient(picturesXML);
+                        client.sendToClient(setItemList(xml));
                         break;
                     case "getItem":
-                        int id = Integer.valueOf(xml.getFirstChild().getContent());
-                        //backendFunctions.getPicturesData(listAsString)
+                        client.sendToClient(setItem(xml));
                         break;
                     case "getItemStats":
                         int id1 = Integer.valueOf(xml.getFirstChild().getContent());
@@ -86,13 +80,13 @@ public class Command {
                         client.userdata.uploadPicture(data, longt1, lat1);
                         Log.logInfo("Successfully uploaded image by " + client.getName(), Command.class);
                         break;
-                    case "flagItem":
-                        int id3 = Integer.valueOf(xml.getFirstChild("id").getContent());
-                        client.userdata.flagPicture(id3);
-                        break;
                     case "flagComment":
                         int commentId = Integer.valueOf(xml.getFirstChild("id").getContent());
                         client.userdata.flagComment(commentId);
+                        break;
+                    case "flagItem":
+                        int id3 = Integer.valueOf(xml.getFirstChild("id").getContent());
+                        client.userdata.flagPicture(id3);
                         break;
                     case "getComments":
                         int id4 = Integer.valueOf(xml.getFirstChild("id").getContent());
@@ -116,6 +110,77 @@ public class Command {
             Log.logWarning("Could not execute command: " + xml.getName() + ": " + e, Command.class);
         }
 
+    }
+
+    public static XML setItemList(XML input) {
+        XML location = input.getFirstChild();
+        int longt = Integer.valueOf(location.getFirstChild("long").getContent());
+        int lat = Integer.valueOf(location.getFirstChild("lat").getContent());
+
+        XML toSend = XML.createNewXML("setItemList");
+        for (int i = 0; i < 10; i++) {
+            int id = 1;//TODO
+            int upvotes = 1;//TODO
+            int downvotes = 1;//TODO
+            int votedByUser = 0;//TODO
+            int rank = 42;//TODO
+            String date = "14:43,1.2.16";//TODO
+
+            XML item = toSend.addChild("item");
+            item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date");
+            item.getFirstChild("id").setContent(String.valueOf(id));
+            item.getFirstChild("upvotes").setContent(String.valueOf(upvotes));
+            item.getFirstChild("downvotes").setContent(String.valueOf(downvotes));
+            item.getFirstChild("votedByUser").setContent(String.valueOf(votedByUser));
+            item.getFirstChild("rank").setContent(String.valueOf(rank));
+            item.getFirstChild("date").setContent(date);
+        }
+        return toSend;
+    }
+
+    public static XML setItem(XML input) {
+        int id = Integer.valueOf(input.getFirstChild("id").getContent());
+
+        int upvotes = 1;//TODO
+        int downvotes = 1;//TODO
+        int votedByUser = 0;//TODO
+        int rank = 42;//TODO
+        String date = "14:43,1.2.16";//TODO
+        String data = "...";//TODO
+
+        XML toSend = XML.createNewXML("setItem");
+        XML item = toSend.addChild("item");
+        item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date", "data");
+        item.getFirstChild("id").setContent(String.valueOf(id));
+        item.getFirstChild("upvotes").setContent(String.valueOf(upvotes));
+        item.getFirstChild("downvotes").setContent(String.valueOf(downvotes));
+        item.getFirstChild("votedByUser").setContent(String.valueOf(votedByUser));
+        item.getFirstChild("rank").setContent(String.valueOf(rank));
+        item.getFirstChild("date").setContent(date);
+        item.getFirstChild("data").setContent(data);
+
+        return toSend;
+    }
+
+    public static XML setItemStats(XML input) {
+        int id = Integer.valueOf(input.getFirstChild("id").getContent());
+
+        int upvotes = 1;//TODO
+        int downvotes = 1;//TODO
+        int votedByUser = 0;//TODO
+        int rank = 42;//TODO
+        String date = "14:43,1.2.16";//TODO
+
+        XML toSend = XML.createNewXML("setItemStats");
+        XML item = toSend.addChild("item");
+        item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date");
+        item.getFirstChild("id").setContent(String.valueOf(id));
+        item.getFirstChild("upvotes").setContent(String.valueOf(upvotes));
+        item.getFirstChild("downvotes").setContent(String.valueOf(downvotes));
+        item.getFirstChild("votedByUser").setContent(String.valueOf(votedByUser));
+        item.getFirstChild("rank").setContent(String.valueOf(rank));
+        item.getFirstChild("date").setContent(date);
+        
     }
 
 }

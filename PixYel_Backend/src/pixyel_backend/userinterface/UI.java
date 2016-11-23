@@ -7,6 +7,7 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import java.util.concurrent.Executors;
+import pixyel_backend.Main;
 
 /**
  * This UI is the application entry point. A UI may either represent a browser
@@ -21,7 +22,6 @@ import java.util.concurrent.Executors;
 public class UI extends com.vaadin.ui.UI implements Runnable {
 
     private final static int PORT = 8080;
-    private final static boolean PRODUCTIONMODE = false;//Change to true to start vaadin NOT in Debug mode
 
     /**
      * To start the UI in general as a separate Thread
@@ -62,7 +62,7 @@ public class UI extends com.vaadin.ui.UI implements Runnable {
      * Some settings for the VaadinServlet and other things
      */
     @WebServlet(urlPatterns = "/*", name = "PixYelUIServlet", asyncSupported = true)
-    @VaadinServletConfiguration(ui = UI.class, productionMode = PRODUCTIONMODE)
+    @VaadinServletConfiguration(ui = UI.class, productionMode = !Main.DEBUG)
     public static class PixYelUIServlet extends VaadinServlet {
     }
 

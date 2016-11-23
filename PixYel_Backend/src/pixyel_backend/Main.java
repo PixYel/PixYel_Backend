@@ -15,9 +15,9 @@ import pixyel_backend.database.DatabaseCleanUpService;
 public class Main {
 
     /**
-     * Setting for the Debug mode
+     * Setting for the Debug mode, affects the Log and Vaadin on the Jetty server
      */
-    public static boolean DEBUG = true;
+    public static final boolean DEBUG = true;
     
     public static void main(String[] args) {
         DatabaseCleanUpService.start();

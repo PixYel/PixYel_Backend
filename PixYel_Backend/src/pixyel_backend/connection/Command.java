@@ -7,11 +7,8 @@ package pixyel_backend.connection;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.BackendFunctions;
 import pixyel_backend.database.exceptions.FlagFailedExcpetion;
@@ -375,7 +372,6 @@ public class Command {
      */
     public static void disconnect(XML input, Client client) {
         client.disconnect(true);
-        Log.logInfo("Client " + client.getName() + " disconnected", Command.class);
     }
 
     /**

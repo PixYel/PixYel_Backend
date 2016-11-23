@@ -14,8 +14,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.BackendFunctions;
+import pixyel_backend.database.exceptions.FlagFailedExcpetion;
+import pixyel_backend.database.exceptions.PictureLoadException;
+import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
+import pixyel_backend.database.exceptions.VoteFailedException;
 import pixyel_backend.database.objects.Comment;
 import pixyel_backend.database.objects.User;
 import pixyel_backend.xml.XML;
@@ -92,6 +96,7 @@ public class Command {
         XML location = input.getFirstChild();
         int longt = Integer.valueOf(location.getFirstChild("long").getContent());
         int lat = Integer.valueOf(location.getFirstChild("lat").getContent());
+        //client.getUserdata().get
 
         XML toSend = XML.createNewXML("setItemList");
         for (int i = 0; i < 10; i++) {
@@ -206,11 +211,28 @@ public class Command {
         return XML.createNewXML("echo_zurueck").setContent(date);
     }
 
+    /**
+     *
+     * @param input
+     * @param client
+     * @return
+     */
     public static XML vote(XML input, Client client) {
         int id = Integer.valueOf(input.getFirstChild("id").getContent());
         boolean upvote = Boolean.valueOf(input.getFirstChild("upvote").getContent());
 
-        boolean voteSuccessful = true;//TODO
+        boolean voteSuccessful = true;
+        try {
+            if (upvote) {
+                client.getUserdata().upvotePicture(id);
+            } else {
+                client.getUserdata().downvotePicture(id);
+            }
+        } catch (VoteFailedException ex) {
+            Log.logInfo("Vote by client " + client.getName() + " failed: " + ex, Command.class);
+            voteSuccessful = false;
+        }
+
         XML toSend = XML.createNewXML("voteSuccessful");
         toSend.addChild("id").setContent(String.valueOf(id));
         toSend.addChild("success").setContent(String.valueOf(voteSuccessful));
@@ -222,14 +244,26 @@ public class Command {
         return toSend;
     }
 
+    /**
+     *
+     * @param input
+     * @param client
+     * @return
+     */
     public static XML upload(XML input, Client client) {
         String data = input.getFirstChild("data").getContent();
         int longt = Integer.valueOf(input.getFirstChild("long").getContent());
         int lat = Integer.valueOf(input.getFirstChild("lat").getContent());
-        //client.userdata.uploadPicture(data, longt, lat);
 
-        int id = 1;//TODO
-        boolean uploadSuccessful = true;//TODO
+        int id = 0;
+        boolean uploadSuccessful = true;
+        try {
+            id = client.getUserdata().uploadPicture(data, (double) longt, (double) lat).getId();
+        } catch (PictureUploadExcpetion | PictureLoadException ex) {
+            uploadSuccessful = false;
+            Log.logInfo("Uploading picture by " + client.getName() + " failed: " + ex, Command.class);
+        }
+
         XML toSend = XML.createNewXML("uploadSuccessful");
         toSend.addChild("id").setContent(String.valueOf(id));
         toSend.addChild("success").setContent(String.valueOf(uploadSuccessful));
@@ -241,10 +275,23 @@ public class Command {
         return toSend;
     }
 
+    /**
+     * 
+     * @param input
+     * @param client
+     * @return 
+     */
     public static XML flagComment(XML input, Client client) {
         int commentId = Integer.valueOf(input.getFirstChild("id").getContent());
 
-        boolean flagCommentSuccessful = true;//TODO
+        boolean flagCommentSuccessful = true;
+        try {
+            client.getUserdata().flagComment(commentId);
+        } catch (FlagFailedExcpetion ex) {
+            Log.logInfo("Failed to flag Comment by " + client.getName() + ": " + ex, Command.class);
+            flagCommentSuccessful = false;
+        }
+
         XML toSend = XML.createNewXML("flagCommentSuccessful");
         toSend.addChild("id").setContent(String.valueOf(commentId));
         toSend.addChild("success").addChild(String.valueOf(flagCommentSuccessful));
@@ -256,10 +303,23 @@ public class Command {
         return toSend;
     }
 
+    /**
+     * 
+     * @param input
+     * @param client
+     * @return 
+     */
     public static XML flagItem(XML input, Client client) {
         int id = Integer.valueOf(input.getFirstChild("id").getContent());
 
         boolean flagItemSuccessful = true;//TODO
+        try {
+            client.getUserdata().flagPicture(id);
+        } catch (FlagFailedExcpetion ex) {
+            Log.logInfo("Failed to flag Item by " + client.getName() + ": " + ex, Command.class);
+            flagItemSuccessful = false;
+        }
+
         XML toSend = XML.createNewXML("flagItemSuccessful");
         toSend.addChild("id").setContent(String.valueOf(id));
         toSend.addChild("success").addChild(String.valueOf(flagItemSuccessful));
@@ -271,6 +331,12 @@ public class Command {
         return toSend;
     }
 
+    /**
+     * 
+     * @param input
+     * @param client
+     * @return 
+     */
     public static XML getComments(XML input, Client client) {
         int id = Integer.valueOf(input.getFirstChild("id").getContent());
         List<Comment> comments = BackendFunctions.getCommentsForPicutre(id);
@@ -279,7 +345,7 @@ public class Command {
         for (Comment comment : comments) {
             commentXML = toSend.addChild("comment");
             commentXML.addChild("id").setContent(String.valueOf(comment.getCommentId()));
-            commentXML.addChild("date").setContent(new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(comment.getCommentDate()));
+            commentXML.addChild("date").setContent(Utils.getDate(comment.getCommentDate()));
             commentXML.addChild("content").setContent(comment.getComment());
         }
         Log.logInfo("Sending comments to client " + client.getName(), Command.class);
@@ -302,12 +368,23 @@ public class Command {
         return toSend;
     }
 
+    /**
+     * 
+     * @param input
+     * @param client 
+     */
     public static void disconnect(XML input, Client client) {
         client.disconnect(true);
         Log.logInfo("Client " + client.getName() + " disconnected", Command.class);
     }
 
+    /**
+     * 
+     * @param input
+     * @param client 
+     */
     public static void alive(XML input, Client client) {
         client.checkClientAlive(true);
     }
+
 }

@@ -1,6 +1,7 @@
 package pixyel_backend.connection;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -19,6 +20,8 @@ public class Connection implements Runnable {
 
     private static ServerSocket SERVER = null;
     private static final HashMap<Integer, Client> CONNECTEDCLIENTS = new HashMap<>();//All online clients
+    private static final HashMap<String, Client> LOGGEDINCLIENTS = new HashMap<>();//All logged in clients
+    private static final HashMap<InetAddress, Client> CONNECTEDIPS = new HashMap<>();
     private static final ExecutorService CLIENTTHREADPOOL = Executors.newCachedThreadPool();
 
     /**
@@ -62,6 +65,16 @@ public class Connection implements Runnable {
     }
 
     /**
+     * Should be called right after a client has logged in
+     * @param client The new Client which has logged in
+     */
+    public static void checkForDoubleClients(Client client){
+        //if (CONNECTEDCLIENTS) {
+            
+        //}
+    }
+    
+    /**
      * Stops the server
      *
      */
@@ -79,19 +92,6 @@ public class Connection implements Runnable {
     }
 
     /**
-     * Returns all online Clients
-     *
-     * @return A ArrayList containing all online Clients
-     */
-    public static ArrayList<Client> getAllOnlineClients() {
-        ArrayList<Client> result = new ArrayList<>();
-        CONNECTEDCLIENTS.entrySet().stream().forEach((clientIdPair) -> {
-            result.add(clientIdPair.getValue());
-        });
-        return result;
-    }
-
-    /**
      * Startes the server, use {@code Connection.start()} !!
      */
     @Override
@@ -106,25 +106,10 @@ public class Connection implements Runnable {
             Log.logError("Server could not be started: " + ex.getMessage(), this);
         }
         onServerStarted();
-        startClientAliveScheduler();
-        Connection.listenForClients();
+        listenForClients();
     }
 
-    /**
-     * Starts the Scheduler for the aliveCheck
-     */
-    public void startClientAliveScheduler() {
-        Executors.newFixedThreadPool(1).submit(() -> {
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    CONNECTEDCLIENTS.forEach((hashcode, client) -> {
-                        client.checkClientAlive(false);
-                    });
-                }
-            }, 120000);
-        });
-    }
+
 
     /**
      * Calls this Method just before its closing its socket

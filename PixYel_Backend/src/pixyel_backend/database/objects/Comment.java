@@ -138,8 +138,8 @@ public class Comment {
             }
         } catch (SQLException ex) {
             Log.logError("Could not read Commentinformation from database - rootcause: " + ex.getMessage(), Comment.class);
+            throw new CommentCreationException();
         }
-        throw new CommentCreationException();
     }
     
     /**

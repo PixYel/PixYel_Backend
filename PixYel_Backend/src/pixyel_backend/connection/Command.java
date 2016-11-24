@@ -92,10 +92,10 @@ public class Command {
     }
 
     /**
-     * 
+     *
      * @param input
      * @param client
-     * @return 
+     * @return
      */
     public static XML getItemList(XML input, Client client) {
         XML location = input.getFirstChild();
@@ -119,16 +119,16 @@ public class Command {
             Log.logInfo("Sending list of ItemStats to client " + client.getName(), Command.class);
             return toSend;
         } catch (NoPicturesFoundExcpetion ex) {
-            Log.logInfo("Could not get Pictures for client " + client.getName(), Command.class);
+            Log.logWarning("Could not get Pictures for client " + client.getName(), Command.class);
         }
         return XML.createNewXML("setItemList");
     }
 
     /**
-     * 
+     *
      * @param input
      * @param client
-     * @return 
+     * @return
      */
     public static XML getItem(XML input, Client client) {
         int id = Integer.valueOf(input.getFirstChild("id").getContent());
@@ -148,17 +148,17 @@ public class Command {
             Log.logInfo("Sending Item " + id + " to client " + client.getName(), Command.class);
             return toSend;
         } catch (PictureLoadException ex) {
-            Log.logInfo("Could not load Picture by " + client.getName(), Command.class);
+            Log.logWarning("Could not load Picture by " + client.getName(), Command.class);
         }
 
-        return XML.createNewXML("setItem");
+        return error("Could not send Image", false);
     }
 
     /**
-     * 
+     *
      * @param input
      * @param client
-     * @return 
+     * @return
      */
     public static XML getItemStats(XML input, Client client) {
         int id = Integer.valueOf(input.getFirstChild("id").getContent());
@@ -177,10 +177,10 @@ public class Command {
             Log.logInfo("Sending ItemStats of Item " + id + " to client " + client.getName(), Command.class);
             return toSend;
         } catch (PictureLoadException ex) {
-            Logger.getLogger(Command.class.getName()).log(Level.SEVERE, null, ex);
+            Log.logWarning("Could not get Pictures for " + client.getName(), Command.class);
         }
 
-        return XML.createNewXML("setItemStats");
+        return error("Could not fetch Item Stats", false);
     }
 
     /**
@@ -246,7 +246,7 @@ public class Command {
                 client.getUserdata().downvotePicture(id);
             }
         } catch (VoteFailedException ex) {
-            Log.logInfo("Vote by client " + client.getName() + " failed: " + ex, Command.class);
+            Log.logWarning("Vote by client " + client.getName() + " failed: " + ex, Command.class);
             voteSuccessful = false;
         }
 
@@ -278,7 +278,7 @@ public class Command {
             id = client.getUserdata().uploadPicture(data, (double) longt, (double) lat).getId();
         } catch (PictureUploadExcpetion ex) {
             uploadSuccessful = false;
-            Log.logInfo("Uploading picture by " + client.getName() + " failed: " + ex, Command.class);
+            Log.logWarning("Uploading picture by " + client.getName() + " failed: " + ex, Command.class);
         }
 
         XML toSend = XML.createNewXML("uploadSuccessful");
@@ -287,7 +287,7 @@ public class Command {
         if (uploadSuccessful) {
             Log.logInfo("Successfully uploaded image " + id + " by " + client.getName(), Command.class);
         } else {
-            Log.logInfo("UNSuccessfully uploaded image " + id + " by " + client.getName(), Command.class);
+            Log.logWarning("UNSuccessfully uploaded image " + id + " by " + client.getName(), Command.class);
         }
         return toSend;
     }
@@ -305,7 +305,7 @@ public class Command {
         try {
             client.getUserdata().flagComment(commentId);
         } catch (FlagFailedExcpetion ex) {
-            Log.logInfo("Failed to flag Comment by " + client.getName() + ": " + ex, Command.class);
+            Log.logWarning("Failed to flag Comment by " + client.getName() + ": " + ex, Command.class);
             flagCommentSuccessful = false;
         }
 
@@ -315,7 +315,7 @@ public class Command {
         if (flagCommentSuccessful) {
             Log.logInfo("Successfully flagged Comment " + commentId + " by " + client.getName(), Command.class);
         } else {
-            Log.logInfo("UNSuccessfully flagged Comment " + commentId + " by " + client.getName(), Command.class);
+            Log.logWarning("UNSuccessfully flagged Comment " + commentId + " by " + client.getName(), Command.class);
         }
         return toSend;
     }
@@ -333,7 +333,7 @@ public class Command {
         try {
             client.getUserdata().flagPicture(id);
         } catch (FlagFailedExcpetion ex) {
-            Log.logInfo("Failed to flag Item by " + client.getName() + ": " + ex, Command.class);
+            Log.logWarning("Failed to flag Item by " + client.getName() + ": " + ex, Command.class);
             flagItemSuccessful = false;
         }
 
@@ -343,7 +343,7 @@ public class Command {
         if (flagItemSuccessful) {
             Log.logInfo("Successfully flagged Item " + id + " by " + client.getName(), Command.class);
         } else {
-            Log.logInfo("UNSuccessfully flagged Item " + id + " by " + client.getName(), Command.class);
+            Log.logWarning("UNSuccessfully flagged Item " + id + " by " + client.getName(), Command.class);
         }
         return toSend;
     }
@@ -383,7 +383,7 @@ public class Command {
         try {
             client.getUserdata().addNewComment(content, id);
         } catch (CommentCreationException ex) {
-            Log.logInfo("Could not add Comment from client " + client.getName(), Command.class);
+            Log.logWarning("Could not add Comment from client " + client.getName(), Command.class);
             successfulAddedComment = false;
         }
 
@@ -393,8 +393,15 @@ public class Command {
         if (successfulAddedComment) {
             Log.logInfo("Successfully added Comment by client " + client.getName(), Command.class);
         } else {
-            Log.logInfo("UNSuccessfully added Comment by client " + client.getName(), Command.class);
+            Log.logWarning("UNSuccessfully added Comment by client " + client.getName(), Command.class);
         }
+        return toSend;
+    }
+
+    public static XML error(String errorMessage, boolean fatal) {
+        XML toSend = XML.createNewXML("error");
+        toSend.addChild("errorMessage").setContent(errorMessage);
+        toSend.addChild("isErrorFatal").setContent(String.valueOf(fatal));
         return toSend;
     }
 

@@ -117,11 +117,11 @@ public class Client implements Runnable {
         }
         //--------------TEMP-END-------------
         try {
-            //System.out.println("Received String: " + receivedString);
+            Log.logDebug("ENCRYPTED_RECEIVED: " + receivedString, this);
             String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
-            //Log.logDebug("Decrypted: " + decrypted, this);
+            Log.logDebug("DECRYPTED_RECEIVED: " + decrypted, this);
             String decompressed = Compression.decompress(decrypted);
-            //Log.logDebug("Decompressed: " + decompressed, this);
+            Log.logDebug("PLAIN_RECEIVED: " + decompressed, this);
             XML xml = XML.openXML(decompressed);
             Command.onCommandReceived(this, xml);
         } catch (XML.XMLException ex) {

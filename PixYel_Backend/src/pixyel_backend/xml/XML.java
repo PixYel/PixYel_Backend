@@ -68,7 +68,7 @@ public class XML {
      *
      * @param file The XML file to be opened
      * @return The new XML instance
-     * @throws pixyel_backend.xml.XML.XMLException Raised when the XML file
+     * @throws XML.XMLException Raised when the XML file
      * contains errors
      */
     public static XML openXML(File file) throws XMLException {
@@ -80,7 +80,7 @@ public class XML {
      *
      * @param xml The XML String to be opened
      * @return The new XML instance
-     * @throws pixyel_backend.xml.XML.XMLException Raised when the XML string
+     * @throws XML.XMLException Raised when the XML string
      * contains errors
      */
     public static XML openXML(String xml) throws XMLException {
@@ -175,7 +175,7 @@ public class XML {
      *
      * @param xmlFile The XML file to be parsed
      * @return null if invalid, a Document if valid
-     * @throws Yes, a lot of shit can happen here
+     * @throws XML.XMLException Yes, a lot of shit can happen here
      */
     private Document isValid(File xmlFile) throws XMLException {
         try {
@@ -195,7 +195,7 @@ public class XML {
      *
      * @param string The String to be parsed
      * @return null if invalid, a Document if valid
-     * @throws Yes, a lot of shit can happen here
+     * @throws XML.XMLException Yes, a lot of shit can happen here
      */
     private Document isValid(String string) throws XMLException {
         try {

@@ -56,6 +56,8 @@ public class Comment {
     }
 
     /**
+     * Returns the next comment from a ResultSet
+     * 
      * IMPORTANT: ResultSet Pointer must already point at an entry, won't go to
      * next result by itself
      *
@@ -74,17 +76,7 @@ public class Comment {
             throw new CommentCreationException();
         }
     }
-
-    /**
-     * Addes a new Comment to the database
-     *
-     * @param pictureId
-     * @param userId
-     * @param comment
-     * @throws CommentCreationException
-     */
-    
-
+  
     /**
      * @return the commentId
      */
@@ -120,6 +112,13 @@ public class Comment {
         return commentDate;
     }
 
+    /**
+     * Insert a new comment in the Database. 
+     * @param pictureId
+     * @param userId
+     * @param comment
+     * @throws CommentCreationException 
+     */
     public static void addComment(int pictureId, int userId, String comment) throws CommentCreationException {
         Connection con = MysqlConnector.getConnection();
         PreparedStatement statement;
@@ -143,8 +142,7 @@ public class Comment {
     }
     
     /**
-     * Adds a flag
-     *
+     * Adds a flag to a comment (Database insert)
      * @param userId
      * @param commentId
      * @throws FlagFailedExcpetion
@@ -201,7 +199,7 @@ public class Comment {
     }
 
     /**
-     * Deletes the Comment out of the database
+     * Deletes the comment out of the database
      * @param commentId
      * @throws java.lang.Exception
      */

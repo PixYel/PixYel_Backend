@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import pixyel_backend.Log;
-import pixyel_backend.database.BackendFunctions;
 import pixyel_backend.database.exceptions.CommentCreationException;
 import pixyel_backend.database.exceptions.FlagFailedExcpetion;
 import pixyel_backend.database.exceptions.NoPicturesFoundExcpetion;
@@ -83,9 +82,6 @@ public class Command {
                         break;
                     case "disconnect":
                         disconnect(xml, client);
-                        break;
-                    case "alive":
-                        alive(xml, client);
                         break;
                 }
             }
@@ -360,7 +356,7 @@ public class Command {
      */
     public static XML getComments(XML input, Client client) {
         int id = Integer.valueOf(input.getFirstChild("id").getContent());
-        List<Comment> comments = BackendFunctions.getCommentsForPicutre(id);
+        List<Comment> comments = Comment.getCommentsForPicutre(id);
         XML toSend = XML.createNewXML("setComments");
         XML commentXML;
         for (Comment comment : comments) {
@@ -409,15 +405,6 @@ public class Command {
      */
     public static void disconnect(XML input, Client client) {
         client.disconnect(true);
-    }
-
-    /**
-     *
-     * @param input
-     * @param client
-     */
-    public static void alive(XML input, Client client) {
-        client.checkClientAlive(true);
     }
 
 }

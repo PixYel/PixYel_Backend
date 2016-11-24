@@ -10,6 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import pixyel_backend.Log;
@@ -342,4 +344,26 @@ public class Picture {
     public int getVoteStatus() {
         return voteStatus;
     }
+    
+    /**
+     * 
+     * @param listAsString , separated list of all id example: 1,2,4,6
+     * @return A map which contains all requested pictureData with their Id as
+     * keys
+     */
+    public static Map<Integer, String> getPicturesData(String... listAsString) {
+        HashMap<Integer, String> pictureList = new HashMap<>();
+        for (String currentPictureIdAsString : listAsString) {
+            Integer currentPictureId = Integer.valueOf(currentPictureIdAsString);
+            String currentPictureData;
+            try {
+                currentPictureData = Picture.getDataForId(currentPictureId);
+            } catch (PictureLoadException ex) {
+                currentPictureData = null;
+            }
+            pictureList.put(currentPictureId, currentPictureData);
+        }
+        return pictureList;
+    }
 }
+

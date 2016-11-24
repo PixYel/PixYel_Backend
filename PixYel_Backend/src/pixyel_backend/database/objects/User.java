@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import pixyel_backend.Log;
-import pixyel_backend.database.BackendFunctions;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
@@ -187,11 +186,21 @@ public class User {
         return this.publicKey;
     }
 
+    /**
+     * Write a new public key into the database for the current user
+     *
+     * @param key
+     */
     public void setPublicKey(String key) {
         this.publicKey = key;
         updateUserValue("publickey", key);
     }
 
+    /**
+     * Gets the storeId of the current user
+     * The storeid is a unique identificationtext which is linked to the storeaccount (googleplay, windowsstore or itunes)
+     * @return 
+     */
     public String getStoreID() {
         return storeID;
     }
@@ -241,6 +250,9 @@ public class User {
 
     }
 
+    /**
+     * @return the date when the user was added to the database
+     */
     public Timestamp getRegistrationDate() {
         return registrationDate;
     }
@@ -297,6 +309,15 @@ public class User {
         Picture.flagPic(id, pictureId);
     }
 
+    /**
+     * Get all Picture that are inside of a given distance to the current
+     * location
+     *
+     * @param cord
+     * @param searchDistance
+     * @return
+     * @throws NoPicturesFoundExcpetion
+     */
     public List<Picture> getPicturesByLocation(Coordinate cord, int searchDistance) throws NoPicturesFoundExcpetion {
         List<Picture> pictureList = new LinkedList();
         List<Coordinate> searchArea = cord.getSearchArea(searchDistance);
@@ -317,10 +338,10 @@ public class User {
                 }
             }
         } catch (SQLException ex) {
-            Log.logWarning(ex.toString(), BackendFunctions.class);
+            Log.logWarning(ex.toString(), User.class);
             throw new NoPicturesFoundExcpetion();
         } catch (PictureLoadException ex) {
-            Log.logWarning(ex.getMessage(), BackendFunctions.class);
+            Log.logWarning(ex.getMessage(), User.class);
         }
         pictureList.sort((Picture pic1, Picture pic2) -> Integer.compare(pic1.getRanking(), pic2.getRanking()));
         if (pictureList.size() > 100) {
@@ -363,18 +384,18 @@ public class User {
     }
 
     /**
-     * 
+     *
      * @param picId
-     * @throws VoteFailedException 
+     * @throws VoteFailedException
      */
     public synchronized void upvotePicture(int picId) throws VoteFailedException {
         Picture.upvotePicture(picId, this.id);
     }
 
     /**
-     * 
+     *
      * @param picId
-     * @throws VoteFailedException 
+     * @throws VoteFailedException
      */
     public synchronized void downvotePicture(int picId) throws VoteFailedException {
         Picture.downvotePicture(picId, this.id);
@@ -392,5 +413,4 @@ public class User {
     public Picture getPicture(int picId) throws PictureLoadException {
         return Picture.getPictureById(picId, this.id);
     }
-
 }

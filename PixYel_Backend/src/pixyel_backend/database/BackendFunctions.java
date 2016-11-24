@@ -18,6 +18,11 @@ import pixyel_backend.database.objects.Picture;
  */
 public class BackendFunctions {
 
+    /**
+     * Returns a list which contains all comments for a given picture
+     * @param pictureId
+     * @return 
+     */
     public static List<Comment> getCommentsForPicutre(int pictureId) {
         return Comment.getCommentsForPicutre(pictureId);
     }

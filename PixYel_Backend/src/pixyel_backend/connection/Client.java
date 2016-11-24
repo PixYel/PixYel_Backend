@@ -42,6 +42,7 @@ public class Client implements Runnable {
     public void run() {
         Log.logDebug("Client " + getName() + " started", this);
         startInputListener();
+        startClientAliveChecker();
     }
 
     /**
@@ -163,7 +164,7 @@ public class Client implements Runnable {
      * Checks if the Client is still alive
      *
      */
-    public void checkClientAlive() {
+    public void startClientAliveChecker() {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override

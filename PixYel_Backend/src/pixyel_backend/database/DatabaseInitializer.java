@@ -60,54 +60,54 @@ public class DatabaseInitializer {
             statements.executeUpdate("USE " + databaseName);
 
             statements.executeUpdate("CREATE TABLE users ("
-                    + "id               INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
-                    + "storeid          VARCHAR(80) NOT NULL UNIQUE,"
-                    + "reg_date         TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-                    + "publickey        TEXT, "
-                    + "status           TINYINT(1) DEFAULT '0')"
+                    + Columns.ID + " INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
+                    + Columns.STORE_ID + " VARCHAR(80) NOT NULL UNIQUE,"
+                    + Columns.REGISTRATION_DATE + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+                    + Columns.PUBLICKEY + " TEXT, "
+                    + Columns.STATUS + " TINYINT(1) DEFAULT '0')"
             );
 
             statements.executeUpdate("CREATE TABLE picturesInfo ("
-                    + "id               INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
-                    + "longitude        DOUBLE NOT NULL, "
-                    + "latitude         DOUBLE NOT NULL, "
-                    + "upload_date      TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-                    + "userid           INT(6) NOT NULL)"
+                    + Columns.ID + " INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
+                    + Columns.LONGITUDE + " DOUBLE NOT NULL, "
+                    + Columns.LATITUDE + " DOUBLE NOT NULL, "
+                    + Columns.UPLOAD_DATE + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+                    + Columns.USER_ID + " INT(6) NOT NULL)"
             );
 
             statements.executeUpdate("CREATE TABLE picturesVotes ("
-                    + "pictureId        INT(6) NOT NULL, "
-                    + "userId           INT(6) NOT NULL, "
-                    + "vote             TINYINT(1) NOT NULL)" //1 für Upvote -1 für downvote
+                    + Columns.PICTURE_ID + " INT(6) NOT NULL, "
+                    + Columns.USER_ID + " INT(6) NOT NULL, "
+                    + Columns.STATUS + " TINYINT(1) NOT NULL)" //1 für Upvote -1 für downvote 0 for no vote
             );
-            statements.executeUpdate("CREATE UNIQUE INDEX id ON picturesVotes (pictureId,userId)");
+            statements.executeUpdate("CREATE UNIQUE INDEX id ON picturesVotes (" + Columns.PICTURE_ID + "," + Columns.USER_ID + ")");
 
             statements.executeUpdate("CREATE TABLE picturesData ("
-                    + "pictureid        INT(6) PRIMARY KEY, "
-                    + "data             LONGTEXT NOT NULL)"
+                    + Columns.PICTURE_ID + " INT(6) PRIMARY KEY, "
+                    + Columns.DATA + " LONGTEXT NOT NULL)"
             );
 
             statements.executeUpdate("CREATE TABLE comments("
-                    + "commentid        INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
-                    + "pictureid        INT(6) NOT NULL, "
-                    + "userid           INT(6) NOT NULL, "
-                    + "comment          VARCHAR(1200) NOT NULL, "
-                    + "comment_date     TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
+                    + Columns.ID + " INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
+                    + Columns.PICTURE_ID + " INT(6) NOT NULL, "
+                    + Columns.USER_ID + " INT(6) NOT NULL, "
+                    + Columns.TEXT + " VARCHAR(1200) NOT NULL, "
+                    + Columns.CREATION_DATE + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
             );
 
             statements.executeUpdate("CREATE TABLE pictureflags("
-                    + "pictureid        INT(6) NOT NULL, "
-                    + "userid           INT(6) NOT NULL, "
-                    + "creation_date    TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
+                    + Columns.PICTURE_ID + "INT(6) NOT NULL, "
+                    + Columns.USER_ID + "INT(6) NOT NULL, "
+                    + Columns.CREATION_DATE + "TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
             );
-            statements.executeUpdate("CREATE UNIQUE INDEX id ON pictureflags (pictureid,userid)");
+            statements.executeUpdate("CREATE UNIQUE INDEX id ON pictureflags (" + Columns.PICTURE_ID + "," + Columns.USER_ID + ")");
 
             statements.executeUpdate("CREATE TABLE commentflags("
-                    + "commentid        INT(6) NOT NULL, "
-                    + "userid           INT(6) NOT NULL, "
-                    + "creation_date    TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
+                    + Columns.COMMENT_ID + "INT(6) NOT NULL, "
+                    + Columns.USER_ID + "INT(6) NOT NULL, "
+                    + Columns.CREATION_DATE + "TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
             );
-            statements.executeUpdate("CREATE UNIQUE INDEX id ON commentflags (commentid,userid)");
+            statements.executeUpdate("CREATE UNIQUE INDEX id ON commentflags (" + Columns.COMMENT_ID + "," + Columns.USER_ID + ")");
         }
     }
 }

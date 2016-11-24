@@ -4,11 +4,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import pixyel_backend.Log;
+import pixyel_backend.database.Columns;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
@@ -16,7 +17,6 @@ import pixyel_backend.database.SqlUtils;
 import pixyel_backend.database.dataProcessing.RankingCalculation;
 import pixyel_backend.database.exceptions.CommentCreationException;
 import pixyel_backend.database.exceptions.FlagFailedExcpetion;
-import pixyel_backend.database.exceptions.NoPicturesFoundExcpetion;
 import pixyel_backend.database.exceptions.PictureLoadException;
 import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 import pixyel_backend.database.exceptions.VoteFailedException;
@@ -41,7 +41,7 @@ public class User {
     public User(int id) throws UserNotFoundException, UserCreationException {
 
         try {
-            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM users WHERE id LIKE ?");
+            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM users WHERE " + Columns.ID + " LIKE ?");
             sta.setInt(1, id);
             ResultSet result = sta.executeQuery();
             if (result == null || !result.isBeforeFirst()) {
@@ -49,11 +49,11 @@ public class User {
             }
             result.next();
             this.id = id;
-            this.storeID = result.getString("storeid");
-            this.publicKey = result.getString("publickey");
-            this.registrationDate = result.getTimestamp("reg_date");
+            this.storeID = result.getString(Columns.STORE_ID);
+            this.publicKey = result.getString(Columns.PUBLICKEY);
+            this.registrationDate = result.getTimestamp(Columns.REGISTRATION_DATE);
 
-            int status = result.getInt("status");
+            int status = result.getInt(Columns.STATUS);
             if (status < 0) {
                 this.isBanned = true;
             } else {
@@ -75,7 +75,7 @@ public class User {
      */
     public User(String storeID) throws UserNotFoundException, UserCreationException {
         try {
-            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM users WHERE storeid LIKE ?");
+            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM users WHERE " + Columns.STORE_ID + " LIKE ?");
             sta.setString(1, SqlUtils.escapeString(storeID));
             ResultSet result = sta.executeQuery();
 
@@ -83,12 +83,12 @@ public class User {
                 throw new UserNotFoundException();
             }
             result.next();
-            this.id = result.getInt("id");
-            this.storeID = result.getString("storeid");
-            this.publicKey = result.getString("publickey");
-            this.registrationDate = result.getTimestamp("reg_date");
+            this.id = result.getInt(Columns.ID);
+            this.storeID = result.getString(Columns.STORE_ID);
+            this.publicKey = result.getString(Columns.PUBLICKEY);
+            this.registrationDate = result.getTimestamp(Columns.REGISTRATION_DATE);
 
-            int status = result.getInt("status");
+            int status = result.getInt(Columns.STATUS);
             if (status < 0) {
                 this.isBanned = true;
             } else {
@@ -139,7 +139,7 @@ public class User {
      * Adds a user to a Database
      */
     private static void addUserToDb(String storeID) throws UserCreationException {
-        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("INSERT INTO users(storeid)VALUES (?)")) {
+        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("INSERT INTO users(" + Columns.STORE_ID + ")VALUES (?)")) {
             storeID = SqlUtils.escapeString(storeID);
             statement.setString(1, storeID);
             statement.executeUpdate();
@@ -193,13 +193,15 @@ public class User {
      */
     public void setPublicKey(String key) {
         this.publicKey = key;
-        updateUserValue("publickey", key);
+        updateUserValue(Columns.PUBLICKEY, key);
     }
 
     /**
-     * Gets the storeId of the current user
-     * The storeid is a unique identificationtext which is linked to the storeaccount (googleplay, windowsstore or itunes)
-     * @return 
+     * Gets the storeId of the current user The storeid is a unique
+     * identificationtext which is linked to the storeaccount (googleplay,
+     * windowsstore or itunes)
+     *
+     * @return
      */
     public String getStoreID() {
         return storeID;
@@ -226,11 +228,11 @@ public class User {
      * @param value value that should be inserted
      */
     private void updateUserValue(String key, String value) {
-        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("UPDATE users SET " + key + " = ? WHERE " + Columns.ID + " LIKE " + this.id)) {
             sta.setString(1, SqlUtils.escapeString(value));
             sta.execute();
         } catch (SQLException ex) {
-            Log.logError("couldnt update user value \"" + key + "\" - rootcause:" + ex.getMessage(), this);
+            Log.logError("Could not update user value \"" + key + "\" - rootcause:" + ex.getMessage(), this);
         }
     }
 
@@ -241,11 +243,11 @@ public class User {
      * @param value value that should be inserted
      */
     private void updateUserValue(String key, int value) {
-        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("UPDATE users SET " + key + " = ? WHERE id LIKE " + this.id)) {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("UPDATE users SET " + key + " = ? WHERE " + Columns.ID + " LIKE " + this.id)) {
             sta.setInt(1, value);
             sta.execute();
         } catch (SQLException ex) {
-            Log.logError("couldnt update user value \"" + key + "\" - rootcause:" + ex.getMessage(), this);
+            Log.logError("Could not update user value \"" + key + "\" - rootcause:" + ex.getMessage(), this);
         }
 
     }
@@ -261,12 +263,12 @@ public class User {
      * deletes this user from the database
      */
     public void delete() {
-        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM Users WHERE id = ?")) {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM Users WHERE " + Columns.ID + " = ?")) {
             sta.setInt(1, this.id);
             sta.executeUpdate();
 
         } catch (Exception e) {
-            Log.logWarning("Couldnt delete user \"" + this.id + "\" - rootcause:" + e, this);
+            Log.logWarning("Could not delete user \"" + this.id + "\" - rootcause:" + e, this);
         }
     }
 
@@ -316,12 +318,11 @@ public class User {
      * @param cord
      * @param searchDistance
      * @return
-     * @throws NoPicturesFoundExcpetion
      */
-    public List<Picture> getPicturesByLocation(Coordinate cord, int searchDistance) throws NoPicturesFoundExcpetion {
+    public List<Picture> getPicturesByLocation(Coordinate cord, int searchDistance) {
         List<Picture> pictureList = new LinkedList();
         List<Coordinate> searchArea = cord.getSearchArea(searchDistance);
-        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT id FROM picturesInfo WHERE (longitude BETWEEN ? AND ?) AND (latitude BETWEEN ? AND ?)")) {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT id FROM picturesInfo WHERE (" + Columns.LONGITUDE + " BETWEEN ? AND ?) AND (" + Columns.LATITUDE + " BETWEEN ? AND ?)")) {
             sta.setDouble(1, searchArea.get(0).getLongitude());
             sta.setDouble(2, searchArea.get(1).getLongitude());
             sta.setDouble(3, searchArea.get(0).getLatitude());
@@ -329,7 +330,7 @@ public class User {
             ResultSet result = sta.executeQuery();
 
             if (result == null || !result.isBeforeFirst()) {
-                throw new NoPicturesFoundExcpetion();
+                return pictureList;
             } else {
                 while (result.next()) {
                     Picture pic = Picture.getPictureById(result.getInt("id"), this.id);
@@ -338,8 +339,8 @@ public class User {
                 }
             }
         } catch (SQLException ex) {
-            Log.logWarning(ex.toString(), User.class);
-            throw new NoPicturesFoundExcpetion();
+            Log.logError(ex.toString(), User.class);
+            return pictureList;
         } catch (PictureLoadException ex) {
             Log.logWarning(ex.getMessage(), User.class);
         }
@@ -357,9 +358,8 @@ public class User {
      *
      * @param cord current location of the user who requests the Photos
      * @return
-     * @throws pixyel_backend.database.exceptions.NoPicturesFoundExcpetion
      */
-    public List<Picture> getPicturesByLocation(Coordinate cord) throws NoPicturesFoundExcpetion {
+    public List<Picture> getPicturesByLocation(Coordinate cord) {
         return getPicturesByLocation(cord, 20);
     }
 

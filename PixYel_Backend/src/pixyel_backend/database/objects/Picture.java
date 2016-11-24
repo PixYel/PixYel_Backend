@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import pixyel_backend.Log;
+import pixyel_backend.database.Columns;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.SqlUtils;
 import pixyel_backend.database.exceptions.FlagFailedExcpetion;
@@ -50,25 +51,25 @@ public class Picture {
         this.id = pictureId;
         try {
             //get Info
-            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM picturesInfo WHERE id LIKE ?");
+            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM picturesInfo WHERE " + Columns.ID + " LIKE ?");
             sta.setInt(1, this.id);
             ResultSet result = sta.executeQuery();
             result.next();
-            double longitude = result.getDouble("longitude");
-            double latitude = result.getDouble("latitude");
+            double longitude = result.getDouble(Columns.LONGITUDE);
+            double latitude = result.getDouble(Columns.LATITUDE);
             this.coordinate = new Coordinate(longitude, latitude);
-            this.timestamp = result.getDate("upload_date");
-            this.userId = result.getInt("userid");
-            Log.logDebug("loaded basic pictureInformation", sta);
-            result = sta.executeQuery("SELECT COUNT(*)FROM picturesVotes WHERE pictureId = " + id + " AND vote = 1");
+            this.timestamp = result.getDate(Columns.UPLOAD_DATE);
+            this.userId = result.getInt(Columns.USER_ID);
+            Log.logDebug("Loaded basic pictureInformation", sta);
+            result = sta.executeQuery("SELECT COUNT(*)FROM picturesVotes WHERE " + Columns.PICTURE_ID + " = " + id + " AND " + Columns.STATUS + " = 1");
             result.next();
             this.upvotes = result.getInt(1);
-            result = sta.executeQuery("SELECT COUNT(*)FROM picturesVotes WHERE pictureId = " + id + " AND vote = -1");
+            result = sta.executeQuery("SELECT COUNT(*)FROM picturesVotes WHERE " + Columns.PICTURE_ID + " = " + id + " AND " + Columns.STATUS + " = -1");
             result.next();
             this.downvotes = result.getInt(1);
             this.voteStatus = userHasLikedPicture(userId, pictureId);
         } catch (Exception ex) {
-            Log.logWarning("couldnt load picture for Id " + pictureId + "- rootcause:" + ex, Picture.class);
+            Log.logWarning("Could not load picture for Id " + pictureId + "- rootcause:" + ex, Picture.class);
             throw new PictureLoadException();
         }
 
@@ -104,18 +105,18 @@ public class Picture {
             Connection con = MysqlConnector.getConnection();
             PreparedStatement statement;
             if (pictureData != null && pictureData.length() >= 1) {
-                statement = con.prepareStatement("INSERT INTO picturesInfo (longitude, latitude, userid) VALUES(?,?,?)");
+                statement = con.prepareStatement("INSERT INTO picturesInfo (" + Columns.LONGITUDE + ", " + Columns.LATITUDE + ", " + Columns.USER_ID + ") VALUES(?,?,?)");
                 statement.setDouble(1, longitude);
                 statement.setDouble(2, latitude);
                 statement.setInt(3, userId);
                 statement.executeUpdate();
-                Log.logDebug("added Picture to Db", Picture.class);
-                ResultSet rs = statement.executeQuery("SELECT MAX(id) as maxid FROM picturesInfo");
+                Log.logDebug("Added Picture to Db", Picture.class);
+                ResultSet rs = statement.executeQuery("SELECT MAX(" + Columns.ID + ") as " + Columns.MAX_ID + " FROM picturesInfo");
                 //get Id as reference for the picturedata
                 rs.next();
-                pictureId = rs.getInt("maxid");
+                pictureId = rs.getInt(Columns.MAX_ID);
                 pictureData = SqlUtils.escapeString(pictureData);
-                statement = con.prepareStatement("INSERT INTO picturesData (pictureid, data) VALUES(?,?)");
+                statement = con.prepareStatement("INSERT INTO picturesData (" + Columns.PICTURE_ID + ", " + Columns.DATA + ") VALUES(?,?)");
                 statement.setInt(1, pictureId);
                 statement.setString(2, pictureData);
                 statement.execute();
@@ -140,12 +141,12 @@ public class Picture {
      * @throws FlagFailedExcpetion
      */
     public static void flagPic(int userId, int pictureId) throws FlagFailedExcpetion {
-        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT id FROM  pictureflags WHERE pictureid = ? AND  userid = ?")) {
+        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.ID + " FROM  pictureflags WHERE " + Columns.PICTURE_ID + " = ? AND  " + Columns.USER_ID + " = ?")) {
             statement.setInt(1, pictureId);
             statement.setInt(2, userId);
             ResultSet result = statement.executeQuery();
             if (result == null || !result.isBeforeFirst()) {
-                try (PreparedStatement instertStatement = MysqlConnector.getConnection().prepareStatement("INSERT INTO pictureflags (pictureid,userid) VALUES (?,?)")) {
+                try (PreparedStatement instertStatement = MysqlConnector.getConnection().prepareStatement("INSERT INTO pictureflags (" + Columns.PICTURE_ID + "," + Columns.USER_ID + ") VALUES (?,?)")) {
                     instertStatement.setInt(1, pictureId);
                     instertStatement.setInt(2, userId);
                     instertStatement.executeUpdate();
@@ -154,7 +155,6 @@ public class Picture {
         } catch (SQLException ex) {
             Log.logWarning("Failed to flag picture " + pictureId + " rootcause: - " + ex, Comment.class);
             throw new FlagFailedExcpetion();
-
         }
     }
 
@@ -167,7 +167,7 @@ public class Picture {
      * downvoted the picture, 0 if the user hasnt voted for the picture
      */
     public static int userHasLikedPicture(int userId, int pictureId) {
-        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT vote FROM  picturesVotes WHERE pictureId = ? AND  userId = ?")) {
+        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT vote FROM  picturesVotes WHERE " + Columns.PICTURE_ID + " = ? AND  " + Columns.USER_ID + " = ?")) {
             statement.setInt(1, pictureId);
             statement.setInt(2, userId);
             ResultSet result = statement.executeQuery();
@@ -175,7 +175,7 @@ public class Picture {
                 return 0;
             } else {
                 result.next();
-                return result.getInt("vote");
+                return result.getInt(Columns.STATUS);
             }
 
         } catch (SQLException ex) {
@@ -221,7 +221,7 @@ public class Picture {
      * @param newVoteStatus
      */
     private static void changeVote(int pictureId, int userId, int newVoteStatus) throws VoteFailedException {
-        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("INSERT INTO picturesVotes (pictureId, userId, vote) VALUES(?,?,?) ON DUPLICATE KEY UPDATE pictureId=?, userId=?, vote =?")) {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("INSERT INTO picturesVotes (" + Columns.PICTURE_ID + ", " + Columns.USER_ID + ", " + Columns.STATUS + ") VALUES(?,?,?) ON DUPLICATE KEY UPDATE " + Columns.PICTURE_ID + "=?, " + Columns.USER_ID + "=?, " + Columns.STATUS + " =?")) {
             sta.setInt(1, pictureId);
             sta.setInt(4, pictureId);
             sta.setInt(2, userId);
@@ -253,12 +253,12 @@ public class Picture {
             //get Data
             PreparedStatement sta;
             try {
-                sta = MysqlConnector.getConnection().prepareStatement("SELECT data FROM picturesData WHERE pictureid LIKE ?");
+                sta = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.DATA + " FROM picturesData WHERE " + Columns.PICTURE_ID + " LIKE ?");
 
                 sta.setInt(1, this.id);
                 ResultSet result = sta.executeQuery();
                 result.next();
-                this.data = result.getString("data");
+                this.data = result.getString(Columns.DATA);
             } catch (SQLException ex) {
                 Logger.getLogger(Picture.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -277,14 +277,14 @@ public class Picture {
         //get Data
         PreparedStatement sta;
         try {
-            sta = MysqlConnector.getConnection().prepareStatement("SELECT data FROM picturesData WHERE pictureid LIKE ?");
+            sta = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.DATA + " FROM picturesData WHERE " + Columns.PICTURE_ID + " LIKE ?");
 
             sta.setInt(1, id);
             ResultSet result = sta.executeQuery();
             result.next();
-            return result.getString("data");
+            return result.getString(Columns.DATA);
         } catch (SQLException ex) {
-            Log.logWarning("couldnt load pictureData for Id" + id + " - rootcause: " + ex, Picture.class
+            Log.logWarning("Could not load pictureData for Id" + id + " - rootcause: " + ex, Picture.class
             );
             throw new PictureLoadException();
         }
@@ -345,9 +345,9 @@ public class Picture {
     public int getVoteStatus() {
         return voteStatus;
     }
-    
+
     /**
-     * 
+     *
      * @param listAsString , separated list of all id example: 1,2,4,6
      * @return A map which contains all requested pictureData with their Id as
      * keys
@@ -367,4 +367,3 @@ public class Picture {
         return pictureList;
     }
 }
-

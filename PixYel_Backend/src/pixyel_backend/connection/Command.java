@@ -9,15 +9,21 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.BackendFunctions;
+import pixyel_backend.database.exceptions.CommentCreationException;
 import pixyel_backend.database.exceptions.FlagFailedExcpetion;
+import pixyel_backend.database.exceptions.NoPicturesFoundExcpetion;
 import pixyel_backend.database.exceptions.PictureLoadException;
 import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.exceptions.VoteFailedException;
 import pixyel_backend.database.objects.Comment;
+import pixyel_backend.database.objects.Coordinate;
+import pixyel_backend.database.objects.Picture;
 import pixyel_backend.database.objects.User;
 import pixyel_backend.xml.XML;
 
@@ -93,74 +99,74 @@ public class Command {
         XML location = input.getFirstChild();
         int longt = Integer.valueOf(location.getFirstChild("long").getContent());
         int lat = Integer.valueOf(location.getFirstChild("lat").getContent());
-        //client.getUserdata().get
 
-        XML toSend = XML.createNewXML("setItemList");
-        for (int i = 0; i < 10; i++) {
-            int id = 1;//TODO
-            int upvotes = 1;//TODO
-            int downvotes = 1;//TODO
-            int votedByUser = 0;//TODO
-            int rank = 42;//TODO
-            String date = "14:43,1.2.16";//TODO
+        try {
+            List<Picture> pictures = client.getUserdata().getPicturesByLocation(new Coordinate(longt, lat));
 
-            XML item = toSend.addChild("item");
-            item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date");
-            item.getFirstChild("id").setContent(String.valueOf(id));
-            item.getFirstChild("upvotes").setContent(String.valueOf(upvotes));
-            item.getFirstChild("downvotes").setContent(String.valueOf(downvotes));
-            item.getFirstChild("votedByUser").setContent(String.valueOf(votedByUser));
-            item.getFirstChild("rank").setContent(String.valueOf(rank));
-            item.getFirstChild("date").setContent(date);
+            XML toSend = XML.createNewXML("setItemList");
+            pictures.stream().forEach((picture) -> {
+                XML item = toSend.addChild("item");
+                item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date");
+                item.getFirstChild("id").setContent(String.valueOf(picture.getId()));
+                item.getFirstChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
+                item.getFirstChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
+                item.getFirstChild("votedByUser").setContent(String.valueOf(picture.getVoteStatus()));
+                item.getFirstChild("rank").setContent(String.valueOf(picture.getRanking()));
+                item.getFirstChild("date").setContent(Utils.getDate(picture.getTimestamp()));
+            });
+            Log.logInfo("Sending list of ItemStats to client " + client.getName(), Command.class);
+            return toSend;
+        } catch (NoPicturesFoundExcpetion ex) {
+            Log.logInfo("Could not get Pictures for client " + client.getName(), Command.class);
         }
-        Log.logInfo("Sending list of ItemStats to client " + client.getName(), Command.class);
-        return toSend;
+        return XML.createNewXML("setItemList");
     }
 
     public static XML getItem(XML input, Client client) {
         int id = Integer.valueOf(input.getFirstChild("id").getContent());
 
-        int upvotes = 1;//TODO
-        int downvotes = 1;//TODO
-        int votedByUser = 0;//TODO
-        int rank = 42;//TODO
-        String date = "14:43,1.2.16";//TODO
-        String data = "...";//TODO
+        try {
+            Picture picture = client.getUserdata().getPicture(id);
+            XML toSend = XML.createNewXML("setItem");
+            XML item = toSend.addChild("item");
+            item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date", "data");
+            item.getFirstChild("id").setContent(String.valueOf(picture.getId()));
+            item.getFirstChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
+            item.getFirstChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
+            item.getFirstChild("votedByUser").setContent(String.valueOf(picture.getVoteStatus()));
+            item.getFirstChild("rank").setContent(String.valueOf(picture.getRanking()));
+            item.getFirstChild("date").setContent(Utils.getDate(picture.getTimestamp()));
+            item.getFirstChild("data").setContent(picture.getData());
+            Log.logInfo("Sending Item " + id + " to client " + client.getName(), Command.class);
+            return toSend;
+        } catch (PictureLoadException ex) {
+            Log.logInfo("Could not load Picture by " + client.getName(), Command.class);
+        }
 
-        XML toSend = XML.createNewXML("setItem");
-        XML item = toSend.addChild("item");
-        item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date", "data");
-        item.getFirstChild("id").setContent(String.valueOf(id));
-        item.getFirstChild("upvotes").setContent(String.valueOf(upvotes));
-        item.getFirstChild("downvotes").setContent(String.valueOf(downvotes));
-        item.getFirstChild("votedByUser").setContent(String.valueOf(votedByUser));
-        item.getFirstChild("rank").setContent(String.valueOf(rank));
-        item.getFirstChild("date").setContent(date);
-        item.getFirstChild("data").setContent(data);
-        Log.logInfo("Sending Item " + id + " to client " + client.getName(), Command.class);
-        return toSend;
+        return XML.createNewXML("setItem");
     }
 
     public static XML getItemStats(XML input, Client client) {
         int id = Integer.valueOf(input.getFirstChild("id").getContent());
 
-        int upvotes = 1;//TODO
-        int downvotes = 1;//TODO
-        int votedByUser = 0;//TODO
-        int rank = 42;//TODO
-        String date = "14:43,1.2.16";//TODO
+        try {
+            Picture picture = client.getUserdata().getPicture(id);
+            XML toSend = XML.createNewXML("setItemStats");
+            XML item = toSend.addChild("item");
+            item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date");
+            item.getFirstChild("id").setContent(String.valueOf(picture.getId()));
+            item.getFirstChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
+            item.getFirstChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
+            item.getFirstChild("votedByUser").setContent(String.valueOf(picture.getDownvotes()));
+            item.getFirstChild("rank").setContent(String.valueOf(picture.getRanking()));
+            item.getFirstChild("date").setContent(Utils.getDate(picture.getTimestamp()));
+            Log.logInfo("Sending ItemStats of Item " + id + " to client " + client.getName(), Command.class);
+            return toSend;
+        } catch (PictureLoadException ex) {
+            Logger.getLogger(Command.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
-        XML toSend = XML.createNewXML("setItemStats");
-        XML item = toSend.addChild("item");
-        item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date");
-        item.getFirstChild("id").setContent(String.valueOf(id));
-        item.getFirstChild("upvotes").setContent(String.valueOf(upvotes));
-        item.getFirstChild("downvotes").setContent(String.valueOf(downvotes));
-        item.getFirstChild("votedByUser").setContent(String.valueOf(votedByUser));
-        item.getFirstChild("rank").setContent(String.valueOf(rank));
-        item.getFirstChild("date").setContent(date);
-        Log.logInfo("Sending ItemStats of Item " + id + " to client " + client.getName(), Command.class);
-        return toSend;
+        return XML.createNewXML("setItemStats");
     }
 
     /**
@@ -256,7 +262,7 @@ public class Command {
         boolean uploadSuccessful = true;
         try {
             id = client.getUserdata().uploadPicture(data, (double) longt, (double) lat).getId();
-        } catch (PictureUploadExcpetion | PictureLoadException ex) {
+        } catch (PictureUploadExcpetion ex) {
             uploadSuccessful = false;
             Log.logInfo("Uploading picture by " + client.getName() + " failed: " + ex, Command.class);
         }
@@ -273,10 +279,10 @@ public class Command {
     }
 
     /**
-     * 
+     *
      * @param input
      * @param client
-     * @return 
+     * @return
      */
     public static XML flagComment(XML input, Client client) {
         int commentId = Integer.valueOf(input.getFirstChild("id").getContent());
@@ -301,10 +307,10 @@ public class Command {
     }
 
     /**
-     * 
+     *
      * @param input
      * @param client
-     * @return 
+     * @return
      */
     public static XML flagItem(XML input, Client client) {
         int id = Integer.valueOf(input.getFirstChild("id").getContent());
@@ -329,10 +335,10 @@ public class Command {
     }
 
     /**
-     * 
+     *
      * @param input
      * @param client
-     * @return 
+     * @return
      */
     public static XML getComments(XML input, Client client) {
         int id = Integer.valueOf(input.getFirstChild("id").getContent());
@@ -349,11 +355,24 @@ public class Command {
         return toSend;
     }
 
+    /**
+     *
+     * @param input
+     * @param client
+     * @return
+     */
     public static XML addComment(XML input, Client client) {
         int id = Integer.valueOf(input.getFirstChild("id").getContent());
         String content = input.getFirstChild("content").getContent();
-        client.getUserdata().addNewComment(content, id);
-        boolean successfulAddedComment = true;//TODO
+        boolean successfulAddedComment = true;
+
+        try {
+            client.getUserdata().addNewComment(content, id);
+        } catch (CommentCreationException ex) {
+            Log.logInfo("Could not add Comment from client " + client.getName(), Command.class);
+            successfulAddedComment = false;
+        }
+
         XML toSend = XML.createNewXML("addCommentSuccessful");
         toSend.addChild("id").setContent(String.valueOf(id));
         toSend.addChild("success").setContent(String.valueOf(successfulAddedComment));
@@ -366,18 +385,18 @@ public class Command {
     }
 
     /**
-     * 
+     *
      * @param input
-     * @param client 
+     * @param client
      */
     public static void disconnect(XML input, Client client) {
         client.disconnect(true);
     }
 
     /**
-     * 
+     *
      * @param input
-     * @param client 
+     * @param client
      */
     public static void alive(XML input, Client client) {
         client.checkClientAlive(true);

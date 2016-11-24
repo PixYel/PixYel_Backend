@@ -16,6 +16,7 @@ import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.SqlUtils;
 import pixyel_backend.database.dataProcessing.RankingCalculation;
+import pixyel_backend.database.exceptions.CommentCreationException;
 import pixyel_backend.database.exceptions.FlagFailedExcpetion;
 import pixyel_backend.database.exceptions.NoPicturesFoundExcpetion;
 import pixyel_backend.database.exceptions.PictureLoadException;
@@ -23,6 +24,7 @@ import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 import pixyel_backend.database.exceptions.VoteFailedException;
 
 public class User {
+
     private final int id;
     private final String storeID;
     private String publicKey;
@@ -151,14 +153,28 @@ public class User {
         }
     }
 
+    /**
+     * @return the id of the user
+     */
     public int getID() {
         return this.id;
     }
 
+    /**
+     * Returns if the user is banned - this information is based on the collum
+     * status in the db (status 0 < 0 ->banned)
+     *
+     * @return
+     */
     public boolean isBanned() {
         return this.isBanned;
     }
 
+    /**
+     *
+     * @param setBanned true if the user should be banned. False unbannes the
+     * user
+     */
     public void setBanned(boolean setBanned) {
         this.isBanned = setBanned;
         if (setBanned) {
@@ -181,6 +197,11 @@ public class User {
         return storeID;
     }
 
+    /**
+     * Chance the usersstatus in the db
+     *
+     * @param i the new status that should be entered in the db
+     */
     private void changeStatusTo(int i) {
         if (i < 0) {
             this.isBanned = true;
@@ -246,14 +267,14 @@ public class User {
     public synchronized void flagComment(int commentId) throws FlagFailedExcpetion {
         Comment.addFlag(this.id, commentId);
     }
-    
-    
+
     /**
      * @param text
      * @param refersToPicuture
+     * @throws pixyel_backend.database.exceptions.CommentCreationException
      * @see pixyel_backend.database.objects.Comment
      */
-    public void addNewComment(String text, int refersToPicuture) {
+    public void addNewComment(String text, int refersToPicuture) throws CommentCreationException {
         Comment.newComment(refersToPicuture, id, text);
     }
 
@@ -263,16 +284,20 @@ public class User {
      * @param latitude
      * @return The pictureobject of the picture that was uploaded
      * @throws pixyel_backend.database.exceptions.PictureUploadExcpetion
-     * @throws pixyel_backend.database.exceptions.PictureLoadException
      * @see pixyel_backend.database.objects.Picture
      */
-    public Picture uploadPicture(String data, double longitude, double latitude) throws PictureUploadExcpetion, PictureLoadException {
+    public Picture uploadPicture(String data, double longitude, double latitude) throws PictureUploadExcpetion {
         return Picture.addNewPicture(id, data, longitude, latitude);
     }
-    
-    public synchronized void flagPicture(int pictureId) throws FlagFailedExcpetion{
+
+    /**
+     * @param pictureId
+     * @throws FlagFailedExcpetion
+     */
+    public synchronized void flagPicture(int pictureId) throws FlagFailedExcpetion {
         Picture.flagPic(id, pictureId);
     }
+
     public List<Picture> getPicturesList(Coordinate cord, int searchDistance) throws NoPicturesFoundExcpetion {
         List<Picture> pictureList = new LinkedList();
         List<Coordinate> searchArea = cord.getSearchArea(searchDistance);
@@ -287,7 +312,7 @@ public class User {
                 throw new NoPicturesFoundExcpetion();
             } else {
                 while (result.next()) {
-                    Picture pic = Picture.getPictureById(result.getInt("id"),this.id);
+                    Picture pic = Picture.getPictureById(result.getInt("id"), this.id);
                     pic.setRanking(RankingCalculation.calculateRanking(pic, cord));
                     pictureList.add(pic);
                 }
@@ -305,7 +330,7 @@ public class User {
             return pictureList;
         }
     }
-    
+
     /**
      * returns a list of max. 100 pictures by using the top ranked pictures
      * inside a searchradius of 20km (headinformation only)
@@ -317,17 +342,15 @@ public class User {
     public List<Picture> getPicturesList(Coordinate cord) throws NoPicturesFoundExcpetion {
         return getPicturesList(cord, 20);
     }
-    
-        /**
+
+    /**
      *
      * @param listAsString , separated list of all id example: 1,2,4,6
-     * @return A map which contains all requested pictures with their Id as
-     * keys
+     * @return A map which contains all requested pictures with their Id as keys
      */
-    public Map<Integer, Picture> getPicturesStats(String listAsString) {
+    public Map<Integer, Picture> getPicturesInfos(String... listAsString) {
         HashMap<Integer, Picture> pictureList = new HashMap<>();
-        List<String> allRequestedPictures = Arrays.asList(listAsString);
-        for (String currentPictureIdAsString : allRequestedPictures) {
+        for (String currentPictureIdAsString : listAsString) {
             Integer currentPictureId = Integer.valueOf(currentPictureIdAsString);
             Picture currentPicture;
             try {
@@ -339,16 +362,26 @@ public class User {
         }
         return pictureList;
     }
-    
+
+    /**
+     * 
+     * @param picId
+     * @throws VoteFailedException 
+     */
     public synchronized void upvotePicture(int picId) throws VoteFailedException {
         Picture.upvotePicture(picId, this.id);
     }
 
+    /**
+     * 
+     * @param picId
+     * @throws VoteFailedException 
+     */
     public synchronized void downvotePicture(int picId) throws VoteFailedException {
         Picture.downvotePicture(picId, this.id);
     }
-    
-     /**
+
+    /**
      * Create an picture-object by reading out all information of the picture
      * out of the database based on the given id
      *

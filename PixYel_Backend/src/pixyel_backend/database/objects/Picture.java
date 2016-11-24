@@ -58,10 +58,10 @@ public class Picture {
             this.timestamp = result.getDate("upload_date");
             this.userId = result.getInt("userid");
             Log.logDebug("loaded basic pictureInformation", sta);
-            result = sta.executeQuery("SELECT COUNT(*)FROM picturesVotes WHERE pictureId = "+id+" AND vote = 1");
+            result = sta.executeQuery("SELECT COUNT(*)FROM picturesVotes WHERE pictureId = " + id + " AND vote = 1");
             result.next();
             this.upvotes = result.getInt(1);
-            result = sta.executeQuery("SELECT COUNT(*)FROM picturesVotes WHERE pictureId = "+id+" AND vote = -1");
+            result = sta.executeQuery("SELECT COUNT(*)FROM picturesVotes WHERE pictureId = " + id + " AND vote = -1");
             result.next();
             this.downvotes = result.getInt(1);
             this.voteStatus = userHasLikedPicture(userId, pictureId);
@@ -71,7 +71,7 @@ public class Picture {
         }
 
     }
-    
+
     /**
      * Create an picture-object by reading out all information of the picture
      * out of the database based on the given id
@@ -95,9 +95,8 @@ public class Picture {
      * @param latitude
      * @return
      * @throws PictureUploadExcpetion
-     * @throws PictureLoadException
      */
-    public static synchronized Picture addNewPicture(int userId, String pictureData, double longitude, double latitude) throws PictureUploadExcpetion, PictureLoadException {
+    public static synchronized Picture addNewPicture(int userId, String pictureData, double longitude, double latitude) throws PictureUploadExcpetion {
         int pictureId;
         try {
             Connection con = MysqlConnector.getConnection();
@@ -119,15 +118,16 @@ public class Picture {
                 statement.setString(2, pictureData);
                 statement.execute();
                 statement.close();
+                return new Picture(pictureId, userId);
             } else {
                 Log.logInfo("Failed to add picture for user \"" + userId + "\" - rootcause: picturedata is NULL or to empty string", Picture.class);
-                throw new PictureUploadExcpetion();
             }
         } catch (SQLException ex) {
             Log.logError("Could not add new picture to database - rootcause: " + ex.getMessage(), Picture.class);
-            throw new PictureUploadExcpetion();
+        } catch (PictureLoadException ex) {
+            Log.logWarning(ex.getMessage(), Picture.class);
         }
-        return new Picture(pictureId, userId);
+        throw new PictureUploadExcpetion();
     }
 
     /**
@@ -182,14 +182,31 @@ public class Picture {
         return 0;
     }
 
+    /**
+     * @param picId
+     * @param userId
+     * @throws VoteFailedException
+     */
     public static void upvotePicture(int picId, int userId) throws VoteFailedException {
         changeVote(picId, userId, 1);
     }
 
+    /**
+     *
+     * @param picId
+     * @param userId
+     * @throws VoteFailedException
+     */
     public static void downvotePicture(int picId, int userId) throws VoteFailedException {
         changeVote(picId, userId, -1);
     }
 
+    /**
+     *
+     * @param picId
+     * @param userId
+     * @throws VoteFailedException
+     */
     public static void removeVoteFromPicture(int picId, int userId) throws VoteFailedException {
         changeVote(picId, userId, 0);
     }
@@ -207,16 +224,14 @@ public class Picture {
             sta.setInt(4, pictureId);
             sta.setInt(2, userId);
             sta.setInt(5, userId);
-            sta.setInt(3,newVoteStatus);
-            sta.setInt(6,newVoteStatus);
+            sta.setInt(3, newVoteStatus);
+            sta.setInt(6, newVoteStatus);
             sta.executeUpdate();
         } catch (SQLException ex) {
             Log.logWarning(ex.getMessage(), Picture.class);
             throw new VoteFailedException();
         }
     }
-
-    
 
     /**
      * @return the id
@@ -267,10 +282,12 @@ public class Picture {
             result.next();
             return result.getString("data");
         } catch (SQLException ex) {
-            Log.logWarning("couldnt load pictureData for Id " + id, Picture.class);
+            Log.logWarning("couldnt load pictureData for Id" + id + " - rootcause: " + ex, Picture.class
+            );
             throw new PictureLoadException();
         }
     }
+
     /**
      * @return the timestamp
      */
@@ -326,5 +343,4 @@ public class Picture {
     public int getVoteStatus() {
         return voteStatus;
     }
-
 }

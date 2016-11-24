@@ -8,8 +8,6 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.SqlUtils;
@@ -28,6 +26,13 @@ public class Comment {
     private final String comment;
     private final Date commentDate;
 
+    /**
+     * Creates a new Comment-object by reading out all information from the
+     * database based on the given id
+     *
+     * @param commentId
+     * @throws CommentCreationException
+     */
     public Comment(int commentId) throws CommentCreationException {
         try {
             ResultSet result;
@@ -55,17 +60,30 @@ public class Comment {
      * next result by itself
      *
      * @param result
-     * @throws SQLException
+     * @throws pixyel_backend.database.exceptions.CommentCreationException
      */
-    public Comment(ResultSet result) throws SQLException {
-        this.commentId = result.getInt("commentid");
-        this.pictureId = result.getInt("pictureid");
-        this.userId = result.getInt("userid");
-        this.comment = result.getString("comment");
-        this.commentDate = result.getDate("comment_date");
+    public Comment(ResultSet result) throws CommentCreationException {
+        try {
+            this.commentId = result.getInt("commentid");
+            this.pictureId = result.getInt("pictureid");
+            this.userId = result.getInt("userid");
+            this.comment = result.getString("comment");
+            this.commentDate = result.getDate("comment_date");
+        } catch (SQLException ex) {
+            Log.logError("Could not create Comment  from resultset - rootcause: " + ex.getMessage(), Comment.class);
+            throw new CommentCreationException();
+        }
     }
 
-    public static void newComment(int pictureId, int userId, String comment) {
+    /**
+     * Addes a new Comment to the database
+     *
+     * @param pictureId
+     * @param userId
+     * @param comment
+     * @throws CommentCreationException
+     */
+    public static void newComment(int pictureId, int userId, String comment) throws CommentCreationException {
         Connection con = MysqlConnector.getConnection();
         PreparedStatement statement;
         try {
@@ -84,6 +102,7 @@ public class Comment {
         } catch (SQLException ex) {
             Log.logError("Could not read Commentinformation from database - rootcause: " + ex.getMessage(), Comment.class);
         }
+        throw new CommentCreationException();
     }
 
     /**
@@ -148,7 +167,7 @@ public class Comment {
     }
 
     /**
-     *
+     * Returns a list of all comments that are linked to the given pictureId
      * @param pictureId
      * @return commentList -> all comments that match the PictureId in order to
      * their insertion date.
@@ -164,7 +183,12 @@ public class Comment {
             ResultSet resultSet = sta.executeQuery();
 
             while (resultSet.next()) {
-                Comment comment = new Comment(resultSet);
+                Comment comment;
+                try {
+                    comment = new Comment(resultSet);
+                } catch (CommentCreationException ex) {
+                   comment = null;
+                }
                 commentList.add(comment);
             }
         } catch (SQLException ex) {
@@ -174,10 +198,18 @@ public class Comment {
 
     }
 
-    public static void deleteComment(int commentId) throws SQLException {
+    /**
+     * Deletes the Comment out of the database
+     * @param commentId
+     * @throws java.lang.Exception
+     */
+    public static void deleteComment(int commentId) throws Exception {
         Connection con = MysqlConnector.getConnection();
-        PreparedStatement sta = con.prepareStatement("DELETE FROM comments WHERE commentid LIKE ?");
-        sta.setInt(1, commentId);
-        sta.executeQuery();
+        try (PreparedStatement sta = con.prepareStatement("DELETE FROM comments WHERE commentid LIKE ?")) {
+            sta.setInt(1, commentId);
+            sta.executeQuery();
+        } catch (Exception ex) {
+            Log.logWarning("Couldent delete comment " + commentId + " - rootcause: " + ex, Comment.class);
+        }
     }
 }

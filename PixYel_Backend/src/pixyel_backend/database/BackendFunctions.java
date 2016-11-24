@@ -5,7 +5,6 @@
  */
 package pixyel_backend.database;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,10 +41,9 @@ public class BackendFunctions {
      * @return A map which contains all requested pictureData with their Id as
      * keys
      */
-    public static Map<Integer, String> getPicturesData(String listAsString) {
+    public static Map<Integer, String> getPicturesData(String... listAsString) {
         HashMap<Integer, String> pictureList = new HashMap<>();
-        List<String> allRequestedPictures = Arrays.asList(listAsString);
-        for (String currentPictureIdAsString : allRequestedPictures) {
+        for (String currentPictureIdAsString : listAsString) {
             Integer currentPictureId = Integer.valueOf(currentPictureIdAsString);
             String currentPictureData;
             try {

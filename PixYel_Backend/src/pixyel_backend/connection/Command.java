@@ -83,9 +83,6 @@ public class Command {
                     case "disconnect":
                         disconnect(xml, client);
                         break;
-                    case "alive":
-                        alive(xml, client);
-                        break;
                 }
             }
         } catch (Exception e) {
@@ -408,15 +405,6 @@ public class Command {
      */
     public static void disconnect(XML input, Client client) {
         client.disconnect(true);
-    }
-
-    /**
-     *
-     * @param input
-     * @param client
-     */
-    public static void alive(XML input, Client client) {
-        client.checkClientAlive(true);
     }
 
 }

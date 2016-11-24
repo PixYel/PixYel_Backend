@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -102,20 +104,6 @@ public class Client implements Runnable {
         if (receivedString.endsWith("\\n")) {
             receivedString = receivedString.substring(0, receivedString.length() - 2);
         }
-        //------------TEMP-START-------------
-        if (receivedString.equals("echo")) {
-            PrintWriter raus;
-            try {
-                Log.logInfo("Sending primitive Echo", this);
-                raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-                raus.println("echo zurueck " + new java.util.Date().toString());
-                raus.flush();
-            } catch (IOException ex) {
-                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            return;
-        }
-        //--------------TEMP-END-------------
         try {
             Log.logDebug("ENCRYPTED_RECEIVED: " + receivedString, this);
             String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
@@ -123,6 +111,7 @@ public class Client implements Runnable {
             String decompressed = Compression.decompress(decrypted);
             Log.logDebug("PLAIN_RECEIVED: " + decompressed, this);
             XML xml = XML.openXML(decompressed);
+            lastCommandReceivedOn = System.currentTimeMillis();
             Command.onCommandReceived(this, xml);
         } catch (XML.XMLException ex) {
             Log.logWarning("Client " + getName() + " has send an invalid String to parse as XML: " + ex, this);
@@ -141,8 +130,6 @@ public class Client implements Runnable {
      * @param expected Is the disconnect expected?
      */
     public void disconnect(boolean expected) {
-        if (userdata != null) {
-        }
         if (listener != null) {
             listener.shutdown();
         }
@@ -169,24 +156,23 @@ public class Client implements Runnable {
         }
     }
 
-    boolean online = true;
+    private long lastCommandReceivedOn = System.currentTimeMillis();
+    private int clientTimeOutInSeconds = 60;
 
     /**
      * Checks if the Client is still alive
      *
-     * @param fromClient If true, this is a call from the client, if false, a
-     * call from the scheduler
      */
-    public void checkClientAlive(boolean fromClient) {
-        if (fromClient) {//If the client has send an alive signal and confirmed, that he is online
-            online = true;
-        } else if (online) {//If its time to check if the client is online and he has responsed in the last periode
-            online = false;
-            sendToClient(XML.createNewXML("alive"));
-        } else {//If its time to check if the client is online and he hasnt responsed in the last period
-            Log.logWarning("Client " + getName() + " has lost the connection", this);
-            //disconnect(true);
-        }
+    public void checkClientAlive() {
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if ((lastCommandReceivedOn + (clientTimeOutInSeconds * 1000)) < System.currentTimeMillis()) {
+                    disconnect(false);
+                }
+            }
+        }, 0, clientTimeOutInSeconds * 1000);
     }
 
     /**

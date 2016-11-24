@@ -152,7 +152,6 @@ public class Picture {
         } catch (SQLException ex) {
             Log.logWarning("Failed to flag picture " + pictureId + " rootcause: - " + ex, Comment.class);
             throw new FlagFailedExcpetion();
-
         }
     }
 

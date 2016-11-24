@@ -64,7 +64,7 @@ public class PictureTest {
         assertEquals(0, pic.getDownvotes());
         assertEquals(0, pic.getUpvotes());
         user.downvotePicture(pic.getId());
-        pic = user.getPictureById(pic.getId());
+        pic = user.getPicture(pic.getId());
         assertEquals(-1, pic.getVoteStatus());
         assertEquals(1, pic.getDownvotes());
     }

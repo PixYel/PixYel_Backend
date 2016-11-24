@@ -83,27 +83,7 @@ public class Comment {
      * @param comment
      * @throws CommentCreationException
      */
-    public static void newComment(int pictureId, int userId, String comment) throws CommentCreationException {
-        Connection con = MysqlConnector.getConnection();
-        PreparedStatement statement;
-        try {
-            statement = con.prepareStatement("INSERT INTO comments (pictureid, userid, comment) VALUES(?,?,?)");
-
-            if (comment != null && comment.length() >= 2) {
-                comment = SqlUtils.escapeString(comment);
-                statement.setInt(1, pictureId);
-                statement.setInt(2, userId);
-                statement.setString(3, comment);
-                statement.executeUpdate();
-                statement.close();
-            } else {
-                Log.logInfo("Failed to create comment for user \"" + userId + "\" - rootcause: Comment is NULL or to short", Comment.class);
-            }
-        } catch (SQLException ex) {
-            Log.logError("Could not read Commentinformation from database - rootcause: " + ex.getMessage(), Comment.class);
-        }
-        throw new CommentCreationException();
-    }
+    
 
     /**
      * @return the commentId
@@ -140,6 +120,28 @@ public class Comment {
         return commentDate;
     }
 
+    public static void addComment(int pictureId, int userId, String comment) throws CommentCreationException {
+        Connection con = MysqlConnector.getConnection();
+        PreparedStatement statement;
+        try {
+            statement = con.prepareStatement("INSERT INTO comments (pictureid, userid, comment) VALUES(?,?,?)");
+
+            if (comment != null && comment.length() >= 2) {
+                comment = SqlUtils.escapeString(comment);
+                statement.setInt(1, pictureId);
+                statement.setInt(2, userId);
+                statement.setString(3, comment);
+                statement.executeUpdate();
+                statement.close();
+            } else {
+                Log.logInfo("Failed to create comment for user \"" + userId + "\" - rootcause: Comment is NULL or to short", Comment.class);
+            }
+        } catch (SQLException ex) {
+            Log.logError("Could not read Commentinformation from database - rootcause: " + ex.getMessage(), Comment.class);
+        }
+        throw new CommentCreationException();
+    }
+    
     /**
      * Adds a flag
      *
@@ -147,7 +149,7 @@ public class Comment {
      * @param commentId
      * @throws FlagFailedExcpetion
      */
-    public static void addFlag(int userId, int commentId) throws FlagFailedExcpetion {
+    public static void flagComment(int userId, int commentId) throws FlagFailedExcpetion {
         try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT id FROM commentflags WHERE commentid = ? AND  userid = ?")) {
             statement.setInt(1, commentId);
             statement.setInt(2, userId);

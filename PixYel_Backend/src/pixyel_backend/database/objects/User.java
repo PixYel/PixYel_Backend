@@ -4,7 +4,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -265,7 +264,7 @@ public class User {
      * @see pixyel_backend.database.objects.Comment.addFlag
      */
     public synchronized void flagComment(int commentId) throws FlagFailedExcpetion {
-        Comment.addFlag(this.id, commentId);
+        Comment.flagComment(this.id, commentId);
     }
 
     /**
@@ -275,7 +274,7 @@ public class User {
      * @see pixyel_backend.database.objects.Comment
      */
     public void addNewComment(String text, int refersToPicuture) throws CommentCreationException {
-        Comment.newComment(refersToPicuture, id, text);
+        Comment.addComment(refersToPicuture, id, text);
     }
 
     /**
@@ -298,7 +297,7 @@ public class User {
         Picture.flagPic(id, pictureId);
     }
 
-    public List<Picture> getPicturesList(Coordinate cord, int searchDistance) throws NoPicturesFoundExcpetion {
+    public List<Picture> getPicturesByLocation(Coordinate cord, int searchDistance) throws NoPicturesFoundExcpetion {
         List<Picture> pictureList = new LinkedList();
         List<Coordinate> searchArea = cord.getSearchArea(searchDistance);
         try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT id FROM picturesInfo WHERE (longitude BETWEEN ? AND ?) AND (latitude BETWEEN ? AND ?)")) {
@@ -339,8 +338,8 @@ public class User {
      * @return
      * @throws pixyel_backend.database.exceptions.NoPicturesFoundExcpetion
      */
-    public List<Picture> getPicturesList(Coordinate cord) throws NoPicturesFoundExcpetion {
-        return getPicturesList(cord, 20);
+    public List<Picture> getPicturesByLocation(Coordinate cord) throws NoPicturesFoundExcpetion {
+        return getPicturesByLocation(cord, 20);
     }
 
     /**
@@ -348,7 +347,7 @@ public class User {
      * @param listAsString , separated list of all id example: 1,2,4,6
      * @return A map which contains all requested pictures with their Id as keys
      */
-    public Map<Integer, Picture> getPicturesInfos(String... listAsString) {
+    public Map<Integer, Picture> getPictures(String... listAsString) {
         HashMap<Integer, Picture> pictureList = new HashMap<>();
         for (String currentPictureIdAsString : listAsString) {
             Integer currentPictureId = Integer.valueOf(currentPictureIdAsString);
@@ -390,7 +389,7 @@ public class User {
      * @throws PictureLoadException if there is no picture in the database for
      * the given id
      */
-    public Picture getPictureById(int picId) throws PictureLoadException {
+    public Picture getPicture(int picId) throws PictureLoadException {
         return Picture.getPictureById(picId, this.id);
     }
 

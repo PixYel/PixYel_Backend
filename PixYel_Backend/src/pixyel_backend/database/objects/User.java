@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import pixyel_backend.Log;
-import pixyel_backend.database.BackendFunctions;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
@@ -339,10 +338,10 @@ public class User {
                 }
             }
         } catch (SQLException ex) {
-            Log.logWarning(ex.toString(), BackendFunctions.class);
+            Log.logWarning(ex.toString(), User.class);
             throw new NoPicturesFoundExcpetion();
         } catch (PictureLoadException ex) {
-            Log.logWarning(ex.getMessage(), BackendFunctions.class);
+            Log.logWarning(ex.getMessage(), User.class);
         }
         pictureList.sort((Picture pic1, Picture pic2) -> Integer.compare(pic1.getRanking(), pic2.getRanking()));
         if (pictureList.size() > 100) {

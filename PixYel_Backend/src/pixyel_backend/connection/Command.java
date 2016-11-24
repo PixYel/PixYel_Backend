@@ -95,6 +95,12 @@ public class Command {
 
     }
 
+    /**
+     * 
+     * @param input
+     * @param client
+     * @return 
+     */
     public static XML getItemList(XML input, Client client) {
         XML location = input.getFirstChild();
         int longt = Integer.valueOf(location.getFirstChild("long").getContent());
@@ -122,6 +128,12 @@ public class Command {
         return XML.createNewXML("setItemList");
     }
 
+    /**
+     * 
+     * @param input
+     * @param client
+     * @return 
+     */
     public static XML getItem(XML input, Client client) {
         int id = Integer.valueOf(input.getFirstChild("id").getContent());
 
@@ -146,6 +158,12 @@ public class Command {
         return XML.createNewXML("setItem");
     }
 
+    /**
+     * 
+     * @param input
+     * @param client
+     * @return 
+     */
     public static XML getItemStats(XML input, Client client) {
         int id = Integer.valueOf(input.getFirstChild("id").getContent());
 

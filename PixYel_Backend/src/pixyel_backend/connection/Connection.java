@@ -98,12 +98,12 @@ public class Connection implements Runnable {
         try {
             SERVER = new ServerSocket(7331);
         } catch (java.net.BindException e) {
-            Log.logError("Adress already binded, is there an existing server running?: " + e.getMessage(), this);
-            Log.logError("Shutting down this server to prevent double servers!", this);
+            Log.logError("Adress already binded, is there an existing server running?: " + e.getMessage(), Connection.class);
+            Log.logError("Shutting down this server to prevent double servers!", Connection.class);
             System.exit(0);
             return;
         } catch (IOException ex) {
-            Log.logError("Server could not be started: " + ex.getMessage(), this);
+            Log.logError("Server could not be started: " + ex.getMessage(), Connection.class);
             System.exit(0);
             return;
         }

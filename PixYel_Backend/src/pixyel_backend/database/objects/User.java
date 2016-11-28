@@ -232,7 +232,7 @@ public class User {
             sta.setString(1, SqlUtils.escapeString(value));
             sta.execute();
         } catch (SQLException ex) {
-            Log.logError("Could not update user value \"" + key + "\" - rootcause:" + ex.getMessage(), this);
+            Log.logError("Could not update user value \"" + key + "\" - rootcause:" + ex.getMessage(), User.class);
         }
     }
 
@@ -247,7 +247,7 @@ public class User {
             sta.setInt(1, value);
             sta.execute();
         } catch (SQLException ex) {
-            Log.logError("Could not update user value \"" + key + "\" - rootcause:" + ex.getMessage(), this);
+            Log.logError("Could not update user value \"" + key + "\" - rootcause:" + ex.getMessage(), User.class);
         }
 
     }
@@ -268,7 +268,7 @@ public class User {
             sta.executeUpdate();
 
         } catch (Exception e) {
-            Log.logWarning("Could not delete user \"" + this.id + "\" - rootcause:" + e, this);
+            Log.logWarning("Could not delete user \"" + this.id + "\" - rootcause:" + e, User.class);
         }
     }
 

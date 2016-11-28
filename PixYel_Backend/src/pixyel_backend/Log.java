@@ -20,10 +20,11 @@ public class Log {
     /**
      * It is logging the logMessage as a Info
      *
+     * @param <T> The Type of the object (The classname)
      * @param logMessage The message to be logged
      * @param clasS The classname of the class of the message
      */
-    public static void logInfo(String logMessage, Object clasS) {
+    public static <T> void logInfo(String logMessage, Class<T> clasS) {
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "INFO:    ";
         for (String line : lines) {
@@ -34,10 +35,11 @@ public class Log {
     /**
      * It is logging the logMessage as a error
      *
+     * @param <T> The Type of the object (The classname)
      * @param logMessage The message to be logged
      * @param clasS The classname of the class of the message
      */
-    public static void logError(String logMessage, Object clasS) {
+    public static <T> void logError(String logMessage, Class<T> clasS) {
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "ERROR:   ";
         for (String line : lines) {
@@ -48,10 +50,11 @@ public class Log {
     /**
      * It is logging the logMessage as a warning
      *
+     * @param <T> The Type of the object (The classname)
      * @param logMessage The message to be logged
      * @param clasS The classname of the class of the message
      */
-    public static void logWarning(String logMessage, Object clasS) {
+    public static <T> void logWarning(String logMessage, Class<T> clasS) {
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "WARNING: ";
         for (String line : lines) {
@@ -63,10 +66,11 @@ public class Log {
      * If the {@link Main.DEBUG} parameter is set to true, it is logging the
      * logMessage
      *
+     * @param <T> The Type of the object (The classname)
      * @param logMessage The message to be logged
      * @param clasS The classname of the class of the message
      */
-    public static void logDebug(String logMessage, Object clasS) {
+    public static <T> void logDebug(String logMessage, Class<T> clasS) {
         if (Main.DEBUG) {
             String[] lines = logMessage.split("\\r?\\n");
             String toPrint = getClassNameWithDate(clasS) + "DEBUG:   ";
@@ -82,10 +86,10 @@ public class Log {
      *
      * @param clasS The class to extract the classname from
      */
-    private static String getClassNameWithDate(Object clasS) {
+    private static <T> String getClassNameWithDate(Class<T> clasS) {
         String result = "";
         int currentLengthOfClassName;
-        String className = clasS.getClass().getTypeName();
+        String className = clasS.getTypeName();
         className = className.substring(className.lastIndexOf(".") + 1);
         if (className.contains("$")) {
             className = className.substring(0, className.lastIndexOf("$"));

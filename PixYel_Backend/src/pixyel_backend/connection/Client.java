@@ -38,7 +38,7 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
-        Log.logDebug("Client " + getName() + " started", this);
+        Log.logDebug("Client " + getName() + " started", Client.class);
         startInputListener();
         startClientAliveChecker();
     }
@@ -51,11 +51,11 @@ public class Client implements Runnable {
     public void sendToClient(XML toSend) {
         if (userdata == null || userdata.getPublicKey() == null || userdata.getPublicKey().isEmpty()) {
             if (userdata == null) {
-                Log.logWarning("Cant send XML: Client " + getName() + " has no userdata, needs to log in first", this);
+                Log.logWarning("Cant send XML: Client " + getName() + " has no userdata, needs to log in first", Client.class);
             } else if (userdata.getPublicKey() == null) {
-                Log.logWarning("Cant send XML: Client " + getName() + "s PublicKey is null , needs to log in first", this);
+                Log.logWarning("Cant send XML: Client " + getName() + "s PublicKey is null , needs to log in first", Client.class);
             } else if (userdata.getPublicKey().isEmpty()) {
-                Log.logWarning("Cant send XML: Client " + getName() + "s PublicKey is an empty String, needs to log in first", this);
+                Log.logWarning("Cant send XML: Client " + getName() + "s PublicKey is an empty String, needs to log in first", Client.class);
             }
             return;
         }
@@ -63,23 +63,23 @@ public class Client implements Runnable {
             toSend = XML.createNewXML("reply").addChild(toSend);
         }
         try {
-            Log.logDebug("PLAIN_TO_SEND: " + toSend, this);
+            Log.logDebug("PLAIN_TO_SEND: " + toSend, Client.class);
             String compressed = Compression.compress(toSend.toString());
-            Log.logDebug("COMPRESSED_TO_SEND: " + compressed, this);
+            Log.logDebug("COMPRESSED_TO_SEND: " + compressed, Client.class);
             String encrypted = Encryption.encrypt(compressed, userdata.getPublicKey());
-            Log.logDebug("ENCRYPTED_TO_SEND: " + encrypted, this);
+            Log.logDebug("ENCRYPTED_TO_SEND: " + encrypted, Client.class);
             PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
             raus.println(encrypted);
             raus.flush();
-            Log.logDebug("Successfullly send XML", this);
+            Log.logDebug("Successfullly send XML", Client.class);
         } catch (Compression.CompressionException | Encryption.EncryptionException | IOException e) {
             if (e.toString().contains("Socket is closed")) {
-                Log.logWarning("Could not send String beacuase the socket is closed, closing the connection to " + getName() + " now: " + e, this);
+                Log.logWarning("Could not send String beacuase the socket is closed, closing the connection to " + getName() + " now: " + e, Client.class);
                 this.disconnect(false);
             } else if (e.toString().contains("socket write error")) {
-                Log.logWarning("Could not write on Socket from " + getName() + ": " + e, this);
+                Log.logWarning("Could not write on Socket from " + getName() + ": " + e, Client.class);
             } else {
-                Log.logWarning("String(" + toSend + ") could not be send to " + getName() + ": " + e, this);
+                Log.logWarning("String(" + toSend + ") could not be send to " + getName() + ": " + e, Client.class);
             }
         }
     }
@@ -95,22 +95,22 @@ public class Client implements Runnable {
             receivedString = receivedString.substring(0, receivedString.length() - 2);
         }
         try {
-            Log.logDebug("ENCRYPTED_RECEIVED: " + receivedString, this);
+            Log.logDebug("ENCRYPTED_RECEIVED: " + receivedString, Client.class);
             String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
-            Log.logDebug("DECRYPTED_RECEIVED: " + decrypted, this);
+            Log.logDebug("DECRYPTED_RECEIVED: " + decrypted, Client.class);
             String decompressed = Compression.decompress(decrypted);
-            Log.logDebug("PLAIN_RECEIVED: " + decompressed, this);
+            Log.logDebug("PLAIN_RECEIVED: " + decompressed, Client.class);
             XML xml = XML.openXML(decompressed);
             lastCommandReceivedOn = System.currentTimeMillis();
             Command.onCommandReceived(this, xml);
         } catch (XML.XMLException ex) {
-            Log.logWarning("Client " + getName() + " has send an invalid String to parse as XML: " + ex, this);
+            Log.logWarning("Client " + getName() + " has send an invalid String to parse as XML: " + ex, Client.class);
         } catch (Encryption.EncryptionException ex) {
-            Log.logWarning("Client " + getName() + " has send an invalid String to decrypt: " + ex, this);
+            Log.logWarning("Client " + getName() + " has send an invalid String to decrypt: " + ex, Client.class);
         } catch (Compression.CompressionException ex) {
-            Log.logWarning("Client " + getName() + " has send an invalid String to decompress: " + ex, this);
+            Log.logWarning("Client " + getName() + " has send an invalid String to decompress: " + ex, Client.class);
         } catch (Exception ex) {
-            Log.logWarning("Client " + getName() + " has send an invalid String: " + ex, this);
+            Log.logWarning("Client " + getName() + " has send an invalid String: " + ex, Client.class);
         }
     }
 
@@ -129,7 +129,7 @@ public class Client implements Runnable {
         try {
             socket.close();
         } catch (Exception e) {
-            Log.logError("Could not close the socket of the client " + getName(), this);
+            Log.logError("Could not close the socket of the client " + getName(), Client.class);
         }
     }
 
@@ -162,7 +162,7 @@ public class Client implements Runnable {
             @Override
             public void run() {
                 if ((lastCommandReceivedOn + (clientTimeOutInSeconds * 1000)) < System.currentTimeMillis()) {
-                    Log.logInfo("Client " + getName() + " was too long inactive! Disconnecting...", this);
+                    Log.logInfo("Client " + getName() + " was too long inactive! Disconnecting...", Client.class);
                     disconnect(false);
                 }
             }
@@ -177,12 +177,12 @@ public class Client implements Runnable {
     public void startInputListener() {
         listener = Executors.newSingleThreadExecutor();
         listener.submit(() -> {
-            //Log.logInfo("Inputlistener for Client " + getName() + " started", this);
+            //Log.logInfo("Inputlistener for Client " + getName() + " started", Client.class);
             BufferedReader rein;
             try {
                 rein = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             } catch (IOException ex) {
-                Log.logError("Could not create InputStream for the client " + getName() + ": " + ex, this);
+                Log.logError("Could not create InputStream for the client " + getName() + ": " + ex, Client.class);
                 return;
             }
             String string;
@@ -199,7 +199,7 @@ public class Client implements Runnable {
                     if (string != null) {
                         onStringReceived(string);
                     } else {
-                        Log.logWarning("Client " + getName() + " is sending NULL Strings", this);
+                        Log.logWarning("Client " + getName() + " is sending NULL Strings", Client.class);
                     }
                 } catch (IOException exe) {
                     if (lookingForInput) {
@@ -207,16 +207,16 @@ public class Client implements Runnable {
                             case "java.net.SocketException: Connection reset":
                             case "java.net.SocketException: Socket closed":
                             case "java.net.SocketException: Software caused connection abort: recv failed":
-                                Log.logWarning("Client " + getName() + " has lost Connection: " + exe + ", shuting down the connection to the client", this);
+                                Log.logWarning("Client " + getName() + " has lost Connection: " + exe + ", shuting down the connection to the client", Client.class);
                                 disconnect(true);
                                 return;
                             case "invalid stream header":
                                 //Jemand sendet zu lange Strings
-                                Log.logError("Steam header too long, received String from " + getName() + " too long??!?: " + exe, this);
+                                Log.logError("Steam header too long, received String from " + getName() + " too long??!?: " + exe, Client.class);
                                 disconnect(true);
                                 return;
                             default:
-                                Log.logError("Could not read incomming message from " + getName() + ": " + exe, this);
+                                Log.logError("Could not read incomming message from " + getName() + ": " + exe, Client.class);
                                 break;
                         }
                     }
@@ -232,7 +232,7 @@ public class Client implements Runnable {
      */
     protected void setUserdata(User user) {
         if (user == null) {
-            Log.logDebug("No User to be set", this);
+            Log.logDebug("No User to be set", Client.class);
         }
         this.userdata = user;
         Connection.removePossibleDoubleClients(this);

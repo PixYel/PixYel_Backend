@@ -1,6 +1,5 @@
 package pixyel_backend.database;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -20,7 +19,7 @@ public class DatabaseCleanUpService implements Runnable {
      * days but didn't finished the account validation
      */
     public void CleanUnregistratedUsers() {
-        Log.logInfo("Cleaning usertable", this);
+        Log.logInfo("Cleaning usertable", DatabaseCleanUpService.class);
         try {
             try (Statement sta = MysqlConnector.getConnection().createStatement()) {
                 Instant instant = Instant.now().minus(3, ChronoUnit.DAYS);
@@ -28,7 +27,7 @@ public class DatabaseCleanUpService implements Runnable {
                 sta.executeLargeUpdate("DELETE FROM Users WHERE status = 0 AND reg_date < '" + currentTimestamp + "'");
             }
         } catch (SQLException ex) {
-            Log.logWarning("Could not clean up unregistered users - root cause: " + ex, this);
+            Log.logWarning("Could not clean up unregistered users - root cause: " + ex, DatabaseCleanUpService.class);
         }
     }
 
@@ -43,7 +42,7 @@ public class DatabaseCleanUpService implements Runnable {
         TimerTask dalyTask = new TimerTask() {
             @Override
             public void run() {
-                Log.logInfo("Starting DatabaseCleanupService", this);
+                Log.logInfo("Starting DatabaseCleanupService", DatabaseCleanUpService.class);
                 CleanUnregistratedUsers();
             }
         };

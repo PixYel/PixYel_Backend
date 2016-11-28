@@ -632,6 +632,16 @@ public class XML {
         }
         return getXMLByElement((Element) chi);
     }
+    
+    /**
+     * Adds a child with content to this node
+     * @param childname The name of the new child to be added
+     * @param content The content of the new child
+     * @return The newly added child as XML
+     */
+    public XML addChild(String childname, String content){
+        return addChild(childname).setContent(content);
+    }
 
     /**
      * Removes this node and with it all its children, attributes and contents

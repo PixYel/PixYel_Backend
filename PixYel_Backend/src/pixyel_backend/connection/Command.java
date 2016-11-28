@@ -217,7 +217,7 @@ public class Command {
         DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         String date = " " + dateFormat.format(new Date()) + " ";
         Log.logInfo("Sending echo to client " + client.getName(), Command.class);
-        return XML.createNewXML("echo_zurueck").setContent(date);
+        return XML.createNewXML("echo").setContent(date);
     }
 
     /**

@@ -123,7 +123,7 @@ public class Connection implements Runnable {
      * accepting new clients
      */
     private static void onServerStarted() {
-        Log.logInfo("Server reachable on " + SERVER.getLocalSocketAddress() + ":" + SERVER.getLocalPort(), Connection.class);
+        Log.logInfo("Server reachable on " + SERVER.getLocalSocketAddress(), Connection.class);
     }
 
     /**

@@ -9,12 +9,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.exceptions.CommentCreationException;
 import pixyel_backend.database.exceptions.FlagFailedExcpetion;
-import pixyel_backend.database.exceptions.NoPicturesFoundExcpetion;
 import pixyel_backend.database.exceptions.PictureLoadException;
 import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 import pixyel_backend.database.exceptions.UserCreationException;
@@ -102,26 +99,21 @@ public class Command {
         int longt = Integer.valueOf(location.getFirstChild("long").getContent());
         int lat = Integer.valueOf(location.getFirstChild("lat").getContent());
 
-        try {
-            List<Picture> pictures = client.getUserdata().getPicturesByLocation(new Coordinate(longt, lat));
+        List<Picture> pictures = client.getUserdata().getPicturesByLocation(new Coordinate(longt, lat));
 
-            XML toSend = XML.createNewXML("setItemList");
-            pictures.stream().forEach((picture) -> {
-                XML item = toSend.addChild("item");
-                item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date");
-                item.getFirstChild("id").setContent(String.valueOf(picture.getId()));
-                item.getFirstChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
-                item.getFirstChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
-                item.getFirstChild("votedByUser").setContent(String.valueOf(picture.getVoteStatus()));
-                item.getFirstChild("rank").setContent(String.valueOf(picture.getRanking()));
-                item.getFirstChild("date").setContent(Utils.getDate(picture.getTimestamp()));
-            });
-            Log.logInfo("Sending list of ItemStats to client " + client.getName(), Command.class);
-            return toSend;
-        } catch (NoPicturesFoundExcpetion ex) {
-            Log.logWarning("Could not get Pictures for client " + client.getName(), Command.class);
-        }
-        return XML.createNewXML("setItemList");
+        XML toSend = XML.createNewXML("setItemList");
+        pictures.stream().forEach((picture) -> {
+            XML item = toSend.addChild("item");
+            item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date");
+            item.getFirstChild("id").setContent(String.valueOf(picture.getId()));
+            item.getFirstChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
+            item.getFirstChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
+            item.getFirstChild("votedByUser").setContent(String.valueOf(picture.getVoteStatus()));
+            item.getFirstChild("rank").setContent(String.valueOf(picture.getRanking()));
+            item.getFirstChild("date").setContent(Utils.getDate(picture.getTimestamp()));
+        });
+        Log.logInfo("Sending list of ItemStats to client " + client.getName(), Command.class);
+        return toSend;
     }
 
     /**

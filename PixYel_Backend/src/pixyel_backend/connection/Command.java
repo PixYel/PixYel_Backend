@@ -188,7 +188,7 @@ public class Command {
             try {
                 client.setUserdata(User.addNewUser(input.getFirstChild("storeId").getContent()));
             } catch (UserCreationException ex1) {
-                Log.logError("Could note create new User " + client.getName() + ": " + ex, Command.class);
+                Log.logError("Could note create new User " + client.getName() + ": " + ex1, Command.class);
                 return null;
             }
         } catch (UserCreationException ex) {
@@ -201,7 +201,7 @@ public class Command {
             toSend = XML.createNewXML("loginSuccessful").setContent("true");
             Log.logInfo("Successfully logged " + client.getName() + " in", Command.class);
         } catch (Exception e) {
-            toSend = XML.createNewXML("loginSuccessful").setContent("false");
+            toSend = XML.createNewXML("loginUnsuccessful").setContent("false");
             Log.logWarning("Failed to log " + client.getName() + " in: " + e, Command.class);
         }
         return toSend;

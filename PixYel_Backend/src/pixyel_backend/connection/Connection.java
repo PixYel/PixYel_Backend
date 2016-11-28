@@ -1,13 +1,9 @@
 package pixyel_backend.connection;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import pixyel_backend.Log;
@@ -18,18 +14,18 @@ import pixyel_backend.Log;
  */
 public class Connection implements Runnable {
 
-    private static ServerSocket SERVER = null;
+    private static ServerSocket SERVER;
+    private static final ExecutorService CLIENTTHREADPOOL = Executors.newCachedThreadPool();
+
     private static final HashMap<Integer, Client> CONNECTEDCLIENTS = new HashMap<>();//All online clients
     private static final HashMap<String, Client> LOGGEDINCLIENTS = new HashMap<>();//All logged in clients
-    private static final HashMap<InetAddress, Client> CONNECTEDIPS = new HashMap<>();
-    private static final ExecutorService CLIENTTHREADPOOL = Executors.newCachedThreadPool();
 
     /**
      * Here the server is going to be started.
      *
      */
     public static void start() {
-        Executors.newFixedThreadPool(1).submit(new Connection());
+        Executors.newSingleThreadExecutor().submit(new Connection());
     }
 
     /**
@@ -66,14 +62,17 @@ public class Connection implements Runnable {
 
     /**
      * Should be called right after a client has logged in
+     *
      * @param client The new Client which has logged in
      */
-    public static void checkForDoubleClients(Client client){
-        //if (CONNECTEDCLIENTS) {
-            
-        //}
+    public static void removePossibleDoubleClients(Client client) {
+        if (LOGGEDINCLIENTS.containsKey(client.getName())) {
+            LOGGEDINCLIENTS.get(client.getName()).disconnect(true);
+            Log.logInfo("Removing old client from " + client.getName(), Connection.class);
+        }
+        LOGGEDINCLIENTS.put(client.getName(), client);
     }
-    
+
     /**
      * Stops the server
      *
@@ -102,14 +101,15 @@ public class Connection implements Runnable {
             Log.logError("Adress already binded, is there an existing server running?: " + e.getMessage(), this);
             Log.logError("Shutting down this server to prevent double servers!", this);
             System.exit(0);
+            return;
         } catch (IOException ex) {
             Log.logError("Server could not be started: " + ex.getMessage(), this);
+            System.exit(0);
+            return;
         }
         onServerStarted();
         listenForClients();
     }
-
-
 
     /**
      * Calls this Method just before its closing its socket

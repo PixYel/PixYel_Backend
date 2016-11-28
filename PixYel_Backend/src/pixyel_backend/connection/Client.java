@@ -15,8 +15,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.connection.compression.Compression;
 import pixyel_backend.connection.encryption.Encryption;
@@ -148,7 +146,6 @@ public class Client implements Runnable {
         }
     }
 
-
     private long lastCommandReceivedOn = System.currentTimeMillis();
     private int clientTimeOutInSeconds = 60;
 
@@ -230,6 +227,7 @@ public class Client implements Runnable {
             Log.logDebug("No User to be set", this);
         }
         this.userdata = user;
+        Connection.removePossibleDoubleClients(this);
     }
 
     /**

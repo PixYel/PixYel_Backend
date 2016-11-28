@@ -18,8 +18,7 @@ import java.util.Base64;
 public class Encryption {
 
     static final int KEYLENGTH = 2048;
-    static final int DEFAULTBLOCKSIZE = (KEYLENGTH / 8) - 16;
-    static final int SECONDBLOCKSIZE = (KEYLENGTH / 8) - 11;
+    static final int BLOCKSIZE = (KEYLENGTH / 8) - 16;
 
     /**
      * Generates the Key-Pair which contains the public and the private key<p>
@@ -121,7 +120,7 @@ public class Encryption {
             byte[] textAsBytes = toEncrypt.getBytes("UTF8");
             //I dont know why but this is the max amount of encryption data
             int encryptedKeyLength = (KEYLENGTH / 8);
-            int maxBytesToEncrypt = DEFAULTBLOCKSIZE;
+            int maxBytesToEncrypt = BLOCKSIZE;
             int amountOfSplitting = textAsBytes.length / maxBytesToEncrypt;
             if (textAsBytes.length % maxBytesToEncrypt != 0) {
                 amountOfSplitting += 1;
@@ -189,10 +188,6 @@ public class Encryption {
      * process
      */
     public static String decrypt(String toDecrypt, String privateKey) throws EncryptionException {
-        return decrypt(toDecrypt, privateKey, DEFAULTBLOCKSIZE);
-    }
-
-    private static String decrypt(String toDecrypt, String privateKey, int blockSize) throws EncryptionException {
         if (toDecrypt == null || toDecrypt.isEmpty()) {
             throw new EncryptionException("The String to be decrypted is null or empty");
         }
@@ -212,8 +207,9 @@ public class Encryption {
 
             //I dont know why but this is the max amount of encryption data
             int encryptedKeyLength = (KEYLENGTH / 8);
+            int maxBytesToEncrypt = BLOCKSIZE;//TODO -11
             int amountOfSplitting = encrypted.length / encryptedKeyLength;
-            int textLength = (amountOfSplitting - 1) * blockSize;
+            int textLength = (amountOfSplitting - 1) * maxBytesToEncrypt;//Not the final value!
             boolean once = true;
 
             byte[][] textAsList = new byte[amountOfSplitting][encryptedKeyLength];
@@ -227,27 +223,24 @@ public class Encryption {
                 if (once) {//determines the length of the final string, this is done only in the first run of the for.
                     once = false;
                     //merges the arrays to one single array
-                    if (textAsList[textAsList.length - 1].length != blockSize) {//If the last array of the textlist is != maxbytesToEncrypt (e.g. 245)
+                    if (textAsList[textAsList.length - 1].length != maxBytesToEncrypt) {//If the last array of the textlist is != maxbytesToEncrypt (e.g. 245)
                         textLength += textAsList[textAsList.length - 1].length;//add the length of the last array to finalize the value of textLength
                     } else {
-                        textLength += blockSize;//simply add another maxbytestoencrypt, very rare case, because the textLength needs to be textLength % mayBytesToEncrypt (e.g.245) = 0
+                        textLength += maxBytesToEncrypt;//simply add another maxbytestoencrypt, very rare case, because the textLength needs to be textLength % mayBytesToEncrypt (e.g.245) = 0
                     }
                     textAsBytes = new byte[textLength];
                 }
                 //merges the text as list to one single textarray
-                if (((i + 1) * blockSize) <= textAsList[i].length) {
-                    System.arraycopy(textAsList[i], 0, textAsBytes, i * blockSize, blockSize);
+                if (((i + 1) * maxBytesToEncrypt) <= textAsList[i].length) {
+                    System.arraycopy(textAsList[i], 0, textAsBytes, i * maxBytesToEncrypt, maxBytesToEncrypt);
                 } else {
-                    System.arraycopy(textAsList[i], 0, textAsBytes, i * blockSize, textAsList[i].length);
+                    System.arraycopy(textAsList[i], 0, textAsBytes, i * maxBytesToEncrypt, textAsList[i].length);
                 }
             }
             return new String(textAsBytes, "UTF8");
         } catch (UnsupportedEncodingException ex) {
             throw new EncryptionException("Your Device cant convert a String to UTF-8: " + ex.getMessage());
         } catch (Exception ex) {
-            if (blockSize != SECONDBLOCKSIZE) {
-                return decrypt(toDecrypt, privateKey, SECONDBLOCKSIZE);
-            }
             throw new EncryptionException("Something went wrong during the decryption: " + ex.getMessage());
         }
     }

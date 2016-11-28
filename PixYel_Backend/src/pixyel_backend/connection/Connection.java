@@ -67,8 +67,8 @@ public class Connection implements Runnable {
      */
     public static void removePossibleDoubleClients(Client client) {
         if (LOGGEDINCLIENTS.containsKey(client.getName())) {
-            LOGGEDINCLIENTS.get(client.getName()).disconnect(true);
             Log.logInfo("Removing old client from " + client.getName(), Connection.class);
+            LOGGEDINCLIENTS.get(client.getName()).disconnect(true);
         }
         LOGGEDINCLIENTS.put(client.getName(), client);
     }

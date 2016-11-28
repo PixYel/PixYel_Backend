@@ -120,10 +120,12 @@ public class Client implements Runnable {
      * @param expected Is the disconnect expected?
      */
     public void disconnect(boolean expected) {
+        lookingForInput = false; //interrupts the while(true) on the inputlistener
         if (listener != null) {
-            listener.shutdown();
+            listener.shutdown(); //shuts the listener thread down
         }
-        Connection.disconnect(socket.hashCode());
+        clientAliveTimer.cancel(); //Shuts the timer for the client live down
+        Connection.disconnect(socket.hashCode()); //Runs the onClientClosed method for futher instructions and removes this client from the loggedInClientsmap (which is used for checking of double logged in clients)
         try {
             socket.close();
         } catch (Exception e) {
@@ -148,28 +150,32 @@ public class Client implements Runnable {
 
     private long lastCommandReceivedOn = System.currentTimeMillis();
     private int clientTimeOutInSeconds = 60;
+    private Timer clientAliveTimer;
 
     /**
      * Checks if the Client is still alive
      *
      */
     public void startClientAliveChecker() {
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
+        clientAliveTimer = new Timer();
+        clientAliveTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 if ((lastCommandReceivedOn + (clientTimeOutInSeconds * 1000)) < System.currentTimeMillis()) {
+                    Log.logInfo("Client " + getName() + " was too long inactive! Disconnecting...", this);
                     disconnect(false);
                 }
             }
         }, 0, clientTimeOutInSeconds * 1000);
     }
 
+    boolean lookingForInput = true;
+
     /**
      * Starts tht InputListener for the Input from the client
      */
     public void startInputListener() {
-        listener = Executors.newFixedThreadPool(1);
+        listener = Executors.newSingleThreadExecutor();
         listener.submit(() -> {
             //Log.logInfo("Inputlistener for Client " + getName() + " started", this);
             BufferedReader rein;
@@ -180,7 +186,7 @@ public class Client implements Runnable {
                 return;
             }
             String string;
-            while (!socket.isClosed() && socket.isConnected() && socket.isBound() && !socket.isInputShutdown() && !socket.isOutputShutdown()) {
+            while (lookingForInput && !socket.isClosed() && socket.isConnected() && socket.isBound() && !socket.isInputShutdown() && !socket.isOutputShutdown()) {
                 try {
 
                     string = rein.readLine();
@@ -196,21 +202,23 @@ public class Client implements Runnable {
                         Log.logWarning("Client " + getName() + " is sending NULL Strings", this);
                     }
                 } catch (IOException exe) {
-                    switch (exe.toString()) {
-                        case "java.net.SocketException: Connection reset":
-                        case "java.net.SocketException: Socket closed":
-                        case "java.net.SocketException: Software caused connection abort: recv failed":
-                            Log.logWarning("Client " + getName() + " has lost Connection: " + exe + ", shuting down the connection to the client", this);
-                            disconnect(true);
-                            return;
-                        case "invalid stream header":
-                            //Jemand sendet zu lange Strings
-                            Log.logError("Steam header too long, received String from " + getName() + " too long??!?: " + exe, this);
-                            disconnect(true);
-                            return;
-                        default:
-                            Log.logError("Could not read incomming message from " + getName() + ": " + exe, this);
-                            break;
+                    if (lookingForInput) {
+                        switch (exe.toString()) {
+                            case "java.net.SocketException: Connection reset":
+                            case "java.net.SocketException: Socket closed":
+                            case "java.net.SocketException: Software caused connection abort: recv failed":
+                                Log.logWarning("Client " + getName() + " has lost Connection: " + exe + ", shuting down the connection to the client", this);
+                                disconnect(true);
+                                return;
+                            case "invalid stream header":
+                                //Jemand sendet zu lange Strings
+                                Log.logError("Steam header too long, received String from " + getName() + " too long??!?: " + exe, this);
+                                disconnect(true);
+                                return;
+                            default:
+                                Log.logError("Could not read incomming message from " + getName() + ": " + exe, this);
+                                break;
+                        }
                     }
                 }
             }

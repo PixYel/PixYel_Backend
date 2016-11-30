@@ -32,6 +32,12 @@ public class Columns {
     public static final String STATUS = "status";
     
     
+    public static final String NAME = "name";
+    public static final String PW = "password";
+    
+    
+    
+    
     
     
     

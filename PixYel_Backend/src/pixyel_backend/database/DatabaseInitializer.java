@@ -66,6 +66,13 @@ public class DatabaseInitializer {
                     + Columns.PUBLICKEY + " TEXT, "
                     + Columns.STATUS + " TINYINT(1) DEFAULT '0')"
             );
+            
+            statements.executeUpdate("CREATE TABLE webusers ("
+                    + Columns.ID + " INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
+                    + Columns.NAME + " VARCHAR(30) NOT NULL UNIQUE,"
+                    + Columns.PW + " VARCHAR(300) NOT NULL,"
+                    + Columns.REGISTRATION_DATE + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
+            );
 
             statements.executeUpdate("CREATE TABLE picturesInfo ("
                     + Columns.ID + " INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
@@ -96,16 +103,16 @@ public class DatabaseInitializer {
             );
 
             statements.executeUpdate("CREATE TABLE pictureflags("
-                    + Columns.PICTURE_ID + "INT(6) NOT NULL, "
-                    + Columns.USER_ID + "INT(6) NOT NULL, "
-                    + Columns.CREATION_DATE + "TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
+                    + Columns.PICTURE_ID + " INT(6) NOT NULL, "
+                    + Columns.USER_ID + " INT(6) NOT NULL, "
+                    + Columns.CREATION_DATE + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
             );
             statements.executeUpdate("CREATE UNIQUE INDEX id ON pictureflags (" + Columns.PICTURE_ID + "," + Columns.USER_ID + ")");
 
             statements.executeUpdate("CREATE TABLE commentflags("
-                    + Columns.COMMENT_ID + "INT(6) NOT NULL, "
-                    + Columns.USER_ID + "INT(6) NOT NULL, "
-                    + Columns.CREATION_DATE + "TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
+                    + Columns.COMMENT_ID + " INT(6) NOT NULL, "
+                    + Columns.USER_ID + " INT(6) NOT NULL, "
+                    + Columns.CREATION_DATE + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
             );
             statements.executeUpdate("CREATE UNIQUE INDEX id ON commentflags (" + Columns.COMMENT_ID + "," + Columns.USER_ID + ")");
         }

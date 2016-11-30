@@ -14,6 +14,8 @@ import pixyel_backend.Log;
  */
 public class DatabaseCleanUpService implements Runnable {
 
+    public static int waitTime;
+    
     /**
      * Deletes all all users from the database that are registerd for at least 3
      * days but didn't finished the account validation
@@ -28,6 +30,8 @@ public class DatabaseCleanUpService implements Runnable {
             }
         } catch (SQLException ex) {
             Log.logWarning("Could not clean up unregistered users - root cause: " + ex, DatabaseCleanUpService.class);
+            waitTime=1000;
+            Log.logInfo("Restarting databasecleanupservice", DatabaseCleanUpService.class);
         }
     }
 
@@ -38,6 +42,7 @@ public class DatabaseCleanUpService implements Runnable {
 
     @Override
     public void run() {
+        waitTime = 86400000;//3 days
         Timer timer = new Timer();
         TimerTask dalyTask = new TimerTask() {
             @Override
@@ -46,6 +51,6 @@ public class DatabaseCleanUpService implements Runnable {
                 CleanUnregistratedUsers();
             }
         };
-        timer.schedule(dalyTask, 0l, 86400000);//3 days
+        timer.schedule(dalyTask, 0l, waitTime);
     }
 }

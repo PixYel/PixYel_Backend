@@ -27,7 +27,7 @@ public class DatabaseCleanUpService implements Runnable {
             try (Statement sta = MysqlConnector.getConnection().createStatement()) {
                 Instant instant = Instant.now().minus(3, ChronoUnit.DAYS);
                 Timestamp currentTimestamp = Timestamp.from(instant);
-                sta.executeLargeUpdate("DELETE FROM Users WHERE status = 0 AND reg_date < '" + currentTimestamp + "'");
+                sta.executeLargeUpdate("DELETE FROM Users WHERE " + Columns.STATUS + " = 0 AND " + Columns.REGISTRATION_DATE + " < '" + currentTimestamp + "'");
                 attemptNr = 0;
             }
         } catch (SQLException ex) {

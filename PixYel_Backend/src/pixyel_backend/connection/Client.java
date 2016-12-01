@@ -16,7 +16,6 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import pixyel_backend.Log;
-import pixyel_backend.connection.compression.Compression;
 import pixyel_backend.connection.encryption.Encryption;
 import pixyel_backend.database.objects.User;
 import pixyel_backend.xml.XML;
@@ -123,7 +122,7 @@ public class Client implements Runnable {
             listener.shutdown(); //shuts the listener thread down
         }
         clientAliveTimer.cancel(); //Shuts the timer for the client live down
-        Connection.disconnect(socket.hashCode()); //Runs the onClientClosed method for futher instructions and removes this client from the loggedInClientsmap (which is used for checking of double logged in clients)
+        Connection.disconnect(this, socket.hashCode()); //Runs the onClientClosed method for futher instructions and removes this client from the loggedInClientsmap (which is used for checking of double logged in clients)
         try {
             socket.close();
         } catch (Exception e) {

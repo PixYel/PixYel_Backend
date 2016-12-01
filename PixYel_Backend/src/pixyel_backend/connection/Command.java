@@ -151,7 +151,7 @@ public class Command {
             item.getFirstChild("data").setContent(picture.getData());
             Log.logInfo("Sending Item " + id + " to client " + client.getName(), Command.class);
             return toSend;
-        } catch (PictureLoadException ex) {
+        } catch (Exception ex) {
             Log.logWarning("Could not load Picture by " + client.getName(), Command.class);
             return error("Could not send Image: " + ex, false);
         }

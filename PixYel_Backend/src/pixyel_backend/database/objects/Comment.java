@@ -149,7 +149,7 @@ public class Comment {
      * @throws FlagFailedExcpetion
      */
     public static void flagComment(int userId, int commentId) throws FlagFailedExcpetion {
-        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.ID + " FROM commentflags WHERE " + Columns.COMMENT_ID + " = ? AND  " + Columns.USER_ID + " = ?")) {
+        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT * FROM commentflags WHERE " + Columns.COMMENT_ID + " = ? AND  " + Columns.USER_ID + " = ?")) {
             statement.setInt(1, commentId);
             statement.setInt(2, userId);
             ResultSet result = statement.executeQuery();

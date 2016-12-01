@@ -167,7 +167,7 @@ public class Picture {
      * downvoted the picture, 0 if the user hasnt voted for the picture
      */
     public static int userHasLikedPicture(int userId, int pictureId) {
-        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT vote FROM  picturesVotes WHERE " + Columns.PICTURE_ID + " = ? AND  " + Columns.USER_ID + " = ?")) {
+        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT "+ Columns.STATUS +" FROM  picturesVotes WHERE " + Columns.PICTURE_ID + " = ? AND  " + Columns.USER_ID + " = ?")) {
             statement.setInt(1, pictureId);
             statement.setInt(2, userId);
             ResultSet result = statement.executeQuery();

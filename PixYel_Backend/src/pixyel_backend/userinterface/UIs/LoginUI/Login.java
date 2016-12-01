@@ -1,9 +1,9 @@
-package pixyel_backend.userinterface;
+package pixyel_backend.userinterface.UIs.LoginUI;
 
-import pixyel_backend.userinterface.Desktop.Desktop;
+import pixyel_backend.userinterface.UIs.DesktopUI.Desktop;
 import com.vaadin.server.FileResource;
+import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
-import com.vaadin.server.Sizeable;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.AbsoluteLayout;
 import com.vaadin.ui.Alignment;
@@ -22,11 +22,18 @@ import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import pixyel_backend.Log;
+import pixyel_backend.database.objects.WebUser;
+import pixyel_backend.userinterface.Translations;
 import pixyel_backend.userinterface.ressources.Ressources;
 
 public class Login {
 
     public static void show() {
+        UI.getCurrent().setResizeLazy(false);
+        Page.getCurrent().addBrowserWindowResizeListener((event) -> {
+            Login.onResized();
+        });
+
         VerticalLayout layout = new VerticalLayout();
 
         Component introVideo = getVideo();
@@ -38,37 +45,42 @@ public class Login {
         showLoginPanel();
     }
 
-    private static void showLoginPanel() {
-        Window loginWindow = new Window();
+    static Window loginWindow;
+    static AbsoluteLayout loginForm;
+    static Image logo;
 
-        final AbsoluteLayout loginForm = new AbsoluteLayout();
+    private static void showLoginPanel() {
+        loginWindow = new Window();
+        loginWindow.setResizeLazy(false);
+
+        loginForm = new AbsoluteLayout();
         int WIDTH = (int) (0.3 * UI.getCurrent().getPage().getBrowserWindowWidth());
         int HIGHT = (int) (0.7 * UI.getCurrent().getPage().getBrowserWindowHeight());
         loginForm.setWidth(WIDTH, Unit.PIXELS);
         loginForm.setHeight(HIGHT, Unit.PIXELS);
 
         try {
-            Image image = new Image();
-            image.setSource(new FileResource(Ressources.getRessource("logo.png")));
-            image.setWidth((float) (WIDTH * 0.6), Unit.PIXELS);
-            loginForm.addComponent(image, "top:10%;left:" + ((WIDTH / 2) - (image.getWidth() / 2)) + "px;");
+            logo = new Image();
+            logo.setSource(new FileResource(Ressources.getRessource("logo.png")));
+            logo.setWidth((float) (WIDTH * 0.6), Unit.PIXELS);
+            loginForm.addComponent(logo, "top:10%;left:" + ((WIDTH / 2) - (logo.getWidth() / 2)) + "px;");
         } catch (Ressources.RessourceNotFoundException e) {
             Log.logError("Could not find Logo for the loginscreen: " + e, Login.class);
         }
 
         final TextField txtUsername = new TextField();
-        txtUsername.setInputPrompt("Username");
+        txtUsername.setInputPrompt(Translations.get(Translations.LOGIN_USERNAME));
         txtUsername.setSizeFull();
         loginForm.addComponent(txtUsername, "top: 40%; left: 10%; right: 10%; bottom: 50%");
 
         final PasswordField txtPassword = new PasswordField();
-        txtPassword.setInputPrompt("Password");
+        txtPassword.setInputPrompt(Translations.get(Translations.LOGIN_PASSWORD));
         txtPassword.setSizeFull();
         loginForm.addComponent(txtPassword, "top: 60%; left: 10%; right: 10%; bottom: 30%");
 
-        final Button btnLogin = new Button("Login");
+        final Button btnLogin = new Button(Translations.get(Translations.LOGIN_LOGINBUTTON));
         btnLogin.setStyleName(ValoTheme.BUTTON_PRIMARY);
-        btnLogin.addClickListener((listener) -> login());
+        btnLogin.addClickListener((listener) -> login(txtUsername.getValue(), getHash(txtUsername.getValue(), txtPassword.getValue())));
         btnLogin.setSizeFull();
         loginForm.addComponent(btnLogin, "top: 80%; left: 25%; right: 25%; bottom: 10%");
 
@@ -78,6 +90,20 @@ public class Login {
         loginWindow.setClosable(false);
 
         UI.getCurrent().addWindow(loginWindow);
+    }
+
+    public static void onResized() {
+        if (loginWindow.isAttached()) {
+            int WIDTH = (int) (0.3 * UI.getCurrent().getPage().getBrowserWindowWidth());
+            int HIGHT = (int) (0.7 * UI.getCurrent().getPage().getBrowserWindowHeight());
+            loginForm.setWidth(WIDTH, Unit.PIXELS);
+            loginForm.setHeight(HIGHT, Unit.PIXELS);
+            loginWindow.center();
+            loginForm.removeComponent(logo);
+            logo.setWidth((float) (WIDTH * 0.6), Unit.PIXELS);
+            loginForm.addComponent(logo, "top:10%;left:" + ((WIDTH / 2) - (logo.getWidth() / 2)) + "px;");
+
+        }
     }
 
     public static Component getVideo() {
@@ -92,23 +118,25 @@ public class Login {
             introVideo.setAltText("Cannot start our introvideo");
             return introVideo;
         } catch (Ressources.RessourceNotFoundException ex) {
-            Log.logError("Coudl not start Backgroundvideo: " + ex, Login.class);
+            Log.logError("Could not start Backgroundvideo: " + ex, Login.class);
             return null;
         }
     }
 
-    public static void login() {
-        //BackendFunctions.login;
-        boolean loginSuccessful = true;
+    public static void login(String username, String hashedPW) {
+        boolean loginSuccessful = WebUser.loginWebUser(username, hashedPW);
+        //TEMP
+        loginSuccessful = true;
+        //TEMP
         if (loginSuccessful) {
             Desktop.show();
         } else {
-            Notification.show("Wrong username or password", Notification.Type.ERROR_MESSAGE);
+            Notification.show(Translations.get(Translations.LOGIN_WRONGLOGIN), Notification.Type.ERROR_MESSAGE);
         }
 
     }
 
-    public String getHash(String username, String password) {
+    public static String getHash(String username, String password) {
         String saltConstant = "#Schnitzel und #Dan-Pierres_erster_Pizzafleischkaes";
         MessageDigest md;
         StringBuilder sb = new StringBuilder();

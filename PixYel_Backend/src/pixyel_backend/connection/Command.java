@@ -37,7 +37,7 @@ public class Command {
      */
     public static void onCommandReceived(Client client, XML xml, boolean encrypted) {
         Log.logDebug("Command from " + client.getName() + " received: \n" + xml.toStringGraph(), Command.class);
-        if (encrypted) {
+        if (encrypted) {//encrypted
 
             try {
                 if (!(xml.getName().equals("request"))) {
@@ -51,7 +51,7 @@ public class Command {
                             client.sendToClient(getItemList(xml, client));
                             break;
                         case "getItem":
-                            client.sendToClient(getItem(xml, client));
+                            client.sendToClientUnencrypted(getItem(xml, client));
                             break;
                         case "getItemStats":
                             client.sendToClient(getItemStats(xml, client));
@@ -93,7 +93,7 @@ public class Command {
                 Log.logWarning("Could not execute encrypted command: " + xml.getName() + ": " + e, Command.class);
                 e.printStackTrace(System.err);
             }
-        } else {
+        } else {//unencrypted
             try {
                 if (!(xml.getName().equals("request"))) {
                     client.sendToClient(error("The first node has to be called \"request\", RTFS!!!", true));
@@ -102,7 +102,7 @@ public class Command {
                 if (xml.getName().equals("request")) {
                     switch ((xml = xml.getFirstChild()).getName()) {//Cuts off the "request"
                         case "upload":
-                            client.sendToClientUnencrypted(upload(xml, client));
+                            client.sendToClient(upload(xml, client));
                             break;
                         default:
                             client.sendToClient(error(xml.getName() + " is not a valid Command, RTFS!!!", true));

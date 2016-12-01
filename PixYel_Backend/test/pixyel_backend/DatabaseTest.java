@@ -20,10 +20,7 @@ public class DatabaseTest {
         String toCompress = "DHBW";
         System.out.println("Original: " + toCompress);
 
-        String compressed = Compression.compress(toCompress);
-        System.out.println("Compressed: " + compressed);
-
-        String encrypted = Encryption.encrypt(compressed, ServerPublicKey);
+        String encrypted = Encryption.encrypt(toCompress, ServerPublicKey);
         System.out.println("Encrypted: " + encrypted);
 
     }

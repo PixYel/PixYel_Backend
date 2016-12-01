@@ -41,7 +41,7 @@ public class User {
     public User(int id) throws UserNotFoundException, UserCreationException {
 
         try {
-            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM users WHERE " + Columns.ID + " LIKE ?");
+            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM users WHERE " + Columns.ID + " = ?");
             sta.setInt(1, id);
             ResultSet result = sta.executeQuery();
             if (result == null || !result.isBeforeFirst()) {
@@ -399,6 +399,15 @@ public class User {
      */
     public synchronized void downvotePicture(int picId) throws VoteFailedException {
         Picture.downvotePicture(picId, this.id);
+    }
+    
+    /**
+     *
+     * @param picId
+     * @throws VoteFailedException
+     */
+    public synchronized void removeVoteFromPicture(int picId) throws VoteFailedException{
+        Picture.removeVoteFromPicture(picId, this.id);
     }
 
     /**

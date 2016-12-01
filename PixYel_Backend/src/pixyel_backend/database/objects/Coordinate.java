@@ -29,14 +29,24 @@ public class Coordinate {
         return latitude;
     }
     
+    /**
+     * Calculates the distance to a second coordinate
+     * @param toCoordinate
+     * @return distance in meters between both coordinates
+     */
     public Long getDistance(Coordinate toCoordinate) {
-        double approximatelatitude = Math.toRadians((this.getLatitude() + toCoordinate.getLatitude()) / 2);
-        double differenceXaxis = 111.3 * Math.cos(approximatelatitude) * (this.getLongitude() - toCoordinate.getLongitude());
-        double differenceYaxis = 111.3 * (this.getLatitude() - toCoordinate.getLatitude());
+        double approximatelatitude = Math.toRadians((this.getLongitude() + toCoordinate.getLongitude()) / 2);
+        double differenceXaxis = 111.3 * Math.cos(approximatelatitude) * (this.getLatitude() - toCoordinate.getLatitude());
+        double differenceYaxis = 111.3 * (this.getLongitude() - toCoordinate.getLongitude());
         double distance = (Math.sqrt(Math.pow(differenceXaxis, 2) + Math.pow(differenceYaxis, 2)) * 1000);
         return (long) distance;
     }
     
+    /**
+     * Variable SearchArea from a center coordinate.
+     * @param distance
+     * @return returns two coordinates which represent the diagonal of the border to search for pictures in.
+     */
     public List<Coordinate> getSearchArea(int distance){
         Coordinate coordinate1;
         Coordinate coordinate2;

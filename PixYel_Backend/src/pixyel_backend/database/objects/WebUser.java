@@ -76,11 +76,15 @@ public class WebUser {
 
             statement.executeUpdate();
         } catch (Exception ex) {
-            Log.logWarning("Could not create webuser for name \"" + username + "\" - rootcause: " + ex, WebUser.class);
+            Log.logWarning("Could not create webuser - rootcause: " + ex, WebUser.class);
             throw new UserCreationException();
         }
     }
 
+    /**
+     * 
+     * @param username 
+     */
     public static void deleteWebUser(String username) {
         try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM webusers WHERE " + Columns.NAME + " = ?")) {
             sta.setString(1, SqlUtils.escapeString(username));
@@ -91,6 +95,13 @@ public class WebUser {
         }
     }
 
+    /**
+     * 
+     * @param toHash
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeySpecException 
+     */
     private static String hash(String toHash) throws NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] salt = "whatever".getBytes();
         KeySpec spec = new PBEKeySpec(toHash.toCharArray(), salt, 65536, 512);

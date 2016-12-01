@@ -31,11 +31,13 @@ public class Connection implements Runnable {
     /**
      * Removes the client from the list of connected clients
      *
-     * @param socketHashCode The Hash code of the socket as key of the map
+     * @param client
+     * @param socketHashcode The Hash code of the socket as key of the map
      */
-    public static void disconnect(int socketHashCode) {
-        onClientDisconnected(CONNECTEDCLIENTS.get(socketHashCode));
-        CONNECTEDCLIENTS.remove(socketHashCode);
+    public static void disconnect(Client client, int socketHashcode) {
+        LOGGEDINCLIENTS.remove(client.getName());
+        onClientDisconnected(CONNECTEDCLIENTS.get(socketHashcode));
+        CONNECTEDCLIENTS.remove(socketHashcode);
     }
 
     /**
@@ -66,11 +68,12 @@ public class Connection implements Runnable {
      * @param client The new Client which has logged in
      */
     public static void removePossibleDoubleClients(Client client) {
-        if (LOGGEDINCLIENTS.containsKey(client.getName())) {
-            Log.logInfo("Removing old client from " + client.getName(), Connection.class);
-            LOGGEDINCLIENTS.get(client.getName()).disconnect(true);
+        String clientName = client.getName();
+        if (LOGGEDINCLIENTS.containsKey(clientName)) {
+            Log.logInfo("Removing old client from " + clientName, Connection.class);
+            LOGGEDINCLIENTS.get(clientName).disconnect(true);
         }
-        LOGGEDINCLIENTS.put(client.getName(), client);
+        LOGGEDINCLIENTS.put(clientName, client);
     }
 
     /**

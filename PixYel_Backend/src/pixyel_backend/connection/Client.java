@@ -16,7 +16,6 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import pixyel_backend.Log;
-import pixyel_backend.connection.compression.Compression;
 import pixyel_backend.connection.encryption.Encryption;
 import pixyel_backend.database.objects.User;
 import pixyel_backend.xml.XML;
@@ -64,15 +63,15 @@ public class Client implements Runnable {
         }
         try {
             Log.logDebug("PLAIN_TO_SEND: " + toSend, Client.class);
-            String compressed = Compression.compress(toSend.toString());
-            Log.logDebug("COMPRESSED_TO_SEND: " + compressed, Client.class);
-            String encrypted = Encryption.encrypt(compressed, userdata.getPublicKey());
+            //String compressed = Compression.compress(toSend.toString());
+            //Log.logDebug("COMPRESSED_TO_SEND: " + compressed, Client.class);
+            String encrypted = Encryption.encrypt(toSend.toString(), userdata.getPublicKey());
             Log.logDebug("ENCRYPTED_TO_SEND: " + encrypted, Client.class);
             PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
             raus.println(encrypted);
             raus.flush();
             Log.logDebug("Successfullly send XML", Client.class);
-        } catch (Compression.CompressionException | Encryption.EncryptionException | IOException e) {
+        } catch (Encryption.EncryptionException | IOException e) {
             if (e.toString().contains("Socket is closed")) {
                 Log.logWarning("Could not send String beacuase the socket is closed, closing the connection to " + getName() + " now: " + e, Client.class);
                 this.disconnect(false);
@@ -97,18 +96,16 @@ public class Client implements Runnable {
         try {
             Log.logDebug("ENCRYPTED_RECEIVED: " + receivedString, Client.class);
             String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
-            Log.logDebug("DECRYPTED_RECEIVED: " + decrypted, Client.class);
-            String decompressed = Compression.decompress(decrypted);
-            Log.logDebug("PLAIN_RECEIVED: " + decompressed, Client.class);
-            XML xml = XML.openXML(decompressed);
+            //Log.logDebug("DECRYPTED_RECEIVED: " + decrypted, Client.class);
+            //String decompressed = Compression.decompress(decrypted);
+            Log.logDebug("PLAIN_RECEIVED: " + decrypted, Client.class);
+            XML xml = XML.openXML(decrypted);
             lastCommandReceivedOn = System.currentTimeMillis();
             Command.onCommandReceived(this, xml);
         } catch (XML.XMLException ex) {
             Log.logWarning("Client " + getName() + " has send an invalid String to parse as XML: " + ex, Client.class);
         } catch (Encryption.EncryptionException ex) {
             Log.logWarning("Client " + getName() + " has send an invalid String to decrypt: " + ex, Client.class);
-        } catch (Compression.CompressionException ex) {
-            Log.logWarning("Client " + getName() + " has send an invalid String to decompress: " + ex, Client.class);
         } catch (Exception ex) {
             Log.logWarning("Client " + getName() + " has send an invalid String: " + ex, Client.class);
         }
@@ -125,7 +122,7 @@ public class Client implements Runnable {
             listener.shutdown(); //shuts the listener thread down
         }
         clientAliveTimer.cancel(); //Shuts the timer for the client live down
-        Connection.disconnect(socket.hashCode()); //Runs the onClientClosed method for futher instructions and removes this client from the loggedInClientsmap (which is used for checking of double logged in clients)
+        Connection.disconnect(this, socket.hashCode()); //Runs the onClientClosed method for futher instructions and removes this client from the loggedInClientsmap (which is used for checking of double logged in clients)
         try {
             socket.close();
         } catch (Exception e) {

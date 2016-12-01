@@ -102,7 +102,7 @@ public class Command {
                 if (xml.getName().equals("request")) {
                     switch ((xml = xml.getFirstChild()).getName()) {//Cuts off the "request"
                         case "upload":
-                            client.sendToClient(upload(xml, client));
+                            client.sendToClientUnencrypted(upload(xml, client));
                             break;
                         default:
                             client.sendToClient(error(xml.getName() + " is not a valid Command, RTFS!!!", true));
@@ -143,14 +143,11 @@ public class Command {
                 item.getFirstChild("rank").setContent(String.valueOf(picture.getRanking()));
                 item.getFirstChild("date").setContent(Utils.getDate(picture.getTimestamp()));
             });
-            Log
-                    .logInfo("Sending list of ItemStats to client " + client.getName(), Command.class
-                    );
+            Log.logInfo("Sending list of ItemStats to client " + client.getName(), Command.class);
             return toSend;
 
         } catch (Exception e) {
-            Log.logWarning("Could not send Item List to: " + client.getName(), Command.class
-            );
+            Log.logWarning("Could not send Item List to: " + client.getName(), Command.class);
             return error("Something went wrong during the item sending process: " + e, true);
         }
     }

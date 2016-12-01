@@ -58,42 +58,35 @@ public class Client implements Runnable {
             }
             return;
         }
-        if (!toSend.getName().equals("reply")) {
-            toSend = XML.createNewXML("reply").addChild(toSend);
-        }
         try {
+            if (!toSend.getName().equals("reply")) {
+                toSend = XML.createNewXML("reply").addChild(toSend);
+            }
             Log.logDebug("PLAIN_TO_SEND: " + toSend, Client.class);
-            //String compressed = Compression.compress(toSend.toString());
-            //Log.logDebug("COMPRESSED_TO_SEND: " + compressed, Client.class);
             String encrypted = Encryption.encrypt(toSend.toString(), userdata.getPublicKey());
             Log.logDebug("ENCRYPTED_TO_SEND: " + encrypted, Client.class);
-            PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
-            raus.println(encrypted);
-            raus.flush();
-            Log.logDebug("Successfullly send encrypted XML", Client.class);
-        } catch (Encryption.EncryptionException | IOException e) {
-            if (e.toString().contains("Socket is closed")) {
-                Log.logWarning("Could not send String beacuase the socket is closed, closing the connection to " + getName() + " now: " + e, Client.class);
-                this.disconnect(false);
-            } else if (e.toString().contains("socket write error")) {
-                Log.logWarning("Could not write on Socket from " + getName() + ": " + e, Client.class);
-            } else {
-                Log.logWarning("String(" + toSend + ") could not be send to " + getName() + ": " + e, Client.class);
-            }
+            sendToClient(encrypted);
+        } catch (Encryption.EncryptionException ex) {
+            Log.logError("Could not encrypt String: " + ex, Client.class);
         }
+
     }
-    
-        public void sendToClientUnencrypted(XML toSend) {
+
+    public void sendToClientUnencrypted(XML toSend) {
         if (!toSend.getName().equals("reply")) {
             toSend = XML.createNewXML("reply").addChild(toSend);
         }
+        Log.logDebug("PLAIN_TO_SEND: " + toSend, Client.class);
+        sendToClient(toSend.toString());
+    }
+
+    PrintWriter raus;
+
+    private void sendToClient(String toSend) {
         try {
-            Log.logDebug("PLAIN_TO_SEND: " + toSend, Client.class);
-            //String compressed = Compression.compress(toSend.toString());
-            //Log.logDebug("COMPRESSED_TO_SEND: " + compressed, Client.class);
-            //String encrypted = Encryption.encrypt(toSend.toString(), userdata.getPublicKey());
-            //Log.logDebug("ENCRYPTED_TO_SEND: " + encrypted, Client.class);
-            PrintWriter raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
+            if (raus == null) {
+                raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
+            }
             raus.println(toSend);
             raus.flush();
             Log.logDebug("Successfullly send unencrypted XML", Client.class);

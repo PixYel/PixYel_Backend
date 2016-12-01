@@ -89,7 +89,7 @@ public class Command {
             }
         } catch (Exception e) {
             Log.logWarning("Could not execute command: " + xml.getName() + ": " + e, Command.class);
-            e.printStackTrace(System.out);
+            e.printStackTrace(System.err);
         }
 
     }

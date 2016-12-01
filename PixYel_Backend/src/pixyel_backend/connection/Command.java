@@ -228,14 +228,16 @@ public class Command {
      */
     public static XML vote(XML input, Client client) {
         int id = Integer.valueOf(input.getFirstChild("id").getContent());
-        boolean upvote = Boolean.valueOf(input.getFirstChild("upvote").getContent());
+        int upvote = Integer.valueOf(input.getFirstChild("upvote").getContent());
 
         boolean voteSuccessful = true;
         try {
-            if (upvote) {
+            if (upvote == 1) {
                 client.getUserdata().upvotePicture(id);
-            } else {
+            } else if(upvote == -1) {
                 client.getUserdata().downvotePicture(id);
+            } else{
+                client.getUserdata().removeVoteFromPicture(id);
             }
         } catch (VoteFailedException ex) {
             Log.logWarning("Vote by client " + client.getName() + " failed: " + ex, Command.class);

@@ -1,5 +1,6 @@
 package pixyel_backend.userinterface.UIs.LoginUI;
 
+import com.vaadin.event.ShortcutAction;
 import pixyel_backend.userinterface.UIs.DesktopUI.Desktop;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.Page;
@@ -21,7 +22,10 @@ import com.vaadin.ui.themes.ValoTheme;
 import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pixyel_backend.Log;
+import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.objects.WebUser;
 import pixyel_backend.userinterface.Translations;
 import pixyel_backend.userinterface.ressources.Ressources;
@@ -80,7 +84,8 @@ public class Login {
 
         final Button btnLogin = new Button(Translations.get(Translations.LOGIN_LOGINBUTTON));
         btnLogin.setStyleName(ValoTheme.BUTTON_PRIMARY);
-        btnLogin.addClickListener((listener) -> login(txtUsername.getValue(), getHash(txtUsername.getValue(), txtPassword.getValue())));
+        btnLogin.setClickShortcut(ShortcutAction.KeyCode.ENTER);
+        btnLogin.addClickListener((listener) -> login(txtUsername.getValue(),  txtPassword.getValue()));
         btnLogin.setSizeFull();
         loginForm.addComponent(btnLogin, "top: 80%; left: 25%; right: 25%; bottom: 10%");
 
@@ -123,37 +128,13 @@ public class Login {
         }
     }
 
-    public static void login(String username, String hashedPW) {
-        boolean loginSuccessful = WebUser.loginWebUser(username, hashedPW);
-        //TEMP
-        loginSuccessful = true;
-        //TEMP
+    public static void login(String username, String password) {
+        boolean loginSuccessful = WebUser.loginWebUser(username, password);
         if (loginSuccessful) {
             Desktop.show();
         } else {
-            Notification.show(Translations.get(Translations.LOGIN_WRONGLOGIN), Notification.Type.ERROR_MESSAGE);
+            Notification.show(Translations.get(Translations.LOGIN_WRONGLOGIN), Notification.Type.WARNING_MESSAGE);
         }
 
-    }
-
-    public static String getHash(String username, String password) {
-        String saltConstant = "#Schnitzel und #Dan-Pierres_erster_Pizzafleischkaes";
-        MessageDigest md;
-        StringBuilder sb = new StringBuilder();
-
-        String saltedPW = password + saltConstant + username;
-
-        try {
-            md = MessageDigest.getInstance("SHA-512");
-            md.update(saltedPW.getBytes());
-            byte byteData[] = md.digest();
-            for (int i = 0; i < byteData.length; i++) {
-                sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
-            }
-        } catch (NoSuchAlgorithmException ex) {
-            System.err.println("Algorithmus nicht verfügbar: " + ex.getMessage());
-            return "";
-        }
-        return sb.toString();
     }
 }

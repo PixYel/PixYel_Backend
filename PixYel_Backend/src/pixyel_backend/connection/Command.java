@@ -25,7 +25,7 @@ import pixyel_backend.xml.XML;
 
 /**
  *
- * @author i01frajos445
+ * @author Josua Frank
  */
 public class Command {
 
@@ -39,6 +39,7 @@ public class Command {
         Log.logDebug("Command from " + client.getName() + " received: \n" + xml.toStringGraph(), Command.class);
         try {
             if (!(xml.getName().equals("request"))) {
+                client.sendToClient(error("The first node has to be called \"request\", RTFS!!!", true));
                 Log.logWarning("Command from " + client.getName() + " does not start with \"request\": " + xml.getName(), Command.class);
             }
             if (xml.getName().equals("request")) {
@@ -80,10 +81,15 @@ public class Command {
                     case "disconnect":
                         disconnect(xml, client);
                         break;
+                    default:
+                        client.sendToClient(error(xml.getName() + " is not a valid Command, RTFS!!!", true));
+                        Log.logError("Client " + client.getName() + " has send a wrong command: " + xml.getName(), Command.class);
+                        break;
                 }
             }
         } catch (Exception e) {
             Log.logWarning("Could not execute command: " + xml.getName() + ": " + e, Command.class);
+            e.printStackTrace(System.out);
         }
 
     }
@@ -95,25 +101,31 @@ public class Command {
      * @return
      */
     public static XML getItemList(XML input, Client client) {
-        XML location = input.getFirstChild();
-        int longt = Integer.valueOf(location.getFirstChild("long").getContent());
-        int lat = Integer.valueOf(location.getFirstChild("lat").getContent());
+        try {
+            XML location = input.getFirstChild();
+            int longt = Integer.valueOf(location.getFirstChild("long").getContent());
+            int lat = Integer.valueOf(location.getFirstChild("lat").getContent());
 
-        List<Picture> pictures = client.getUserdata().getPicturesByLocation(new Coordinate(longt, lat));
+            List<Picture> pictures = client.getUserdata().getPicturesByLocation(new Coordinate(longt, lat));
 
-        XML toSend = XML.createNewXML("setItemList");
-        pictures.stream().forEach((picture) -> {
-            XML item = toSend.addChild("item");
-            item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date");
-            item.getFirstChild("id").setContent(String.valueOf(picture.getId()));
-            item.getFirstChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
-            item.getFirstChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
-            item.getFirstChild("votedByUser").setContent(String.valueOf(picture.getVoteStatus()));
-            item.getFirstChild("rank").setContent(String.valueOf(picture.getRanking()));
-            item.getFirstChild("date").setContent(Utils.getDate(picture.getTimestamp()));
-        });
-        Log.logInfo("Sending list of ItemStats to client " + client.getName(), Command.class);
-        return toSend;
+            XML toSend = XML.createNewXML("setItemList");
+            pictures.stream().forEach((picture) -> {
+                XML item = toSend.addChild("item");
+                item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date");
+                item.getFirstChild("id").setContent(String.valueOf(picture.getId()));
+                item.getFirstChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
+                item.getFirstChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
+                item.getFirstChild("votedByUser").setContent(String.valueOf(picture.getVoteStatus()));
+                item.getFirstChild("rank").setContent(String.valueOf(picture.getRanking()));
+                item.getFirstChild("date").setContent(Utils.getDate(picture.getTimestamp()));
+            });
+            Log.logInfo("Sending list of ItemStats to client " + client.getName(), Command.class);
+            return toSend;
+
+        } catch (Exception e) {
+            Log.logWarning("Could not send Item List to: " + client.getName(), Command.class);
+            return error("Something went wrong during the item sending process: " + e, true);
+        }
     }
 
     /**
@@ -123,9 +135,9 @@ public class Command {
      * @return
      */
     public static XML getItem(XML input, Client client) {
-        int id = Integer.valueOf(input.getFirstChild("id").getContent());
-
         try {
+            int id = Integer.valueOf(input.getFirstChild("id").getContent());
+
             Picture picture = client.getUserdata().getPicture(id);
             XML toSend = XML.createNewXML("setItem");
             XML item = toSend.addChild("item");
@@ -141,9 +153,8 @@ public class Command {
             return toSend;
         } catch (PictureLoadException ex) {
             Log.logWarning("Could not load Picture by " + client.getName(), Command.class);
+            return error("Could not send Image: " + ex, false);
         }
-
-        return error("Could not send Image", false);
     }
 
     /**
@@ -153,9 +164,9 @@ public class Command {
      * @return
      */
     public static XML getItemStats(XML input, Client client) {
-        int id = Integer.valueOf(input.getFirstChild("id").getContent());
-
         try {
+            int id = Integer.valueOf(input.getFirstChild("id").getContent());
+
             Picture picture = client.getUserdata().getPicture(id);
             XML toSend = XML.createNewXML("setItemStats");
             XML item = toSend.addChild("item");
@@ -170,9 +181,8 @@ public class Command {
             return toSend;
         } catch (PictureLoadException ex) {
             Log.logWarning("Could not get Pictures for " + client.getName(), Command.class);
+            return error("Could not fetch Item Stats: " + ex, false);
         }
-
-        return error("Could not fetch Item Stats", false);
     }
 
     /**
@@ -189,7 +199,7 @@ public class Command {
                 client.setUserdata(User.addNewUser(input.getFirstChild("storeId").getContent()));
             } catch (UserCreationException ex1) {
                 Log.logError("Could note create new User " + client.getName() + ": " + ex1, Command.class);
-                return null;
+                return error("Could not create new User: " + ex1, true);
             }
         } catch (UserCreationException ex) {
             Log.logError("Could not get existing User " + client.getName() + ": " + ex, Command.class);
@@ -214,10 +224,14 @@ public class Command {
      * @return
      */
     public static XML echo(XML input, Client client) {
-        DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-        String date = " " + dateFormat.format(new Date()) + " ";
-        Log.logInfo("Sending echo to client " + client.getName(), Command.class);
-        return XML.createNewXML("echo").setContent(date);
+        try {
+            DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            String date = " " + dateFormat.format(new Date()) + " ";
+            Log.logInfo("Sending echo to client " + client.getName(), Command.class);
+            return XML.createNewXML("echo").setContent(date);
+        } catch (Exception e) {
+            return error("Could not send echo: "+e, true);
+        }
     }
 
     /**
@@ -234,9 +248,9 @@ public class Command {
         try {
             if (upvote == 1) {
                 client.getUserdata().upvotePicture(id);
-            } else if(upvote == -1) {
+            } else if (upvote == -1) {
                 client.getUserdata().downvotePicture(id);
-            } else{
+            } else {
                 client.getUserdata().removeVoteFromPicture(id);
             }
         } catch (VoteFailedException ex) {

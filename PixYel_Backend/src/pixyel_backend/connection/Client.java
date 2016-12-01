@@ -94,14 +94,21 @@ public class Client implements Runnable {
             receivedString = receivedString.substring(0, receivedString.length() - 2);
         }
         try {
-            Log.logDebug("ENCRYPTED_RECEIVED: " + receivedString, Client.class);
-            String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
-            //Log.logDebug("DECRYPTED_RECEIVED: " + decrypted, Client.class);
-            //String decompressed = Compression.decompress(decrypted);
-            Log.logDebug("PLAIN_RECEIVED: " + decrypted, Client.class);
-            XML xml = XML.openXML(decrypted);
-            lastCommandReceivedOn = System.currentTimeMillis();
-            Command.onCommandReceived(this, xml);
+            if (!receivedString.startsWith("<request>")) {
+                Log.logDebug("ENCRYPTED_RECEIVED: " + receivedString, Client.class);
+                String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
+                //Log.logDebug("DECRYPTED_RECEIVED: " + decrypted, Client.class);
+                //String decompressed = Compression.decompress(decrypted);
+                Log.logDebug("PLAIN_RECEIVED: " + decrypted, Client.class);
+                XML xml = XML.openXML(decrypted);
+                lastCommandReceivedOn = System.currentTimeMillis();
+                Command.onCommandReceived(this, xml, true);
+            } else {
+                Log.logDebug("PLAIN_RECEIVED: " + receivedString, Client.class);
+                XML xml = XML.openXML(receivedString);
+                lastCommandReceivedOn = System.currentTimeMillis();
+                Command.onCommandReceived(this, xml, false);
+            }
         } catch (XML.XMLException ex) {
             Log.logWarning("Client " + getName() + " has send an invalid String to parse as XML: " + ex, Client.class);
         } catch (Encryption.EncryptionException ex) {

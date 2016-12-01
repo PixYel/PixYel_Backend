@@ -4,8 +4,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.exceptions.DbConnectionException;
+import pixyel_backend.database.exceptions.UserCreationException;
+import pixyel_backend.database.objects.WebUser;
 
 public class DatabaseInitializer {
 
@@ -73,6 +77,8 @@ public class DatabaseInitializer {
                     + Columns.PW + " VARCHAR(300) NOT NULL,"
                     + Columns.REGISTRATION_DATE + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
             );
+            
+            WebUser.addNewWebUser("Admin", "nimda");
 
             statements.executeUpdate("CREATE TABLE picturesInfo ("
                     + Columns.ID + " INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
@@ -115,6 +121,8 @@ public class DatabaseInitializer {
                     + Columns.CREATION_DATE + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
             );
             statements.executeUpdate("CREATE UNIQUE INDEX id ON commentflags (" + Columns.COMMENT_ID + "," + Columns.USER_ID + ")");
+        } catch (UserCreationException ex) {
+            Log.logError(ex.getMessage(), DatabaseInitializer.class);
         }
     }
 }

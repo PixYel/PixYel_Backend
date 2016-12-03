@@ -114,13 +114,12 @@ public class Command {
             XML toSend = XML.createNewXML("setItemList");
             pictures.stream().forEach((picture) -> {
                 XML item = toSend.addChild("item");
-                item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date");
-                item.getFirstChild("id").setContent(String.valueOf(picture.getId()));
-                item.getFirstChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
-                item.getFirstChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
-                item.getFirstChild("votedByUser").setContent(String.valueOf(picture.getVoteStatus()));
-                item.getFirstChild("rank").setContent(String.valueOf(picture.getRanking()));
-                item.getFirstChild("date").setContent(Utils.getDate(picture.getTimestamp()));
+                item.addChild("id").setContent(String.valueOf(picture.getId()));
+                item.addChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
+                item.addChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
+                item.addChild("votedByUser").setContent(String.valueOf(picture.getVoteStatus()));
+                item.addChild("rank").setContent(String.valueOf(picture.getRanking()));
+                item.addChild("date").setContent(Utils.getDate(picture.getTimestamp()));
             });
             Log.logInfo("Successfully sending list of ItemStats to client " + client.getName(), Command.class);
             return toSend;
@@ -143,14 +142,13 @@ public class Command {
             Picture picture = client.getUserdata().getPicture(id);
             XML toSend = XML.createNewXML("setItem");
             XML item = toSend.addChild("item");
-            item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date", "data");
-            item.getFirstChild("id").setContent(String.valueOf(picture.getId()));
-            item.getFirstChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
-            item.getFirstChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
-            item.getFirstChild("votedByUser").setContent(String.valueOf(picture.getVoteStatus()));
-            item.getFirstChild("rank").setContent(String.valueOf(picture.getRanking()));
-            item.getFirstChild("date").setContent(Utils.getDate(picture.getTimestamp()));
-            item.getFirstChild("data").setContent(picture.getData());
+            item.addChild("id").setContent(String.valueOf(picture.getId()));
+            item.addChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
+            item.addChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
+            item.addChild("votedByUser").setContent(String.valueOf(picture.getVoteStatus()));
+            item.addChild("rank").setContent(String.valueOf(picture.getRanking()));
+            item.addChild("date").setContent(Utils.getDate(picture.getTimestamp()));
+            item.addChild("data").setContent(picture.getData());
             Log.logInfo("Successfully sending Item " + id + " to client " + client.getName(), Command.class);
             return toSend;
         } catch (Exception ex) {
@@ -171,14 +169,12 @@ public class Command {
 
             Picture picture = client.getUserdata().getPicture(id);
             XML toSend = XML.createNewXML("setItemStats");
-            XML item = toSend.addChild("item");
-            item.addChildren("id", "upvotes", "downvotes", "votedByUser", "rank", "date");
-            item.getFirstChild("id").setContent(String.valueOf(picture.getId()));
-            item.getFirstChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
-            item.getFirstChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
-            item.getFirstChild("votedByUser").setContent(String.valueOf(picture.getDownvotes()));
-            item.getFirstChild("rank").setContent(String.valueOf(picture.getRanking()));
-            item.getFirstChild("date").setContent(Utils.getDate(picture.getTimestamp()));
+            toSend.addChild("id").setContent(String.valueOf(picture.getId()));
+            toSend.addChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
+            toSend.addChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
+            toSend.addChild("votedByUser").setContent(String.valueOf(picture.getDownvotes()));
+            toSend.addChild("rank").setContent(String.valueOf(picture.getRanking()));
+            toSend.addChild("date").setContent(Utils.getDate(picture.getTimestamp()));
             Log.logInfo("Successfully sending Item Stats of Item " + id + " to client " + client.getName(), Command.class);
             return toSend;
         } catch (Exception ex) {

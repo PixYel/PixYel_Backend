@@ -29,12 +29,8 @@ import org.xml.sax.SAXException;
  */
 public class XML {
 
-    private File xmlFile;//File only for this file
+    private final SettingsContainer s;
     private final Element e;//Element only for this XML-Type(Element)
-    private Document doc;//Document only for this XML-File(test.xml)
-    private static LinkedHashMap<Element, XML> LIST = new LinkedHashMap<>();
-    private boolean autosave = false;//Saves the file after EVERY change
-    private static final String EMPTYKEYWORD = "EMPTY";
 
     //DIENEN NUR DAMIT MAN SIE NICHT IN JEDER METHODE NEU DEKLARIEREN MUSS, KEINE INHALTSABLAGE
     private NodeList ch;//Children
@@ -68,8 +64,7 @@ public class XML {
      *
      * @param file The XML file to be opened
      * @return The new XML instance
-     * @throws XML.XMLException Raised when the XML file
-     * contains errors
+     * @throws XML.XMLException Raised when the XML file contains errors
      */
     public static XML openXML(File file) throws XMLException {
         return new XML(file);
@@ -80,39 +75,70 @@ public class XML {
      *
      * @param xml The XML String to be opened
      * @return The new XML instance
-     * @throws XML.XMLException Raised when the XML string
-     * contains errors
+     * @throws XML.XMLException Raised when the XML string contains errors
      */
     public static XML openXML(String xml) throws XMLException {
         return new XML(xml, true);
     }
 
+    /**
+     * create with string a new xml
+     *
+     * @param name
+     */
     private XML(String name) {
-        doc = getDoc();
+        s = new SettingsContainer(XML.createDoc());
         if (name.equals("")) {
-            name = EMPTYKEYWORD;
+            name = s.getEmptyKeyword();
         }
-        e = doc.createElement(name);
-        LIST.put(e, this);
+        e = s.getDoc().createElement(name);
+        s.getList().put(e, this);
     }
 
+    /**
+     * open an existing xml file
+     *
+     * @param file
+     * @throws pixyel_backend.xml.XML.XMLException
+     */
     private XML(File file) throws XMLException {
-        e = readXML(file);
-        LIST.put(e, this);
+        Document document = isValid(file);
+        e = document.getDocumentElement();
+        e.normalize();
+        s = new SettingsContainer(document);
+        s.setXMLFile(file);
+        s.getList().put(e, this);
     }
 
+    /**
+     * open an existing xml string
+     *
+     * @param toRead
+     * @param useless
+     * @throws pixyel_backend.xml.XML.XMLException
+     */
     private XML(String toRead, boolean useless) throws XMLException {
-        e = readXML(toRead);
-        LIST.put(e, this);
+        Document document = isValid(toRead);
+        e = document.getDocumentElement();
+        e.normalize();
+        s = new SettingsContainer(document);
+        s.getList().put(e, this);
     }
 
+    /**
+     * creates a new xml with a file to be saved in and a given rootname
+     *
+     * @param file
+     * @param rootname
+     */
     private XML(File file, String rootname) {
+        s = new SettingsContainer(XML.createDoc());
         if (rootname == null) {
             rootname = "";
         }
         e = createXML(file, rootname);
-        LIST.put(e, this);
-        if (e != null && autosave) {
+        s.getList().put(e, this);
+        if (e != null && s.getAutosave()) {
             reloadFile();
         }
     }
@@ -124,51 +150,30 @@ public class XML {
      * @param rootname
      */
     private Element createXML(File file, String rootname) {
-        xmlFile = file;
+        s.setXMLFile(file);
         Element element = null;
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            xmlFile.createNewFile();
-            if (doc == null) {
-                doc = builder.newDocument();
-            }
+            s.getXMLFile().createNewFile();
             if (rootname.isEmpty()) {
                 String root = file.getName();
                 if (root.contains(".")) {
-                    element = doc.createElement(xmlFile.getName().substring(0, xmlFile.getName().lastIndexOf(".")));
+                    element = s.getDoc().createElement(s.getXMLFile().getName().substring(0, s.getXMLFile().getName().lastIndexOf(".")));
                 } else {
-                    element = doc.createElement(root);
+                    element = s.getDoc().createElement(root);
                 }
             } else {
-                element = doc.createElement(rootname);
+                element = s.getDoc().createElement(rootname);
             }
-        } catch (ParserConfigurationException | IOException ex) {
+        } catch (IOException ex) {
             System.err.println("Fehler: " + ex);
         }
         return element;
     }
 
-    private Element readXML(File file) throws XMLException {
-        xmlFile = file;
-        Document document = isValid(xmlFile);
-        Element element = document.getDocumentElement();
-        element.normalize();
-        doc = document;
-        return element;
-    }
-
-    private Element readXML(String string) throws XMLException {
-        Document document = isValid(string);
-        Element element = document.getDocumentElement();
-        element.normalize();
-        doc = document;
-        return element;
-    }
-
-    private XML(Element element) {
+    private XML(Element element, SettingsContainer settings) {
+        s = settings;
         e = element;
-        XML.LIST.put(e, this);
+        s.getList().put(e, this);
     }
 
     /**
@@ -354,7 +359,7 @@ public class XML {
      */
     public XML getParent() {
         if (!isRoot()) {
-            return getXMLByElement((Element) e.getParentNode());
+            return getXMLByElement((Element) e.getParentNode(), s);
         }
         return null;
     }
@@ -376,7 +381,7 @@ public class XML {
                 e.removeChild(chi);
                 childDeleted = true;
             } else if (chi.getNodeType() == Node.ELEMENT_NODE) {
-                r.add(getXMLByElement((Element) ch.item(i)));
+                r.add(getXMLByElement((Element) ch.item(i), s));
             }
         }
         return r;
@@ -393,7 +398,7 @@ public class XML {
         for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
             chi = ch.item(i);
             if (chi.getNodeType() == Node.ELEMENT_NODE && chi.getNodeName().equals(name)) {
-                r.add(getXMLByElement((Element) chi));
+                r.add(getXMLByElement((Element) chi, s));
             }
         }
         return r;
@@ -408,7 +413,7 @@ public class XML {
     public XML getFirstChild() {
         for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
             if ((chi = ch.item(i)).getNodeType() == Node.ELEMENT_NODE) {
-                return getXMLByElement((Element) chi);
+                return getXMLByElement((Element) chi, s);
             }
         }
         return null;
@@ -424,7 +429,7 @@ public class XML {
     public XML getFirstChild(String name) {
         for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
             if ((chi = ch.item(i)).getNodeType() == Node.ELEMENT_NODE && chi.getNodeName().equals(name)) {
-                return getXMLByElement((Element) chi);
+                return getXMLByElement((Element) chi, s);
             }
         }
         return null;
@@ -439,7 +444,7 @@ public class XML {
         chi = null;
         for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
             if ((chi = ch.item(i - 1)).getNodeType() == Node.ELEMENT_NODE) {
-                return getXMLByElement((Element) chi);
+                return getXMLByElement((Element) chi, s);
             }
         }
         return null;
@@ -455,7 +460,7 @@ public class XML {
     public XML getLastChild(String name) {
         for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
             if ((chi = ch.item(i - 1)).getNodeType() == Node.ELEMENT_NODE && chi.getNodeName().equals(name)) {
-                return getXMLByElement((Element) chi);
+                return getXMLByElement((Element) chi, s);
             }
         }
         return null;
@@ -474,7 +479,7 @@ public class XML {
             if (chi.getNodeType() == Node.ELEMENT_NODE) {
                 for (int j = 0; j < (a = chi.getAttributes()).getLength(); j++) {
                     if (a.item(j).getNodeValue().equals(attributeValue)) {
-                        r.add(getXMLByElement((Element) chi));
+                        r.add(getXMLByElement((Element) chi, s));
                     }
                 }
             }
@@ -493,7 +498,7 @@ public class XML {
      */
     public XML addAttribute(String name, String value) {
         e.setAttribute(name, value);
-        if (autosave) {
+        if (s.getAutosave()) {
             reloadFile();
         }
         return this;
@@ -506,9 +511,8 @@ public class XML {
      * @return This node (for convenience reasons)
      */
     public XML setContent(String content) {
-        doc = getDoc();
-        e.appendChild(doc.createTextNode(content));
-        if (autosave) {
+        e.appendChild(s.getDoc().createTextNode(content));
+        if (s.getAutosave()) {
             reloadFile();
         }
         return this;
@@ -521,25 +525,26 @@ public class XML {
      * @return A ArrayList of the newly added children
      */
     public ArrayList<XML> addChildren(XML... children) {
-        doc = getDoc();
         ArrayList<XML> r = new ArrayList<>();
         for (XML child : children) {
             if (!alreadyAppended.contains(child)) {
-                if (child.e.getOwnerDocument().equals(doc)) {
+                if (child.e.getOwnerDocument().equals(s.getDoc())) {
                     chi = e.appendChild(child.e);
                 } else {
-                    chi = e.appendChild(doc.adoptNode((Node) child.e));
+                    chi = e.appendChild(s.getDoc().adoptNode((Node) child.e));
                 }
                 alreadyAppended.add(child);
             } else//bla
-             if (doc.equals(child.e.getOwnerDocument())) {
+            {
+                if (s.getDoc().equals(child.e.getOwnerDocument())) {
                     chi = e.appendChild(child.e.cloneNode(true));
                 } else {
-                    chi = e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
+                    chi = e.appendChild(s.getDoc().adoptNode((Node) child.e.cloneNode(true)));
                 }
-            r.add(getXMLByElement((Element) chi));
+            }
+            r.add(getXMLByElement((Element) chi, s));
         }
-        if (autosave) {
+        if (s.getAutosave()) {
             reloadFile();
         }
         return r;
@@ -552,24 +557,25 @@ public class XML {
      * @return The newly added child as XML
      */
     public XML addChild(XML child) {
-        doc = getDoc();
         if (!alreadyAppended.contains(child)) {
-            if (child.e.getOwnerDocument().equals(doc)) {
+            if (child.e.getOwnerDocument().equals(s.getDoc())) {
                 chi = e.appendChild(child.e);
             } else {
-                chi = e.appendChild(doc.adoptNode((Node) child.e));
+                chi = e.appendChild(s.getDoc().adoptNode((Node) child.e));
             }
             alreadyAppended.add(child);
         } else//bla
-         if (doc.equals(child.e.getOwnerDocument())) {
+        {
+            if (s.getDoc().equals(child.e.getOwnerDocument())) {
                 chi = e.appendChild(child.e.cloneNode(true));
             } else {
-                chi = e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
+                chi = e.appendChild(s.getDoc().adoptNode((Node) child.e.cloneNode(true)));
             }
-        if (autosave) {
+        }
+        if (s.getAutosave()) {
             reloadFile();
         }
-        return getXMLByElement((Element) chi);
+        return getXMLByElement((Element) chi, s);
     }
 
     /**
@@ -579,27 +585,28 @@ public class XML {
      * @return A ArrayList of the newly added children
      */
     public ArrayList<XML> addChildren(String... children) {
-        doc = getDoc();
         ArrayList<XML> r = new ArrayList<>();
         XML child;
         for (String childS : children) {
             child = new XML(childS);
             if (!alreadyAppended.contains(child)) {
-                if (child.e.getOwnerDocument().equals(doc)) {
+                if (child.e.getOwnerDocument().equals(s.getDoc())) {
                     chi = e.appendChild(child.e);
                 } else {
-                    chi = e.appendChild(doc.adoptNode((Node) child.e));
+                    chi = e.appendChild(s.getDoc().adoptNode((Node) child.e));
                 }
                 alreadyAppended.add(child);
             } else//
-             if (doc.equals(child.e.getOwnerDocument())) {
+            {
+                if (s.getDoc().equals(child.e.getOwnerDocument())) {
                     chi = e.appendChild(child.e.cloneNode(true));
                 } else {
-                    chi = e.appendChild(doc.adoptNode((Node) child.e.cloneNode(true)));
+                    chi = e.appendChild(s.getDoc().adoptNode((Node) child.e.cloneNode(true)));
                 }
-            r.add(getXMLByElement((Element) chi));
+            }
+            r.add(getXMLByElement((Element) chi, s));
         }
-        if (autosave) {
+        if (s.getAutosave()) {
             reloadFile();
         }
         return r;
@@ -612,34 +619,36 @@ public class XML {
      * @return The newly added child as XML
      */
     public XML addChild(String child) {
-        doc = getDoc();
         XML childXML = new XML(child);
         if (!alreadyAppended.contains(childXML)) {
-            if (childXML.e.getOwnerDocument().equals(doc)) {
+            if (childXML.e.getOwnerDocument().equals(s.getDoc())) {
                 chi = e.appendChild(childXML.e);
             } else {
-                chi = e.appendChild(doc.adoptNode((Node) childXML.e));
+                chi = e.appendChild(s.getDoc().adoptNode((Node) childXML.e));
             }
             alreadyAppended.add(childXML);
         } else//
-         if (doc.equals(childXML.e.getOwnerDocument())) {
+        {
+            if (s.getDoc().equals(childXML.e.getOwnerDocument())) {
                 chi = e.appendChild(childXML.e.cloneNode(true));
             } else {
-                chi = e.appendChild(doc.adoptNode((Node) childXML.e.cloneNode(true)));
+                chi = e.appendChild(s.getDoc().adoptNode((Node) childXML.e.cloneNode(true)));
             }
-        if (autosave) {
+        }
+        if (s.getAutosave()) {
             reloadFile();
         }
-        return getXMLByElement((Element) chi);
+        return getXMLByElement((Element) chi, s);
     }
-    
+
     /**
      * Adds a child with content to this node
+     *
      * @param childname The name of the new child to be added
      * @param content The content of the new child
      * @return The newly added child as XML
      */
-    public XML addChild(String childname, String content){
+    public XML addChild(String childname, String content) {
         return addChild(childname).setContent(content);
     }
 
@@ -649,8 +658,8 @@ public class XML {
     public void remove() {
         if (hasParent()) {
             (chi = e.getParentNode()).removeChild(e);
-            if (autosave) {
-                getXMLByElement((Element) chi).reloadFile();
+            if (s.getAutosave()) {
+                getXMLByElement((Element) chi, s).reloadFile();
             }
         }
     }
@@ -663,7 +672,7 @@ public class XML {
      */
     public XML removeAttribute(String name) {
         e.removeAttribute(name);
-        if (autosave) {
+        if (s.getAutosave()) {
             reloadFile();
         }
         return this;
@@ -677,12 +686,12 @@ public class XML {
     public XML removeFirstAttribute() {
         for (int i = 0; i < (a = e.getAttributes()).getLength(); i++) {
             e.removeAttribute(a.item(i).getNodeName());
-            if (autosave) {
+            if (s.getAutosave()) {
                 reloadFile();
             }
             return this;
         }
-        if (autosave) {
+        if (s.getAutosave()) {
             reloadFile();
         }
         return this;
@@ -696,12 +705,12 @@ public class XML {
     public XML removeLastAttribute() {
         for (int i = (a = e.getAttributes()).getLength(); i > 0; i--) {
             e.removeAttribute(a.item(i - 1).getNodeName());
-            if (autosave) {
+            if (s.getAutosave()) {
                 reloadFile();
             }
             return this;
         }
-        if (autosave) {
+        if (s.getAutosave()) {
             reloadFile();
         }
         return this;
@@ -720,7 +729,7 @@ public class XML {
                 e.removeAttribute(a.item(i - 1).getNodeName());
             }
         }
-        if (autosave) {
+        if (s.getAutosave()) {
             reloadFile();
         }
         return this;
@@ -737,7 +746,7 @@ public class XML {
         for (int i = 0; i < (a = e.getAttributes()).getLength(); i++) {
             if (a.item(i).getNodeValue().equals(value)) {
                 e.removeAttribute(a.item(i).getNodeName());
-                if (autosave) {
+                if (s.getAutosave()) {
                     reloadFile();
                 }
                 return this;
@@ -757,7 +766,7 @@ public class XML {
         for (int i = (a = e.getAttributes()).getLength(); i > 0; i--) {
             if (a.item(i - 1).getNodeValue().equals(value)) {
                 e.removeAttribute(a.item(i - 1).getNodeName());
-                if (autosave) {
+                if (s.getAutosave()) {
                     reloadFile();
                 }
                 return this;
@@ -779,7 +788,7 @@ public class XML {
                 }
             }
         }
-        if (autosave) {
+        if (s.getAutosave()) {
             reloadFile();
         }
         return this;
@@ -797,7 +806,7 @@ public class XML {
                 e.removeChild(chi);
             }
         }
-        if (autosave) {
+        if (s.getAutosave()) {
             reloadFile();
         }
         return this;
@@ -811,7 +820,7 @@ public class XML {
      */
     public XML removeChild(XML child) {
         e.removeChild(child.e);
-        if (autosave) {
+        if (s.getAutosave()) {
             reloadFile();
         }
         return this;
@@ -826,7 +835,7 @@ public class XML {
         for (int i = 0; i < (ch = e.getChildNodes()).getLength(); i++) {
             if ((chi = ch.item(i)).getNodeType() == Node.ELEMENT_NODE) {
                 e.removeChild(chi);
-                if (autosave) {
+                if (s.getAutosave()) {
                     reloadFile();
                 }
                 return this;
@@ -845,7 +854,7 @@ public class XML {
         for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
             if ((chi = ch.item(i - 1)).getNodeType() == Node.ELEMENT_NODE) {
                 e.removeChild(chi);
-                if (autosave) {
+                if (s.getAutosave()) {
                     reloadFile();
                 }
                 return this;
@@ -863,7 +872,7 @@ public class XML {
         for (int i = (a = e.getAttributes()).getLength(); i > 0; i--) {
             e.removeAttribute(a.item(i - 1).getNodeName());
         }
-        if (autosave) {
+        if (s.getAutosave()) {
             reloadFile();
         }
         return this;
@@ -881,7 +890,7 @@ public class XML {
                     e.removeChild(chi);
                 }
             }
-            if (autosave) {
+            if (s.getAutosave()) {
                 reloadFile();
             }
         }
@@ -897,7 +906,7 @@ public class XML {
         for (int i = (ch = e.getChildNodes()).getLength(); i > 0; i--) {
             e.removeChild(ch.item(i - 1));
         }
-        if (autosave) {
+        if (s.getAutosave()) {
             reloadFile();
         }
         return this;
@@ -909,26 +918,18 @@ public class XML {
      * @param file The file in which this XML-object is going to be stored in
      */
     public void setFileToSaveIn(File file) {
-        if (hasParent()) {
-            getParent().setFileToSaveIn(file);
-            return;
-        }
-        xmlFile = file;
+        s.setXMLFile(file);
     }
 
     /**
      * Saves this XML-object to the specified file
      */
     public void save() {
-        if (hasParent()) {
-            getParent().save();
-            return;
-        }
-        if (xmlFile == null) {
+        if (s.getXMLFile() == null) {
             System.err.println("Fehler, keine Datei angegeben, bitte benutze saveTo(file) oder definiere die Datei mit setFileToSaveIn(file)");
             return;
         }
-        saveTo(xmlFile);
+        saveTo(s.getXMLFile());
     }
 
     /**
@@ -939,10 +940,6 @@ public class XML {
      * in
      */
     public void saveTo(File toSaveIn) {
-        if (hasParent()) {
-            getParent().saveTo(toSaveIn);
-            return;
-        }
         try {
             // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -969,40 +966,21 @@ public class XML {
      * @param flag The Autosave flag
      */
     public void setAutosave(boolean flag) {
-        autosave = flag;
+        s.setAutosave(flag);
         save();
     }
 
-    private Document getDoc() {
-        if (hasParent()) {
-            return getParent().getDoc();
-        } else if (doc == null) {
-            try {
-                return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-            } catch (ParserConfigurationException ex) {
-                System.err.println("Error, could not create Document instance");
-                return null;
-            }
-        } else {
-            return doc;
-        }
-    }
-
     private void reloadFile() {
-        if (hasParent()) {
-            getParent().reloadFile();
-            return;
-        }
-        if (xmlFile != null) {
+        if (s.getXMLFile() != null) {
             save();
         }
     }
 
-    private XML getXMLByElement(Element e) {
-        if (XML.LIST.containsKey(e)) {
-            return XML.LIST.get(e);
+    private XML getXMLByElement(Element e, SettingsContainer s) {
+        if (s.getList().containsKey(e)) {
+            return s.getList().get(e);
         }
-        return new XML(e);
+        return new XML(e, s);
     }
 
     /**
@@ -1033,6 +1011,15 @@ public class XML {
             t = p.getNodeType();
         }
         return p == null || (t != Node.ELEMENT_NODE && t != Node.TEXT_NODE);
+    }
+
+    private static Document createDoc() {
+        try {
+            return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+        } catch (ParserConfigurationException ex) {
+            System.err.println("Error, could not create Document instance");
+            return null;
+        }
     }
 
     /**
@@ -1170,6 +1157,47 @@ public class XML {
             super(message);
         }
 
+    }
+
+    public class SettingsContainer {
+
+        private File impl_xmlFile;//File only for this file
+        private final Document impl_doc;//Document only for this XML-File(e.g. test.xml)
+        private LinkedHashMap<Element, XML> impl_list = new LinkedHashMap<>();
+        private boolean impl_autosave = false;//Saves the file after EVERY change
+        private static final String impl_EMPTYKEYWORD = "EMPTY";
+
+        public SettingsContainer(Document doc) {
+            impl_doc = doc;
+        }
+
+        public void setXMLFile(File xmlFile) {
+            this.impl_xmlFile = xmlFile;
+        }
+
+        public File getXMLFile() {
+            return impl_xmlFile;
+        }
+
+        public Document getDoc() {
+            return impl_doc;
+        }
+
+        public LinkedHashMap<Element, XML> getList() {
+            return impl_list;
+        }
+
+        public void setAutosave(boolean autosave) {
+            impl_autosave = autosave;
+        }
+
+        public boolean getAutosave() {
+            return impl_autosave;
+        }
+
+        public String getEmptyKeyword() {
+            return impl_EMPTYKEYWORD;
+        }
     }
 
 }

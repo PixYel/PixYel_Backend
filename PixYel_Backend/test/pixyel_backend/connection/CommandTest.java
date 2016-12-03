@@ -8,9 +8,13 @@ package pixyel_backend.connection;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -20,8 +24,9 @@ import pixyel_backend.database.objects.User;
 import pixyel_backend.xml.XML;
 
 /**
+ * Tests ONLY the structure of XML files
  *
- * @author Administrator
+ * @author Josua Frank
  */
 public class CommandTest {
 
@@ -72,12 +77,16 @@ public class CommandTest {
                 + "</request>";
         try {
             toTest = Command.getItemList(XML.openXML(input.replaceAll("\\n", "").replaceAll(" ", "")).getFirstChild(), dummyclient);
+
+            assertEquals("setItemList", toTest.getName());
+            assertEquals("item", (toTest = toTest.getFirstChild()).getName());
+            assertEquals(6, toTest.getChildren().size());
+            List<String> list = toTest.getChildren().stream().map(xml -> xml.getName()).collect(Collectors.toList());
+
+            Assert.assertTrue(list.containsAll(Arrays.asList("id", "upvotes", "downvotes", "votedByUser", "rank", "date")));
         } catch (XML.XMLException ex) {
             Assert.fail("Coulnt read test xml");
         }
-
-        String expeced = "";
-        //toTest.toString();
     }
 
     /**
@@ -93,10 +102,15 @@ public class CommandTest {
                 + "</request>";
         try {
             toTest = Command.getItem(XML.openXML(input.replaceAll("\\n", "").replaceAll(" ", "")).getFirstChild(), dummyclient);
+
+            assertEquals("setItem", toTest.getName());
+            assertEquals(7, toTest.getChildren().size());
+            List<String> list = toTest.getChildren().stream().map(xml -> xml.getName()).collect(Collectors.toList());
+
+            Assert.assertTrue(list.containsAll(Arrays.asList("id", "upvotes", "downvotes", "votedByUser", "rank", "date", "data")));
         } catch (XML.XMLException ex) {
             Assert.fail("Coulnt read test xml");
         }
-        System.out.println(toTest.toString());
     }
 
     /**
@@ -112,6 +126,12 @@ public class CommandTest {
                 + "</request>";
         try {
             toTest = Command.getItemStats(XML.openXML(input.replaceAll("\\n", "").replaceAll(" ", "")).getFirstChild(), dummyclient);
+
+            assertEquals("setItemStats", toTest.getName());
+            assertEquals(6, toTest.getChildren().size());
+            List<String> list = toTest.getChildren().stream().map(xml -> xml.getName()).collect(Collectors.toList());
+
+            Assert.assertTrue(list.containsAll(Arrays.asList("id", "upvotes", "downvotes", "votedByUser", "rank", "date")));
         } catch (XML.XMLException ex) {
             Assert.fail("Coulnt read test xml");
         }
@@ -128,6 +148,8 @@ public class CommandTest {
                 + "</request>";
         try {
             toTest = Command.echo(XML.openXML(input.replaceAll("\\n", "").replaceAll(" ", "")).getFirstChild(), dummyclient);
+
+            assertEquals("echo", toTest.getName());
         } catch (XML.XMLException ex) {
             Assert.fail("Coulnt read test xml");
         }
@@ -147,6 +169,12 @@ public class CommandTest {
                 + "</request>";
         try {
             toTest = Command.vote(XML.openXML(input.replaceAll("\\n", "").replaceAll(" ", "")).getFirstChild(), dummyclient);
+
+            assertEquals("voteSuccessful", toTest.getName());
+            assertEquals(2, toTest.getChildren().size());
+            List<String> list = toTest.getChildren().stream().map(xml -> xml.getName()).collect(Collectors.toList());
+
+            Assert.assertTrue(list.containsAll(Arrays.asList("id", "success")));
         } catch (XML.XMLException ex) {
             Assert.fail("Coulnt read test xml");
         }
@@ -167,6 +195,12 @@ public class CommandTest {
                 + "</request>";
         try {
             toTest = Command.upload(XML.openXML(input.replaceAll("\\n", "").replaceAll(" ", "")).getFirstChild(), dummyclient);
+
+            assertEquals("uploadSuccessful", toTest.getName());
+            assertEquals(2, toTest.getChildren().size());
+            List<String> list = toTest.getChildren().stream().map(xml -> xml.getName()).collect(Collectors.toList());
+
+            Assert.assertTrue(list.containsAll(Arrays.asList("id", "success")));
         } catch (XML.XMLException ex) {
             Assert.fail("Coulnt read test xml");
         }
@@ -185,6 +219,12 @@ public class CommandTest {
                 + "</request>";
         try {
             toTest = Command.flagComment(XML.openXML(input.replaceAll("\\n", "").replaceAll(" ", "")).getFirstChild(), dummyclient);
+
+            assertEquals("flagCommentSuccessful", toTest.getName());
+            assertEquals(2, toTest.getChildren().size());
+            List<String> list = toTest.getChildren().stream().map(xml -> xml.getName()).collect(Collectors.toList());
+
+            Assert.assertTrue(list.containsAll(Arrays.asList("id", "success")));
         } catch (XML.XMLException ex) {
             Assert.fail("Coulnt read test xml");
         }
@@ -203,6 +243,11 @@ public class CommandTest {
                 + "</request>";
         try {
             toTest = Command.flagItem(XML.openXML(input.replaceAll("\\n", "").replaceAll(" ", "")).getFirstChild(), dummyclient);
+
+            assertEquals("flagItemSuccessful", toTest.getName());
+            assertEquals(2, toTest.getChildren().size());
+            List<String> list = toTest.getChildren().stream().map(xml -> xml.getName()).collect(Collectors.toList());
+            Assert.assertTrue(list.containsAll(Arrays.asList("id", "success")));
         } catch (XML.XMLException ex) {
             Assert.fail("Coulnt read test xml");
         }
@@ -221,6 +266,13 @@ public class CommandTest {
                 + "</request>";
         try {
             toTest = Command.getComments(XML.openXML(input.replaceAll("\\n", "").replaceAll(" ", "")).getFirstChild(), dummyclient);
+
+            assertEquals("setComments", toTest.getName());
+            assertEquals("comment", (toTest = toTest.getFirstChild()).getName());
+            assertEquals(3, toTest.getChildren().size());
+            List<String> list = toTest.getChildren().stream().map(xml -> xml.getName()).collect(Collectors.toList());
+
+            Assert.assertTrue(list.containsAll(Arrays.asList("id", "date", "content")));
         } catch (XML.XMLException ex) {
             Assert.fail("Coulnt read test xml");
         }
@@ -240,6 +292,12 @@ public class CommandTest {
                 + "</request>";
         try {
             toTest = Command.addComment(XML.openXML(input.replaceAll("\\n", "").replaceAll(" ", "")).getFirstChild(), dummyclient);
+
+            assertEquals("addCommentSuccessful", toTest.getName());
+            assertEquals(2, toTest.getChildren().size());
+            List<String> list = toTest.getChildren().stream().map(xml -> xml.getName()).collect(Collectors.toList());
+
+            Assert.assertTrue(list.containsAll(Arrays.asList("id", "success")));
         } catch (XML.XMLException ex) {
             Assert.fail("Coulnt read test xml");
         }
@@ -252,6 +310,12 @@ public class CommandTest {
     public void testError() {
         XML toTest;
         toTest = Command.error("testmessage", false);
+
+        assertEquals("error", toTest.getName());
+        assertEquals(2, toTest.getChildren().size());
+        List<String> list = toTest.getChildren().stream().map(xml -> xml.getName()).collect(Collectors.toList());
+
+        Assert.assertTrue(list.containsAll(Arrays.asList("errorMessage", "isErrorFatal")));
     }
 
     /**

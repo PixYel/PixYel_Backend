@@ -36,8 +36,13 @@ public class Connection implements Runnable {
      */
     public static void disconnect(Client client, int socketHashcode) {
         LOGGEDINCLIENTS.remove(client.getName());
-        onClientDisconnected(CONNECTEDCLIENTS.get(socketHashcode));
-        CONNECTEDCLIENTS.remove(socketHashcode);
+        if (!CONNECTEDCLIENTS.containsKey(socketHashcode)) {
+            Log.logError("Client " + client.getName() + " has not been connected through the normal connection process!!!!!!", Connection.class);
+            onClientDisconnected(client);
+        } else {
+            onClientConnected(CONNECTEDCLIENTS.get(socketHashcode));
+            CONNECTEDCLIENTS.remove(socketHashcode);
+        }
     }
 
     /**

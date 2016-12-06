@@ -178,7 +178,7 @@ public class Comment {
         PreparedStatement sta;
         List<Comment> commentList = new LinkedList();
         try {
-            sta = con.prepareStatement("SELECT * FROM comment WHERE " + Columns.PICTURE_ID + " LIKE ? ORDER BY " + Columns.CREATION_DATE + " ASC");
+            sta = con.prepareStatement("SELECT * FROM comments WHERE " + Columns.PICTURE_ID + " LIKE ? ORDER BY " + Columns.CREATION_DATE + " ASC");
 
             sta.setInt(1, pictureId);
             ResultSet resultSet = sta.executeQuery();

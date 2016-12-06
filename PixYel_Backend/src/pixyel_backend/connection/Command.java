@@ -106,9 +106,8 @@ public class Command {
     public static XML getItemList(XML input, Client client) {
         try {
             XML location = input.getFirstChild();
-            int longt = Integer.valueOf(location.getFirstChild("long").getContent());
-            int lat = Integer.valueOf(location.getFirstChild("lat").getContent());
-
+            Double longt = Double.valueOf(location.getFirstChild("long").getContent());
+            Double lat = Double.valueOf(location.getFirstChild("lat").getContent());
             List<Picture> pictures = client.getUserdata().getPicturesByLocation(new Coordinate(longt, lat));
 
             XML toSend = XML.createNewXML("setItemList");

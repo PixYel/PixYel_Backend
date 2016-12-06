@@ -94,20 +94,19 @@ public class Picture {
      *
      * @param userId
      * @param pictureData
-     * @param longitude
-     * @param latitude
+     * @param cord
      * @return
      * @throws PictureUploadExcpetion
      */
-    public static synchronized Picture addNewPicture(int userId, String pictureData, double longitude, double latitude) throws PictureUploadExcpetion {
+    public static synchronized Picture addNewPicture(int userId, String pictureData, Coordinate cord) throws PictureUploadExcpetion {
         int pictureId;
         try {
             Connection con = MysqlConnector.getConnection();
             PreparedStatement statement;
             if (pictureData != null && pictureData.length() >= 1) {
                 statement = con.prepareStatement("INSERT INTO picturesInfo (" + Columns.LONGITUDE + ", " + Columns.LATITUDE + ", " + Columns.USER_ID + ") VALUES(?,?,?)");
-                statement.setDouble(1, longitude);
-                statement.setDouble(2, latitude);
+                statement.setDouble(1, cord.getLongitude());
+                statement.setDouble(2, cord.getLatitude());
                 statement.setInt(3, userId);
                 statement.executeUpdate();
                 Log.logDebug("Added Picture to Db", Picture.class);

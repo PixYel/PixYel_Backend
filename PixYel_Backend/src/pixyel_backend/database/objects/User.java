@@ -293,14 +293,13 @@ public class User {
 
     /**
      * @param data
-     * @param longitude
-     * @param latitude
+     * @param cord
      * @return The pictureobject of the picture that was uploaded
      * @throws pixyel_backend.database.exceptions.PictureUploadExcpetion
      * @see pixyel_backend.database.objects.Picture
      */
-    public Picture uploadPicture(String data, double longitude, double latitude) throws PictureUploadExcpetion {
-        return Picture.addNewPicture(id, data, longitude, latitude);
+    public Picture uploadPicture(String data, Coordinate cord) throws PictureUploadExcpetion {
+        return Picture.addNewPicture(id, data, cord);
     }
 
     /**

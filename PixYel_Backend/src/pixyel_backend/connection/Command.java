@@ -282,9 +282,9 @@ public class Command {
         int id = 0;
         try {
             String data = input.getFirstChild("data").getContent();
-            int longt = Integer.valueOf(input.getFirstChild("long").getContent());
-            int lat = Integer.valueOf(input.getFirstChild("lat").getContent());
-            id = client.getUserdata().uploadPicture(data, (double) longt, (double) lat).getId();
+            Double longt = Double.valueOf(input.getFirstChild("long").getContent());
+            Double lat = Double.valueOf(input.getFirstChild("lat").getContent());
+            id = client.getUserdata().uploadPicture(data, new Coordinate(longt, lat)).getId();
 
             XML toSend = XML.createNewXML("uploadSuccessful");
             toSend.addChild("id").setContent(String.valueOf(id));

@@ -72,7 +72,7 @@ public class Command {
                             disconnect(xml, client);
                             break;
                         default:
-                            client.sendToClient(error(xml.getName() + " is not a valid Command, RTFS!!!", true));
+                            client.sendToClient(error(xml.getName() + " is not a valid Command", true));
                             Log.logError("Client " + client.getName() + " has send a wrong command: " + xml.getName(), Command.class);
                             break;
                     }

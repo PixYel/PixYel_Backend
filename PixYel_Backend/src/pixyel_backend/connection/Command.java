@@ -209,7 +209,7 @@ public class Command {
             toSend = XML.createNewXML("loginSuccessful").setContent("true");
             Log.logInfo("Successfully logged " + client.getName() + " in", Command.class);
         } catch (Exception e) {
-            toSend = XML.createNewXML("loginUnsuccessful").setContent("false");
+            toSend = XML.createNewXML("loginSuccessful").setContent("false");
             Log.logWarning("Could not log " + client.getName() + " in: " + e, Command.class);
         }
         return toSend;
@@ -319,7 +319,7 @@ public class Command {
 
             XML toSend = XML.createNewXML("flagCommentSuccessful");
             toSend.addChild("id").setContent(String.valueOf(commentId));
-            toSend.addChild("success").addChild("true");
+            toSend.addChild("success").setContent("true");
 
             Log.logInfo("Successfully flagged Comment " + commentId + " by " + client.getName(), Command.class);
             return toSend;
@@ -331,7 +331,7 @@ public class Command {
             } catch (Exception ex) {
                 return error("Could not get the id of the comment: " + ex, true);
             }
-            toSend.addChild("success").addChild("false");
+            toSend.addChild("success").setContent("false");
             return toSend;
         }
     }
@@ -349,7 +349,7 @@ public class Command {
 
             XML toSend = XML.createNewXML("flagItemSuccessful");
             toSend.addChild("id").setContent(String.valueOf(id));
-            toSend.addChild("success").addChild("true");
+            toSend.addChild("success").setContent("true");
 
             Log.logInfo("Successfully flagged Item " + id + " by " + client.getName(), Command.class);
             return toSend;
@@ -361,7 +361,7 @@ public class Command {
             } catch (Exception e) {
                 return error("Could not get the id of the picture: " + e, true);
             }
-            toSend.addChild("success").addChild("false");
+            toSend.addChild("success").setContent("false");
             return toSend;
         }
     }

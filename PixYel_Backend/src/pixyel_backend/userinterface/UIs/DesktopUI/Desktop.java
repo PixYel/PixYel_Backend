@@ -87,7 +87,7 @@ public class Desktop {
                 OnlineMonitorWindow.show(onClose);
             }
         };
-        GridLayout appOnlineMonitor = getAppButtons(Translations.get(Translations.DESKTOP_ONLINE_MONITOR), "desktop_console_icon.png", runOnlineMonitor);
+        GridLayout appOnlineMonitor = getAppButtons(Translations.get(Translations.DESKTOP_ONLINE_MONITOR), "desktop_system_monitor_icon.png", runOnlineMonitor);
         gridLayout.addComponent(appOnlineMonitor, 1, 0);
         gridLayout.setComponentAlignment(appOnlineMonitor, Alignment.MIDDLE_CENTER);
 
@@ -98,7 +98,7 @@ public class Desktop {
                 UserManagementWindow.show(onClose);
             }
         };
-        GridLayout appUserManagement = getAppButtons(Translations.get(Translations.DESKTOP_USER_MANAGMENT), "desktop_console_icon.png", runUserManagement);
+        GridLayout appUserManagement = getAppButtons(Translations.get(Translations.DESKTOP_USER_MANAGMENT), "desktop_user_management_icon.png", runUserManagement);
         gridLayout.addComponent(appUserManagement, 2, 0);
         gridLayout.setComponentAlignment(appUserManagement, Alignment.MIDDLE_CENTER);
 
@@ -108,7 +108,7 @@ public class Desktop {
                 Logout.show();
             }
         };
-        GridLayout appLogout = getAppButtons(Translations.get(Translations.DESKTOP_LOGOUT), "desktop_console_icon.png", runLogout);
+        GridLayout appLogout = getAppButtons(Translations.get(Translations.DESKTOP_LOGOUT), "desktop_logout_icon.png", runLogout);
         gridLayout.addComponent(appLogout, 3, 0);
         gridLayout.setComponentAlignment(appLogout, Alignment.MIDDLE_CENTER);
         return gridLayout;
@@ -133,6 +133,7 @@ public class Desktop {
         gridLayout.addComponent(label, 0, 1);
         gridLayout.setComponentAlignment(image, Alignment.MIDDLE_CENTER);
         gridLayout.setComponentAlignment(label, Alignment.MIDDLE_CENTER);
+        gridLayout.setSpacing(true);
         return gridLayout;
     }
 

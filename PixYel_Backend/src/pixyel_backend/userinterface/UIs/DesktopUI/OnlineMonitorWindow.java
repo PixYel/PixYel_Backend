@@ -5,8 +5,10 @@
  */
 package pixyel_backend.userinterface.UIs.DesktopUI;
 
+import com.vaadin.server.FileResource;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
+import pixyel_backend.userinterface.ressources.Ressources;
 
 /**
  *
@@ -20,6 +22,10 @@ public class OnlineMonitorWindow extends Window {
 
     public OnlineMonitorWindow(Runnable onClose) {
         addCloseListener(ce -> onClose.run());
+        try {
+            setIcon(new FileResource(Ressources.getRessource("desktop_system_monitor_icon_small.png")));
+        } catch (Ressources.RessourceNotFoundException ex) {
+        }
 
         UI.getCurrent().addWindow(this);
     }

@@ -5,11 +5,15 @@
  */
 package pixyel_backend.userinterface.UIs.DesktopUI;
 
+import com.vaadin.event.Action;
 import com.vaadin.server.FileResource;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 import java.util.ArrayList;
@@ -32,7 +36,7 @@ public class ConsoleWindow extends Window {
 
     public ConsoleWindow() {
         windows.add(this);
-        addCloseListener((CloseEvent ce)->{
+        addCloseListener((CloseEvent ce) -> {
             windows.remove(this);
         });
         table.setSizeFull();
@@ -46,6 +50,7 @@ public class ConsoleWindow extends Window {
         table.addContainerProperty(id, Label.class, null);
         table.setColumnExpandRatio(id, 1);
 
+        setImmediate(true);
         setContent(table);
         setCaption(" " + Translations.get(Translations.DESKTOP_CONSOLE));
         try {
@@ -59,6 +64,9 @@ public class ConsoleWindow extends Window {
         setSizeFull();
     }
 
+    
+    
+    
     public static void logError(String errorMessage, String className) {
         windows.forEach((ConsoleWindow window) -> window.addError(errorMessage, className));
     }
@@ -70,6 +78,7 @@ public class ConsoleWindow extends Window {
         counter++;
         table.addItem(new Object[]{dateField, classNameLabel, errorLabel}, counter);
         table.setCurrentPageFirstItemId(counter);
+        table.markAsDirtyRecursive();
     }
 
     public static void logInfo(String infoMessage, String className) {
@@ -83,6 +92,7 @@ public class ConsoleWindow extends Window {
         counter++;
         table.addItem(new Object[]{dateField, classNameLabel, infoLabel}, counter);
         table.setCurrentPageFirstItemId(counter);
+        table.markAsDirtyRecursive();
     }
 
     public static void logDebug(String debugMessage, String className) {
@@ -96,6 +106,7 @@ public class ConsoleWindow extends Window {
         counter++;
         table.addItem(new Object[]{dateField, classNameLabel, debugLabel}, counter);
         table.setCurrentPageFirstItemId(counter);
+        table.markAsDirtyRecursive();
     }
 
     public static void logWarning(String warningMessage, String className) {
@@ -109,6 +120,7 @@ public class ConsoleWindow extends Window {
         counter++;
         table.addItem(new Object[]{dateField, classNameLabel, warningLabel}, counter);
         table.setCurrentPageFirstItemId(counter);
+        table.markAsDirtyRecursive();
     }
 
     private static DateField getDate() {

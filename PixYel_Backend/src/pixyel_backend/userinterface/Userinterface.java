@@ -76,6 +76,7 @@ public class Userinterface extends com.vaadin.ui.UI implements Runnable {
      */
     @Override
     protected void init(VaadinRequest vaadinRequest) {
+        setImmediate(true);
         Login.show();
     }
 

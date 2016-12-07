@@ -56,11 +56,6 @@ public class ConsoleWindow extends Window {
         center();
         setSizeFull();
         UI.getCurrent().addWindow(this);
-
-        Log.logDebug("TestDebug", ConsoleWindow.class);
-        Log.logInfo("TestInfo", ConsoleWindow.class);
-        Log.logError("TestError", ConsoleWindow.class);
-        Log.logWarning("TestWarning", ConsoleWindow.class);
     }
 
     public void addError(String errorMessage, String className) {

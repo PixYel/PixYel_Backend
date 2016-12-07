@@ -43,10 +43,11 @@ public class ConsoleWindow extends Window {
         });
         Page.getCurrent().addBrowserWindowResizeListener((s) -> onResized());
         
+        HorizontalLayout scrollLayout = new HorizontalLayout();
         layout = new VerticalLayout();
         
         setImmediate(true);
-        setContent(layout);
+        setContent(scrollLayout);
         setCaption(" " + Translations.get(Translations.DESKTOP_CONSOLE));
         try {
             setIcon(new FileResource(Ressources.getRessource("desktop_console_icon_small.png")));

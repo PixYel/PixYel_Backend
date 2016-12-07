@@ -12,6 +12,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import pixyel_backend.Log;
@@ -27,8 +28,13 @@ public class ConsoleWindow extends Window {
 
     private Table table = new Table();
     private int counter = 0;
+    private static ArrayList<ConsoleWindow> windows = new ArrayList<>();
 
     public ConsoleWindow() {
+        windows.add(this);
+        addCloseListener((CloseEvent ce)->{
+            windows.remove(this);
+        });
         table.setSizeFull();
         table.setSelectable(true);
         table.setImmediate(true);
@@ -51,21 +57,10 @@ public class ConsoleWindow extends Window {
         setDraggable(true);
         center();
         setSizeFull();
-
-        Log.logInfo("Testinfo", ConsoleWindow.class);
-        Log.logWarning("Testwarning", ConsoleWindow.class);
-        Log.logError("Testerror", ConsoleWindow.class);
-        Log.logDebug("Testdebug", ConsoleWindow.class);
     }
 
     public static void logError(String errorMessage, String className) {
-        Userinterface.sessions.stream().map((Userinterface ui) -> ui.getWindows()).forEach((Collection<Window> windows) -> {
-            windows.forEach((Window window) -> {
-                if (window instanceof ConsoleWindow) {
-                    ((ConsoleWindow) window).addError(errorMessage, className);
-                }
-            });
-        });
+        windows.forEach((ConsoleWindow window) -> window.addError(errorMessage, className));
     }
 
     public void addError(String errorMessage, String className) {
@@ -78,13 +73,7 @@ public class ConsoleWindow extends Window {
     }
 
     public static void logInfo(String infoMessage, String className) {
-        Userinterface.sessions.stream().map((Userinterface ui) -> ui.getWindows()).forEach((Collection<Window> windows) -> {
-            windows.forEach((Window window) -> {
-                if (window instanceof ConsoleWindow) {
-                    ((ConsoleWindow) window).addInfo(infoMessage, className);
-                }
-            });
-        });
+        windows.forEach((ConsoleWindow window) -> window.addInfo(infoMessage, className));
     }
 
     public void addInfo(String infoMessage, String className) {
@@ -97,13 +86,7 @@ public class ConsoleWindow extends Window {
     }
 
     public static void logDebug(String debugMessage, String className) {
-        Userinterface.sessions.stream().map((Userinterface ui) -> ui.getWindows()).forEach((Collection<Window> windows) -> {
-            windows.forEach((Window window) -> {
-                if (window instanceof ConsoleWindow) {
-                    ((ConsoleWindow) window).addDebug(debugMessage, className);
-                }
-            });
-        });
+        windows.forEach((ConsoleWindow window) -> window.addDebug(debugMessage, className));
     }
 
     public void addDebug(String debugMessage, String className) {
@@ -116,13 +99,7 @@ public class ConsoleWindow extends Window {
     }
 
     public static void logWarning(String warningMessage, String className) {
-        Userinterface.sessions.stream().map((Userinterface ui) -> ui.getWindows()).forEach((Collection<Window> windows) -> {
-            windows.forEach((Window window) -> {
-                if (window instanceof ConsoleWindow) {
-                    ((ConsoleWindow) window).addWarning(warningMessage, className);
-                }
-            });
-        });
+        windows.forEach((ConsoleWindow window) -> window.addWarning(warningMessage, className));
     }
 
     public void addWarning(String warningMessage, String className) {

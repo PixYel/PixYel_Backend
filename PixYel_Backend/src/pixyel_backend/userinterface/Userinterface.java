@@ -32,10 +32,9 @@ import pixyel_backend.userinterface.UIs.LoginUI.Login;
 @Theme("mytheme")
 public class Userinterface extends com.vaadin.ui.UI implements Runnable {
 
-    private final static int PORT = 80;
+    private final static int PORT = 8080;
     private static Runnable onStarted;
     private static boolean started = false;
-    public static ArrayList<Userinterface> sessions = new ArrayList<>();
 
     /**
      * To start the Userinterface in general as a separate Thread
@@ -86,13 +85,6 @@ public class Userinterface extends com.vaadin.ui.UI implements Runnable {
     @WebServlet(urlPatterns = "/*", name = "PixYelUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = Userinterface.class, productionMode = !Main.DEBUG)
     public static class PixYelUIServlet extends VaadinServlet {
-
-        @Override
-        public void init(ServletConfig servletConfig) throws ServletException {
-            super.init(servletConfig);
-            getService().addSessionInitListener(new VaadinSessionInitListener());
-            getService().addSessionDestroyListener(new VaadinSessionDestroyListener());
-        }
     }
 
     public static void onStarted(Runnable r) {
@@ -100,27 +92,6 @@ public class Userinterface extends com.vaadin.ui.UI implements Runnable {
             r.run();
         } else {
             onStarted = r;
-        }
-    }
-
-    public static class VaadinSessionInitListener implements SessionInitListener {
-
-        @Override
-        public void sessionInit(SessionInitEvent event) throws ServiceException {
-            event.getSession().getUIs().stream().filter((UI ui) -> ui instanceof Userinterface).forEach((UI ui) -> sessions.add((Userinterface) ui));
-            Log.logInfo("Active Sessions: " + sessions.size(), VaadinSessionInitListener.class);
-        }
-    }
-
-    public static class VaadinSessionDestroyListener implements SessionDestroyListener {
-
-        @Override
-        public void sessionDestroy(SessionDestroyEvent event) {
-
-            if (event.getSession() != null && event.getSession().getSession() != null) {
-                event.getSession().getUIs().stream().filter((UI ui) -> ui instanceof Userinterface).forEach((UI ui) -> sessions.remove((Userinterface) ui));
-                Log.logInfo("Active Sessions: " + sessions.size(), VaadinSessionDestroyListener.class);
-            }
         }
     }
 

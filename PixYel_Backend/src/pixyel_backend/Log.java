@@ -32,7 +32,7 @@ public class Log {
             System.out.println(toPrint + line);
         }
         try {
-            ConsoleWindow.addInfo(logMessage, getClassName(clasS));
+            ConsoleWindow.logInfo(logMessage, getClassName(clasS));
         } catch (Exception e) {
         }
     }
@@ -51,7 +51,7 @@ public class Log {
             System.err.println(toPrint + line);
         }
         try {
-            ConsoleWindow.addError(logMessage, getClassName(clasS));
+            ConsoleWindow.logError(logMessage, getClassName(clasS));
         } catch (Exception e) {
         }
     }
@@ -70,7 +70,7 @@ public class Log {
             System.out.println(toPrint + line);
         }
         try {
-            ConsoleWindow.addWarning(logMessage, getClassName(clasS));
+            ConsoleWindow.logWarning(logMessage, getClassName(clasS));
         } catch (Exception e) {
         }
     }
@@ -91,7 +91,7 @@ public class Log {
                 System.out.println(toPrint + line);
             }
             try {
-                ConsoleWindow.addDebug(logMessage, getClassName(clasS));
+                ConsoleWindow.logDebug(logMessage, getClassName(clasS));
             } catch (Exception e) {
             }
         }

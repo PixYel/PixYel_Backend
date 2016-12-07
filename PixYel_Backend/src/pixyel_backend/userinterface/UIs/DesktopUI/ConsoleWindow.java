@@ -6,26 +6,17 @@
 package pixyel_backend.userinterface.UIs.DesktopUI;
 
 import com.vaadin.server.FileResource;
-import com.vaadin.server.WebBrowser;
-import com.vaadin.shared.ui.colorpicker.Color;
 import com.vaadin.shared.ui.datefield.Resolution;
-import com.vaadin.ui.AbsoluteLayout;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.userinterface.Translations;
+import pixyel_backend.userinterface.Userinterface;
 import pixyel_backend.userinterface.ressources.Ressources;
 
 /**
@@ -34,11 +25,10 @@ import pixyel_backend.userinterface.ressources.Ressources;
  */
 public class ConsoleWindow extends Window {
 
-    static Table table = new Table();
-    static int counter = 0;
+    private Table table = new Table();
+    private int counter = 0;
 
     public ConsoleWindow() {
-
         table.setSizeFull();
         table.setSelectable(true);
         table.setImmediate(true);
@@ -53,9 +43,9 @@ public class ConsoleWindow extends Window {
         setContent(table);
         setCaption(" " + Translations.get(Translations.DESKTOP_CONSOLE));
         try {
-            setIcon(new FileResource(Ressources.getRessource("desktop_console_icon.png")));
+            setIcon(new FileResource(Ressources.getRessource("desktop_console_icon_small.png")));
         } catch (Ressources.RessourceNotFoundException ex) {
-            Log.logWarning("Could not set the Console icon: "+ex, ConsoleWindow.class);
+            Log.logWarning("Could not set the Console icon: " + ex, ConsoleWindow.class);
         }
         //setPrimaryStyleName(ValoTheme.);
         setDraggable(true);
@@ -68,7 +58,17 @@ public class ConsoleWindow extends Window {
         Log.logDebug("Testdebug", ConsoleWindow.class);
     }
 
-    public static void addError(String errorMessage, String className) {
+    public static void logError(String errorMessage, String className) {
+        Userinterface.sessions.stream().map((Userinterface ui) -> ui.getWindows()).forEach((Collection<Window> windows) -> {
+            windows.forEach((Window window) -> {
+                if (window instanceof ConsoleWindow) {
+                    ((ConsoleWindow) window).addError(errorMessage, className);
+                }
+            });
+        });
+    }
+
+    public void addError(String errorMessage, String className) {
         DateField dateField = getDate();
         Label classNameLabel = getClassNameLabel(className);
         Label errorLabel = getMessageLabel(errorMessage, "red");
@@ -77,7 +77,17 @@ public class ConsoleWindow extends Window {
         table.setCurrentPageFirstItemId(counter);
     }
 
-    public static void addInfo(String infoMessage, String className) {
+    public static void logInfo(String infoMessage, String className) {
+        Userinterface.sessions.stream().map((Userinterface ui) -> ui.getWindows()).forEach((Collection<Window> windows) -> {
+            windows.forEach((Window window) -> {
+                if (window instanceof ConsoleWindow) {
+                    ((ConsoleWindow) window).addInfo(infoMessage, className);
+                }
+            });
+        });
+    }
+
+    public void addInfo(String infoMessage, String className) {
         DateField dateField = getDate();
         Label classNameLabel = getClassNameLabel(className);
         Label infoLabel = getMessageLabel(infoMessage, "black");
@@ -86,7 +96,17 @@ public class ConsoleWindow extends Window {
         table.setCurrentPageFirstItemId(counter);
     }
 
-    public static void addDebug(String debugMessage, String className) {
+    public static void logDebug(String debugMessage, String className) {
+        Userinterface.sessions.stream().map((Userinterface ui) -> ui.getWindows()).forEach((Collection<Window> windows) -> {
+            windows.forEach((Window window) -> {
+                if (window instanceof ConsoleWindow) {
+                    ((ConsoleWindow) window).addDebug(debugMessage, className);
+                }
+            });
+        });
+    }
+
+    public void addDebug(String debugMessage, String className) {
         DateField dateField = getDate();
         Label classNameLabel = getClassNameLabel(className);
         Label debugLabel = getMessageLabel(debugMessage, "blue");
@@ -95,7 +115,17 @@ public class ConsoleWindow extends Window {
         table.setCurrentPageFirstItemId(counter);
     }
 
-    public static void addWarning(String warningMessage, String className) {
+    public static void logWarning(String warningMessage, String className) {
+        Userinterface.sessions.stream().map((Userinterface ui) -> ui.getWindows()).forEach((Collection<Window> windows) -> {
+            windows.forEach((Window window) -> {
+                if (window instanceof ConsoleWindow) {
+                    ((ConsoleWindow) window).addWarning(warningMessage, className);
+                }
+            });
+        });
+    }
+
+    public void addWarning(String warningMessage, String className) {
         DateField dateField = getDate();
         Label classNameLabel = getClassNameLabel(className);
         Label warningLabel = getMessageLabel(warningMessage, "yellow");

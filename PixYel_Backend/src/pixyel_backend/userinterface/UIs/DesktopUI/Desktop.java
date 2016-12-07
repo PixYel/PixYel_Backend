@@ -13,7 +13,6 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
@@ -30,10 +29,8 @@ import pixyel_backend.userinterface.ressources.Ressources;
  */
 public class Desktop {
 
-    private static AbsoluteLayout layout = new AbsoluteLayout();
-
     public static void show() {
-        //Notification.show("Showing Desktop");
+        AbsoluteLayout layout = new AbsoluteLayout();
         closeAllWindows();
         layout.addComponent(getImage(), "top:0px; left: 0px;");
         layout.addComponent(getTaskBar(), "top: 80%; left: 0%; right: 0%, bottom: 0%");

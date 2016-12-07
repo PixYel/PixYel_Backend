@@ -89,7 +89,7 @@ public class Desktop {
             Logger.getLogger(Desktop.class.getName()).log(Level.SEVERE, null, ex);
         }
         image.addClickListener((MouseEvents.ClickEvent c) -> {
-            Notification.show("Console");
+            UI.getCurrent().addWindow(new ConsoleWindow());
         });
 
         Label label = new Label(caption);

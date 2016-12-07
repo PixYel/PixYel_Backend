@@ -11499,6 +11499,22 @@ div.v-layout.v-horizontal.v-widget {
     color: #ffffff;
 }
 
+.label-red {
+    color: #cd0000;
+}
+
+.label-yellow {
+    color: #e19300;
+}
+
+.label-blue {
+    color: #0000ff;
+}
+
+.label-green {
+    color: #007a00;
+}
+
 .mytheme .v-label-large {
 	font-size: 20px;
 }

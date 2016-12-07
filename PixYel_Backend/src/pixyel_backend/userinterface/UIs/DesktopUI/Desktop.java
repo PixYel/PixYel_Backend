@@ -5,22 +5,21 @@
  */
 package pixyel_backend.userinterface.UIs.DesktopUI;
 
-import com.vaadin.server.ExternalResource;
+import com.vaadin.event.MouseEvents;
 import com.vaadin.server.FileResource;
-import com.vaadin.server.Resource;
 import com.vaadin.ui.AbsoluteLayout;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.userinterface.Translations;
 import pixyel_backend.userinterface.ressources.Ressources;
@@ -64,40 +63,44 @@ public class Desktop {
         GridLayout gridLayout = new GridLayout(4, 1);
         gridLayout.setSizeFull();
 
-        VerticalLayout appConsole = getAppButtons(Translations.get(Translations.DESKTOP_CONSOLE), new ExternalResource("http://vaadin.com/image/user_male_portrait?img_id=44268&t=1251193981449"));
+        GridLayout appConsole = getAppButtons(Translations.get(Translations.DESKTOP_CONSOLE), "desktop_console_icon.png");
         gridLayout.addComponent(appConsole, 0, 0);
         gridLayout.setComponentAlignment(appConsole, Alignment.MIDDLE_CENTER);
 
-        VerticalLayout appOnlineMonitor = getAppButtons(Translations.get(Translations.DESKTOP_ONLINE_MONITOR), new ExternalResource("http://vaadin.com/image/user_male_portrait?img_id=44268&t=1251193981449"));
+        GridLayout appOnlineMonitor = getAppButtons(Translations.get(Translations.DESKTOP_ONLINE_MONITOR), "desktop_console_icon.png");
         gridLayout.addComponent(appOnlineMonitor, 1, 0);
         gridLayout.setComponentAlignment(appOnlineMonitor, Alignment.MIDDLE_CENTER);
 
-        VerticalLayout appUserManagement = getAppButtons(Translations.get(Translations.DESKTOP_USER_MANAGMENT), new ExternalResource("http://vaadin.com/image/user_male_portrait?img_id=44268&t=1251193981449"));
+        GridLayout appUserManagement = getAppButtons(Translations.get(Translations.DESKTOP_USER_MANAGMENT), "desktop_console_icon.png");
         gridLayout.addComponent(appUserManagement, 2, 0);
         gridLayout.setComponentAlignment(appUserManagement, Alignment.MIDDLE_CENTER);
 
-        VerticalLayout appLogout = getAppButtons(Translations.get(Translations.DESKTOP_LOGOUT), new ExternalResource("http://vaadin.com/image/user_male_portrait?img_id=44268&t=1251193981449"));
+        GridLayout appLogout = getAppButtons(Translations.get(Translations.DESKTOP_LOGOUT), "desktop_console_icon.png");
         gridLayout.addComponent(appLogout, 3, 0);
         gridLayout.setComponentAlignment(appLogout, Alignment.MIDDLE_CENTER);
         return gridLayout;
     }
 
-    private static VerticalLayout getAppButtons(String caption, Resource icon) {
-        Button button = new Button();
-        //button.setStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
-        button.setIcon(new ExternalResource("http://vaadin.com/image/user_male_portrait?img_id=44268&t=1251193981449"));
-        button.addListener((ClickListener) (Button.ClickEvent event) -> {
-            Notification.show("CLICK!");
+    private static GridLayout getAppButtons(String caption, String ressourceName) {
+        Image image = new Image();
+        try {
+            image.setSource(new FileResource(Ressources.getRessource(ressourceName)));
+        } catch (Ressources.RessourceNotFoundException ex) {
+            Logger.getLogger(Desktop.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        image.addClickListener((MouseEvents.ClickEvent c) -> {
+            UI.getCurrent().addWindow(new ConsoleWindow());
         });
-        button.setWidth("140px");
-        button.setHeight("140px");
 
-        Label label = new Label(Translations.get(Translations.DESKTOP_ONLINE_MONITOR));
-        VerticalLayout verticalLayout = new VerticalLayout(button, label);
-        verticalLayout.setSizeFull();
-        verticalLayout.setComponentAlignment(button, Alignment.MIDDLE_CENTER);
-        verticalLayout.setComponentAlignment(label, Alignment.MIDDLE_CENTER);
-        return verticalLayout;
+        Label label = new Label(caption);
+        label.setSizeUndefined();
+        label.setStyleName(ValoTheme.LABEL_COLORED);
+        GridLayout gridLayout = new GridLayout(1, 2);
+        gridLayout.addComponent(image, 0, 0);
+        gridLayout.addComponent(label, 0, 1);
+        gridLayout.setComponentAlignment(image, Alignment.MIDDLE_CENTER);
+        gridLayout.setComponentAlignment(label, Alignment.MIDDLE_CENTER);
+        return gridLayout;
     }
 
 }

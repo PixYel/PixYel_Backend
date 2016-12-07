@@ -106,9 +106,8 @@ public class Command {
     public static XML getItemList(XML input, Client client) {
         try {
             XML location = input.getFirstChild();
-            int longt = Integer.valueOf(location.getFirstChild("long").getContent());
-            int lat = Integer.valueOf(location.getFirstChild("lat").getContent());
-
+            Double longt = Double.valueOf(location.getFirstChild("long").getContent());
+            Double lat = Double.valueOf(location.getFirstChild("lat").getContent());
             List<Picture> pictures = client.getUserdata().getPicturesByLocation(new Coordinate(longt, lat));
 
             XML toSend = XML.createNewXML("setItemList");
@@ -283,9 +282,9 @@ public class Command {
         int id = 0;
         try {
             String data = input.getFirstChild("data").getContent();
-            int longt = Integer.valueOf(input.getFirstChild("long").getContent());
-            int lat = Integer.valueOf(input.getFirstChild("lat").getContent());
-            id = client.getUserdata().uploadPicture(data, (double) longt, (double) lat).getId();
+            Double longt = Double.valueOf(input.getFirstChild("long").getContent());
+            Double lat = Double.valueOf(input.getFirstChild("lat").getContent());
+            id = client.getUserdata().uploadPicture(data, new Coordinate(longt, lat)).getId();
 
             XML toSend = XML.createNewXML("uploadSuccessful");
             toSend.addChild("id").setContent(String.valueOf(id));

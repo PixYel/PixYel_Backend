@@ -22,7 +22,9 @@ import pixyel_backend.userinterface.UIs.LoginUI.Login;
 @Theme("mytheme")
 public class Userinterface extends com.vaadin.ui.UI implements Runnable {
 
-    private final static int PORT = 8080;
+    private final static int PORT = 80;
+    private static Runnable onStarted;
+    private static boolean started = false;
 
     /**
      * To start the Userinterface in general as a separate Thread
@@ -32,14 +34,20 @@ public class Userinterface extends com.vaadin.ui.UI implements Runnable {
         Executors.newCachedThreadPool().submit(new Userinterface());
     }
 
+    private static VaadinJettyServer vaadinJettyServer;
+
     /**
      * Here starts the seperate Thread working
      */
     @Override
     public void run() {
         try {
-            VaadinJettyServer vaadinJettyServer = new VaadinJettyServer(8080, Userinterface.class);
+            vaadinJettyServer = new VaadinJettyServer(8080, Userinterface.class);
             vaadinJettyServer.start();
+            if (onStarted != null) {
+                onStarted.run();
+            }
+            started = true;
         } catch (Exception ex) {
             if (ex.toString().contains("Address already in use")) {
                 System.err.println("Could not start UI, port " + PORT + " is used by another program, shutting down this UI");
@@ -67,6 +75,14 @@ public class Userinterface extends com.vaadin.ui.UI implements Runnable {
     @WebServlet(urlPatterns = "/*", name = "PixYelUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = Userinterface.class, productionMode = !Main.DEBUG)
     public static class PixYelUIServlet extends VaadinServlet {
+    }
+
+    public static void onStarted(Runnable r) {
+        if (started) {
+            r.run();
+        } else {
+            onStarted = r;
+        }
     }
 
     /**

@@ -8,6 +8,7 @@ package pixyel_backend;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import pixyel_backend.userinterface.UIs.DesktopUI.ConsoleWindow;
 
 /**
  *
@@ -30,6 +31,10 @@ public class Log {
         for (String line : lines) {
             System.out.println(toPrint + line);
         }
+        try {
+            ConsoleWindow.addInfo(logMessage, getClassName(clasS));
+        } catch (Exception e) {
+        }
     }
 
     /**
@@ -45,6 +50,10 @@ public class Log {
         for (String line : lines) {
             System.err.println(toPrint + line);
         }
+        try {
+            ConsoleWindow.addError(logMessage, getClassName(clasS));
+        } catch (Exception e) {
+        }
     }
 
     /**
@@ -59,6 +68,10 @@ public class Log {
         String toPrint = getClassNameWithDate(clasS) + "WARNING: ";
         for (String line : lines) {
             System.out.println(toPrint + line);
+        }
+        try {
+            ConsoleWindow.addWarning(logMessage, getClassName(clasS));
+        } catch (Exception e) {
         }
     }
 
@@ -77,6 +90,10 @@ public class Log {
             for (String line : lines) {
                 System.out.println(toPrint + line);
             }
+            try {
+                ConsoleWindow.addDebug(logMessage, getClassName(clasS));
+            } catch (Exception e) {
+            }
         }
     }
 
@@ -89,11 +106,7 @@ public class Log {
     private static <T> String getClassNameWithDate(Class<T> clasS) {
         String result = "";
         int currentLengthOfClassName;
-        String className = clasS.getTypeName();
-        className = className.substring(className.lastIndexOf(".") + 1);
-        if (className.contains("$")) {
-            className = className.substring(0, className.lastIndexOf("$"));
-        }
+        String className = getClassName(clasS);
         if ((currentLengthOfClassName = className.length()) > maxLengthOfClassName) {
             maxLengthOfClassName = currentLengthOfClassName;
         }
@@ -115,5 +128,14 @@ public class Log {
         DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         result += " [" + dateFormat.format(new Date()) + "] ";
         return result;
+    }
+
+    public static String getClassName(Class<?> T) {
+        String className = T.getTypeName();
+        className = className.substring(className.lastIndexOf(".") + 1);
+        if (className.contains("$")) {
+            className = className.substring(0, className.lastIndexOf("$"));
+        }
+        return className;
     }
 }

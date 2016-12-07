@@ -43,7 +43,7 @@ public class ConsoleWindow extends Window {
         });
         Page.getCurrent().addBrowserWindowResizeListener((s) -> onResized());
         
-        HorizontalLayout scrollLayout = new HorizontalLayout();
+        HorizontalLayout scrollLayout = new HorizontalLayout(layout);
         layout = new VerticalLayout();
         
         setImmediate(true);

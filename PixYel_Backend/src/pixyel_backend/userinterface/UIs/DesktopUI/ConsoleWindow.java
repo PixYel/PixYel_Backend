@@ -27,14 +27,14 @@ import pixyel_backend.userinterface.ressources.Ressources;
  * @author Josua Frank
  */
 public class ConsoleWindow extends Window {
-    
+
     private int counter = 0;
     private VerticalLayout layout;
-    
+
     public static ConsoleWindow show(Runnable onClose) {
         return new ConsoleWindow(onClose);
     }
-    
+
     public ConsoleWindow(Runnable onClose) {
         Log.addConsoleWindow(this);
         addCloseListener((CloseEvent ce) -> {
@@ -42,10 +42,10 @@ public class ConsoleWindow extends Window {
             onClose.run();
         });
         Page.getCurrent().addBrowserWindowResizeListener((s) -> onResized());
-        
-        HorizontalLayout scrollLayout = new HorizontalLayout(layout);
+
         layout = new VerticalLayout();
-        
+        HorizontalLayout scrollLayout = new HorizontalLayout(layout);
+
         setImmediate(true);
         setContent(scrollLayout);
         setCaption(" " + Translations.get(Translations.DESKTOP_CONSOLE));
@@ -63,7 +63,7 @@ public class ConsoleWindow extends Window {
         setHeight(HIGHT, Unit.PIXELS);
         UI.getCurrent().addWindow(this);
     }
-    
+
     public void onResized() {
         if (isAttached()) {
             int WIDTH = (int) (0.5 * UI.getCurrent().getPage().getBrowserWindowWidth());
@@ -72,7 +72,7 @@ public class ConsoleWindow extends Window {
             setHeight(HIGHT, Unit.PIXELS);
         }
     }
-    
+
     public void addError(String errorMessage, String className) {
         DateField dateField = getDate();
         Label classNameLabel = getClassNameLabel(className);
@@ -80,7 +80,7 @@ public class ConsoleWindow extends Window {
         counter++;
         addToConsole(dateField, classNameLabel, errorLabel);
     }
-    
+
     public void addInfo(String infoMessage, String className) {
         DateField dateField = getDate();
         Label classNameLabel = getClassNameLabel(className);
@@ -88,7 +88,7 @@ public class ConsoleWindow extends Window {
         counter++;
         addToConsole(dateField, classNameLabel, infoLabel);
     }
-    
+
     public void addDebug(String debugMessage, String className) {
         DateField dateField = getDate();
         Label classNameLabel = getClassNameLabel(className);
@@ -96,7 +96,7 @@ public class ConsoleWindow extends Window {
         counter++;
         addToConsole(dateField, classNameLabel, debugLabel);
     }
-    
+
     public void addWarning(String warningMessage, String className) {
         DateField dateField = getDate();
         Label classNameLabel = getClassNameLabel(className);
@@ -104,9 +104,9 @@ public class ConsoleWindow extends Window {
         counter++;
         addToConsole(dateField, classNameLabel, warningLabel);
     }
-    
+
     ArrayBlockingQueue<HorizontalLayout> maxQueue = new ArrayBlockingQueue<>(250);
-    
+
     private void addToConsole(DateField date, Label className, Label messageLabel) {
         HorizontalLayout row = new HorizontalLayout(date, className, messageLabel);
         row.setComponentAlignment(date, Alignment.MIDDLE_LEFT);
@@ -120,7 +120,7 @@ public class ConsoleWindow extends Window {
         layout.addComponent(row);
         setScrollTop(999);
     }
-    
+
     private static DateField getDate() {
         DateField dateField = new DateField();
         dateField.setValue(new Date());
@@ -130,13 +130,13 @@ public class ConsoleWindow extends Window {
         dateField.setStyleName(ValoTheme.DATEFIELD_BORDERLESS);
         return dateField;
     }
-    
+
     private static Label getClassNameLabel(String className) {
         Label classNameLabel = new Label(className);
         classNameLabel.setStyleName(ValoTheme.LABEL_BOLD);
         return classNameLabel;
     }
-    
+
     private static Label getMessageLabel(String content, String color) {
         Label message = new Label(content);
         switch (color) {

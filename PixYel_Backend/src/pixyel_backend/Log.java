@@ -7,6 +7,7 @@ package pixyel_backend;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import pixyel_backend.userinterface.UIs.DesktopUI.ConsoleWindow;
 
@@ -28,13 +29,16 @@ public class Log {
     public static <T> void logInfo(String logMessage, Class<T> clasS) {
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "INFO:    ";
+        boolean first = true;
         for (String line : lines) {
-            System.out.println(toPrint + line);
+            if (first) {
+                System.out.println(toPrint + line);
+                first = false;
+            } else {
+                System.out.println("         " + line);
+            }
         }
-        try {
-            ConsoleWindow.logInfo(logMessage, getClassName(clasS));
-        } catch (Exception e) {
-        }
+        windows.forEach((ConsoleWindow window) -> window.addInfo(logMessage, getClassName(clasS)));
     }
 
     /**
@@ -47,13 +51,16 @@ public class Log {
     public static <T> void logError(String logMessage, Class<T> clasS) {
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "ERROR:   ";
+        boolean first = true;
         for (String line : lines) {
-            System.err.println(toPrint + line);
+            if (first) {
+                System.out.println(toPrint + line);
+                first = false;
+            } else {
+                System.out.println("         " + line);
+            }
         }
-        try {
-            ConsoleWindow.logError(logMessage, getClassName(clasS));
-        } catch (Exception e) {
-        }
+        windows.forEach((ConsoleWindow window) -> window.addError(logMessage, getClassName(clasS)));
     }
 
     /**
@@ -66,13 +73,16 @@ public class Log {
     public static <T> void logWarning(String logMessage, Class<T> clasS) {
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "WARNING: ";
+        boolean first = true;
         for (String line : lines) {
-            System.out.println(toPrint + line);
+            if (first) {
+                System.out.println(toPrint + line);
+                first = false;
+            } else {
+                System.out.println("         " + line);
+            }
         }
-        try {
-            ConsoleWindow.logWarning(logMessage, getClassName(clasS));
-        } catch (Exception e) {
-        }
+        windows.forEach((ConsoleWindow window) -> window.addWarning(logMessage, getClassName(clasS)));
     }
 
     /**
@@ -87,13 +97,16 @@ public class Log {
         if (Main.DEBUG) {
             String[] lines = logMessage.split("\\r?\\n");
             String toPrint = getClassNameWithDate(clasS) + "DEBUG:   ";
+            boolean first = true;
             for (String line : lines) {
-                System.out.println(toPrint + line);
+                if (first) {
+                    System.out.println(toPrint + line);
+                    first = false;
+                } else {
+                    System.out.println("         " + line);
+                }
             }
-            try {
-                ConsoleWindow.logDebug(logMessage, getClassName(clasS));
-            } catch (Exception e) {
-            }
+            windows.forEach((ConsoleWindow window) -> window.addDebug(logMessage, getClassName(clasS)));
         }
     }
 
@@ -137,5 +150,15 @@ public class Log {
             className = className.substring(0, className.lastIndexOf("$"));
         }
         return className;
+    }
+
+    private static ArrayList<ConsoleWindow> windows = new ArrayList<>();
+
+    public static void addConsoleWindow(ConsoleWindow window) {
+        windows.add(window);
+    }
+
+    public static void removeConsoleWindow(ConsoleWindow window) {
+        windows.remove(window);
     }
 }

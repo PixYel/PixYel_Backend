@@ -5,23 +5,20 @@
  */
 package pixyel_backend.userinterface.UIs.DesktopUI;
 
-import com.vaadin.event.Action;
 import com.vaadin.server.FileResource;
 import com.vaadin.shared.ui.datefield.Resolution;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.DateField;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.CellStyleGenerator;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
+import java.util.concurrent.ArrayBlockingQueue;
 import pixyel_backend.Log;
 import pixyel_backend.userinterface.Translations;
-import pixyel_backend.userinterface.Userinterface;
 import pixyel_backend.userinterface.ressources.Ressources;
 
 /**
@@ -30,28 +27,24 @@ import pixyel_backend.userinterface.ressources.Ressources;
  */
 public class ConsoleWindow extends Window {
 
-    private Table table = new Table();
     private int counter = 0;
-    private static ArrayList<ConsoleWindow> windows = new ArrayList<>();
+    private VerticalLayout layout;
 
-    public ConsoleWindow() {
-        windows.add(this);
+    public static ConsoleWindow show(Runnable onClose) {
+        return new ConsoleWindow(onClose);
+    }
+
+    public ConsoleWindow(Runnable onClose) {
+        Log.addConsoleWindow(this);
         addCloseListener((CloseEvent ce) -> {
-            windows.remove(this);
+            Log.removeConsoleWindow(this);
+            onClose.run();
         });
-        table.setSizeFull();
-        table.setSelectable(true);
-        table.setImmediate(true);
-        table.setColumnCollapsingAllowed(true);
 
-        table.addContainerProperty(Translations.get(Translations.CONSOLE_DATE), DateField.class, null);
-        table.addContainerProperty(Translations.get(Translations.CONSOLE_CLASS), Label.class, null);
-        String id = Translations.get(Translations.CONSOLE_MESSAGE);
-        table.addContainerProperty(id, Label.class, null);
-        table.setColumnExpandRatio(id, 1);
+        layout = new VerticalLayout();
 
         setImmediate(true);
-        setContent(table);
+        setContent(layout);
         setCaption(" " + Translations.get(Translations.DESKTOP_CONSOLE));
         try {
             setIcon(new FileResource(Ressources.getRessource("desktop_console_icon_small.png")));
@@ -62,13 +55,12 @@ public class ConsoleWindow extends Window {
         setDraggable(true);
         center();
         setSizeFull();
-    }
+        UI.getCurrent().addWindow(this);
 
-    
-    
-    
-    public static void logError(String errorMessage, String className) {
-        windows.forEach((ConsoleWindow window) -> window.addError(errorMessage, className));
+        Log.logDebug("TestDebug", ConsoleWindow.class);
+        Log.logInfo("TestInfo", ConsoleWindow.class);
+        Log.logError("TestError", ConsoleWindow.class);
+        Log.logWarning("TestWarning", ConsoleWindow.class);
     }
 
     public void addError(String errorMessage, String className) {
@@ -76,13 +68,7 @@ public class ConsoleWindow extends Window {
         Label classNameLabel = getClassNameLabel(className);
         Label errorLabel = getMessageLabel(errorMessage, "red");
         counter++;
-        table.addItem(new Object[]{dateField, classNameLabel, errorLabel}, counter);
-        table.setCurrentPageFirstItemId(counter);
-        table.markAsDirtyRecursive();
-    }
-
-    public static void logInfo(String infoMessage, String className) {
-        windows.forEach((ConsoleWindow window) -> window.addInfo(infoMessage, className));
+        addToConsole(dateField, classNameLabel, errorLabel);
     }
 
     public void addInfo(String infoMessage, String className) {
@@ -90,13 +76,7 @@ public class ConsoleWindow extends Window {
         Label classNameLabel = getClassNameLabel(className);
         Label infoLabel = getMessageLabel(infoMessage, "black");
         counter++;
-        table.addItem(new Object[]{dateField, classNameLabel, infoLabel}, counter);
-        table.setCurrentPageFirstItemId(counter);
-        table.markAsDirtyRecursive();
-    }
-
-    public static void logDebug(String debugMessage, String className) {
-        windows.forEach((ConsoleWindow window) -> window.addDebug(debugMessage, className));
+        addToConsole(dateField, classNameLabel, infoLabel);
     }
 
     public void addDebug(String debugMessage, String className) {
@@ -104,13 +84,7 @@ public class ConsoleWindow extends Window {
         Label classNameLabel = getClassNameLabel(className);
         Label debugLabel = getMessageLabel(debugMessage, "blue");
         counter++;
-        table.addItem(new Object[]{dateField, classNameLabel, debugLabel}, counter);
-        table.setCurrentPageFirstItemId(counter);
-        table.markAsDirtyRecursive();
-    }
-
-    public static void logWarning(String warningMessage, String className) {
-        windows.forEach((ConsoleWindow window) -> window.addWarning(warningMessage, className));
+        addToConsole(dateField, classNameLabel, debugLabel);
     }
 
     public void addWarning(String warningMessage, String className) {
@@ -118,9 +92,23 @@ public class ConsoleWindow extends Window {
         Label classNameLabel = getClassNameLabel(className);
         Label warningLabel = getMessageLabel(warningMessage, "yellow");
         counter++;
-        table.addItem(new Object[]{dateField, classNameLabel, warningLabel}, counter);
-        table.setCurrentPageFirstItemId(counter);
-        table.markAsDirtyRecursive();
+        addToConsole(dateField, classNameLabel, warningLabel);
+    }
+
+    ArrayBlockingQueue<HorizontalLayout> maxQueue = new ArrayBlockingQueue<>(250);
+
+    private void addToConsole(DateField date, Label className, Label messageLabel) {
+        HorizontalLayout row = new HorizontalLayout(date, className, messageLabel);
+        row.setComponentAlignment(date, Alignment.MIDDLE_LEFT);
+        row.setComponentAlignment(className, Alignment.MIDDLE_LEFT);
+        row.setComponentAlignment(messageLabel, Alignment.MIDDLE_LEFT);
+        row.setSpacing(true);
+        if (maxQueue.size() >= 250) {
+            layout.removeComponent(maxQueue.poll());
+        }
+        maxQueue.add(row);
+        layout.addComponent(row);
+        setScrollTop(999);
     }
 
     private static DateField getDate() {

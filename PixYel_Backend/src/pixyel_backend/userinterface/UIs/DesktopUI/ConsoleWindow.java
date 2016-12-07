@@ -42,9 +42,10 @@ public class ConsoleWindow extends Window {
         });
 
         layout = new VerticalLayout();
+        HorizontalLayout scrollLayout = new HorizontalLayout(layout);
 
         setImmediate(true);
-        setContent(layout);
+        setContent(scrollLayout);
         setCaption(" " + Translations.get(Translations.DESKTOP_CONSOLE));
         try {
             setIcon(new FileResource(Ressources.getRessource("desktop_console_icon_small.png")));
@@ -54,7 +55,7 @@ public class ConsoleWindow extends Window {
         //setPrimaryStyleName(ValoTheme.);
         setDraggable(true);
         center();
-        setSizeFull();
+        setSizeUndefined();
         UI.getCurrent().addWindow(this);
     }
 

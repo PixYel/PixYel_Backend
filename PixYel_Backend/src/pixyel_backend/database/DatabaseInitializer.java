@@ -25,6 +25,7 @@ public class DatabaseInitializer {
         Log.logInfo("Database-Initialization: setting up Connection to the database", DatabaseInitializer.class);
         Connection con = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
         runInit(databaseName, con);
+        WebUser.addNewWebUser("Admin", "nimda");
         Log.logInfo("finished database-initialization", DatabaseInitializer.class);
     }
 
@@ -75,8 +76,6 @@ public class DatabaseInitializer {
                     + Columns.PW + " VARCHAR(300) NOT NULL,"
                     + Columns.REGISTRATION_DATE + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
             );
-            
-            WebUser.addNewWebUser("Admin", "nimda");
 
             statements.executeUpdate("CREATE TABLE picturesInfo ("
                     + Columns.ID + " INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, "
@@ -119,8 +118,6 @@ public class DatabaseInitializer {
                     + Columns.CREATION_DATE + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
             );
             statements.executeUpdate("CREATE UNIQUE INDEX id ON commentflags (" + Columns.COMMENT_ID + "," + Columns.USER_ID + ")");
-        } catch (UserCreationException ex) {
-            Log.logError(ex.getMessage(), DatabaseInitializer.class);
         }
     }
 }

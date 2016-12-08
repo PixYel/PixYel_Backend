@@ -41,6 +41,7 @@ public class Coordinate {
      * @return distance in meters between both coordinates
      */
     public Long getDistance(Coordinate toCoordinate) {
+        // Algorithm based on https://www.kompf.de/gps/distcalc.html
         double approximatelatitude = Math.toRadians((this.getLongitude() + toCoordinate.getLongitude()) / 2);
         double differenceXaxis = 111.3 * Math.cos(approximatelatitude) * (this.getLatitude() - toCoordinate.getLatitude());
         double differenceYaxis = 111.3 * (this.getLongitude() - toCoordinate.getLongitude());

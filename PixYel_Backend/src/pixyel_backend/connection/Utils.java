@@ -7,11 +7,12 @@ package pixyel_backend.connection;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
  *
- * @author i01frajos445
+ * @author Josua Frank
  */
 public class Utils {
 
@@ -21,17 +22,25 @@ public class Utils {
     }
 
     public static String getDate(Date date, Date time) {
-        return getDate(new Date(
-                date.getYear(), date.getMonth(), date.getDay(),
-                time.getHours(), time.getMinutes(), time.getSeconds()
-        ));
+        return getDate(mergeDates(date, time));
     }
 
     public static Date mergeDates(Date date, Date time) {
-        return new Date(
-                date.getYear(), date.getMonth(), date.getDay(),
-                time.getHours(), time.getMinutes(), time.getSeconds()
-        );
+        Calendar calendarDate = Calendar.getInstance();
+        calendarDate.setTime(date);
+
+        Calendar calendarTime = Calendar.getInstance();
+        calendarTime.setTime(time);
+
+        Calendar calendarDateTime = Calendar.getInstance();
+        calendarDateTime.set(Calendar.DAY_OF_MONTH, calendarDate.get(Calendar.DAY_OF_MONTH));
+        calendarDateTime.set(Calendar.MONTH, calendarDate.get(Calendar.MONTH));
+        calendarDateTime.set(Calendar.YEAR, calendarDate.get(Calendar.YEAR));
+        calendarDateTime.set(Calendar.HOUR_OF_DAY, calendarTime.get(Calendar.HOUR_OF_DAY));
+        calendarDateTime.set(Calendar.MINUTE, calendarTime.get(Calendar.MINUTE));
+        calendarDateTime.set(Calendar.SECOND, calendarTime.get(Calendar.SECOND));
+        
+        return calendarDateTime.getTime();
     }
 
 }

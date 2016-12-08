@@ -36,7 +36,6 @@ public class ConsoleWindow extends Window {
     }
 
     public ConsoleWindow(Runnable onClose) {
-        Log.addConsoleWindow(this);
         addCloseListener((CloseEvent ce) -> {
             Log.removeConsoleWindow(this);
             onClose.run();
@@ -61,6 +60,7 @@ public class ConsoleWindow extends Window {
         int HIGHT = (int) (0.5 * UI.getCurrent().getPage().getBrowserWindowHeight());
         setWidth(WIDTH, Unit.PIXELS);
         setHeight(HIGHT, Unit.PIXELS);
+        Log.addConsoleWindow(this);
         UI.getCurrent().addWindow(this);
     }
 

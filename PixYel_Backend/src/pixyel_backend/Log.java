@@ -5,10 +5,12 @@
  */
 package pixyel_backend;
 
+import com.vaadin.ui.HorizontalLayout;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.ArrayBlockingQueue;
 import pixyel_backend.userinterface.UIs.DesktopUI.ConsoleWindow;
 
 /**
@@ -18,6 +20,7 @@ import pixyel_backend.userinterface.UIs.DesktopUI.ConsoleWindow;
 public class Log {
 
     private static int maxLengthOfClassName = 0;
+    private static final ArrayBlockingQueue<LogMessage> maxQueue = new ArrayBlockingQueue<>(250);
 
     /**
      * It is logging the logMessage as a Info
@@ -39,6 +42,11 @@ public class Log {
             }
         }
         windows.forEach((ConsoleWindow window) -> window.addInfo(logMessage, getClassName(clasS)));
+        if (!(maxQueue.size() < 250)) {
+            maxQueue.poll();
+        }
+        maxQueue.add(new LogMessage(0, logMessage, clasS));
+
     }
 
     /**
@@ -61,6 +69,10 @@ public class Log {
             }
         }
         windows.forEach((ConsoleWindow window) -> window.addError(logMessage, getClassName(clasS)));
+        if (!(maxQueue.size() < 250)) {
+            maxQueue.poll();
+        }
+        maxQueue.add(new LogMessage(2, logMessage, clasS));
     }
 
     /**
@@ -83,6 +95,10 @@ public class Log {
             }
         }
         windows.forEach((ConsoleWindow window) -> window.addWarning(logMessage, getClassName(clasS)));
+        if (!(maxQueue.size() < 250)) {
+            maxQueue.poll();
+        }
+        maxQueue.add(new LogMessage(1, logMessage, clasS));
     }
 
     /**
@@ -107,6 +123,10 @@ public class Log {
                 }
             }
             windows.forEach((ConsoleWindow window) -> window.addDebug(logMessage, getClassName(clasS)));
+            if (!(maxQueue.size() < 250)) {
+                maxQueue.poll();
+            }
+            maxQueue.add(new LogMessage(3, logMessage, clasS));
         }
     }
 
@@ -156,9 +176,46 @@ public class Log {
 
     public static void addConsoleWindow(ConsoleWindow window) {
         windows.add(window);
+        addAll(window);
     }
 
     public static void removeConsoleWindow(ConsoleWindow window) {
         windows.remove(window);
+    }
+
+    public static void addAll(ConsoleWindow window) {
+        maxQueue.forEach((LogMessage log) -> {
+            switch (log.messageType) {
+                case 0:
+                    window.addInfo(log.message, log.type);
+                    break;
+                case 1:
+                    window.addWarning(log.message, log.type);
+                    break;
+                case 2:
+                    window.addError(log.message, log.type);
+                    break;
+                case 3:
+                    window.addDebug(log.message, log.type);
+                    break;
+            }
+        });
+    }
+
+    public static class LogMessage {
+
+        //0 = info, 1 = warning, 2 = error, 3 = debug
+        int messageType;
+
+        String message;
+
+        String type;
+        
+        public LogMessage(int messageType, String message, Class<?> type) {
+            this.messageType = messageType;
+            this.message = message;
+            this.type = getClassName(type);
+        }
+
     }
 }

@@ -40,7 +40,7 @@ public class Connection implements Runnable {
             Log.logError("Client " + client.getName() + " has not been connected through the normal connection process!!!!!!", Connection.class);
             onClientDisconnected(client);
         } else {
-            onClientConnected(CONNECTEDCLIENTS.get(socketHashcode));
+            onClientDisconnected(CONNECTEDCLIENTS.get(socketHashcode));
             CONNECTEDCLIENTS.remove(socketHashcode);
         }
     }

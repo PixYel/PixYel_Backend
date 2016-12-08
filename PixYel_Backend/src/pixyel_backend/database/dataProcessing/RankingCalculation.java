@@ -2,6 +2,7 @@ package pixyel_backend.database.dataProcessing;
 
 import static java.lang.Math.pow;
 import java.util.Date;
+import pixyel_backend.connection.Utils;
 import pixyel_backend.database.objects.Coordinate;
 import pixyel_backend.database.objects.Picture;
 
@@ -10,20 +11,22 @@ import pixyel_backend.database.objects.Picture;
  * @author Da_Groove
  */
 public class RankingCalculation {
+
     /**
      * Used to calculate the Ranking of a picture.
+     *
      * @param picture
      * @param userCoordinate
-     * @return 
+     * @return
      */
     public static int calculateRanking(Picture picture, Coordinate userCoordinate) {
         int timeRankingPercentage = 30;
         int distanceRankingPercentage = 30;
         int votesRankingPercentage = 40;
         int ranking;
-        ranking = timeRankingPercentage*getTimeRanking(picture.getTimestamp()) + 
-                  distanceRankingPercentage*getDistanceRanking(picture.getCoordinate(), userCoordinate) +
-                  votesRankingPercentage*getVoteRanking(picture.getUpvotes(), picture.getDownvotes());
+        ranking = timeRankingPercentage * getTimeRanking(Utils.mergeDates(picture.getUploadDate(), picture.getUploadTime()))
+                + distanceRankingPercentage * getDistanceRanking(picture.getCoordinate(), userCoordinate)
+                + votesRankingPercentage * getVoteRanking(picture.getUpvotes(), picture.getDownvotes());
         return ranking;
     }
 
@@ -51,7 +54,7 @@ public class RankingCalculation {
 
     private static int getVoteRanking(int upvotes, int downvotes) {
         int voteRanking;
-        voteRanking = (int)(50+upvotes-Math.pow(downvotes,1.5));
+        voteRanking = (int) (50 + upvotes - Math.pow(downvotes, 1.5));
         return voteRanking;
     }
 }

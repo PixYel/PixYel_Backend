@@ -5,11 +5,13 @@
  */
 package pixyel_backend.connection;
 
+import pixyel_backend.connection.socket.SocketClient;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import pixyel_backend.Log;
+import pixyel_backend.connection.encryption.Encryption;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.objects.Comment;
@@ -27,11 +29,11 @@ public class Command {
     /**
      * This method is being called when a command is arrived
      *
-     * @param client The Client
+     * @param client The SocketClient
      * @param xml
      * @param encrypted
      */
-    public static void onCommandReceived(Client client, XML xml, boolean encrypted) {
+    public static String onCommandReceived(Client client, XML xml, boolean encrypted) {
         Log.logDebug("Command from " + client.getName() + " received: \n" + xml.toStringGraph(), Command.class);
         try {
             if (xml.getName().equals("request")) {
@@ -39,61 +41,68 @@ public class Command {
                 if (encrypted) {
                     switch (xml.getName()) {//Cuts off the "request"
                         case "getItemList":
-                            client.sendToClient(getItemList(xml, client));
-                            break;
+                            return encryptXML(getItemList(xml, client), client);
                         case "getItem":
-                            client.sendToClientUnencrypted(getItem(xml, client));
-                            break;
+                            return getItem(xml, client).toString();
                         case "getItemStats":
-                            client.sendToClient(getItemStats(xml, client));
-                            break;
+                            return encryptXML(getItemStats(xml, client), client);
                         case "login":
-                            client.sendToClient(login(xml, client));
-                            break;
+                            return encryptXML(login(xml, client), client);
                         case "echo":
-                            client.sendToClient(echo(xml, client));
-                            break;
+                            return encryptXML(echo(xml, client), client);
                         case "vote":
-                            client.sendToClient(vote(xml, client));
-                            break;
+                            return encryptXML(vote(xml, client), client);
                         case "flagComment":
-                            client.sendToClient(flagComment(xml, client));
-                            break;
+                            return encryptXML(flagComment(xml, client), client);
                         case "flagItem":
-                            client.sendToClient(flagItem(xml, client));
-                            break;
+                            return encryptXML(flagItem(xml, client), client);
                         case "getComments":
-                            client.sendToClient(getComments(xml, client));
-                            break;
+                            return encryptXML(getComments(xml, client), client);
                         case "addComment":
-                            client.sendToClient(addComment(xml, client));
-                            break;
+                            return encryptXML(addComment(xml, client), client);
                         case "disconnect":
                             disconnect(xml, client);
-                            break;
+                            return "";
                         default:
-                            client.sendToClient(error(xml.getName() + " is not a valid Command", true));
                             Log.logError("Client " + client.getName() + " has send a wrong command: " + xml.getName(), Command.class);
-                            break;
+                            return encryptXML(error(xml.getName() + " is not a valid Command", true), client);
                     }
                 } else {//unencrypted
                     switch (xml.getName()) {
                         case "upload":
-                            client.sendToClient(upload(xml, client));
-                            break;
+                            return encryptXML(upload(xml, client), client);
                         default:
-                            client.sendToClient(error(xml.getName() + " is not a valid Command, RTFS!!!", true));
                             Log.logError("Client " + client.getName() + " has send a wrong command: " + xml.getName(), Command.class);
-                            break;
+                            return encryptXML(error(xml.getName() + " is not a valid Command", true), client);
                     }
                 }
             } else {
-                client.sendToClient(error("The first node has to be called \"request\", RTFS!!!", true));
                 Log.logWarning("Command from " + client.getName() + " does not start with \"request\": " + xml.getName(), Command.class);
+                return encryptXML(error("The first node has to be called \"request\"", true), client);
             }
         } catch (Exception e) {
             Log.logWarning("Could not execute command: " + xml.getName() + ": " + e, Command.class);
             e.printStackTrace(System.err);
+            return encryptXML(error("Could not execute command: " + e, true), client);
+        }
+    }
+
+    private static String encryptXML(XML xml, Client client) {
+        if (!xml.getName().equals("reply")) {
+            xml = XML.createNewXML("reply").addChild(xml);
+        }
+        Log.logDebug("PLAIN_TO_SEND: " + xml, SocketClient.class);
+
+        if (client.getUserdata() != null && client.getUserdata().getPublicKey() != null) {
+            try {
+                return Encryption.encrypt(xml.toString(), client.getUserdata().getPublicKey());
+            } catch (Encryption.EncryptionException ex) {
+                Log.logError("Could not encrypt message for " + client.getName(), Command.class);
+                return error("Could not encrypt message: " + ex, true).toString();
+            }
+        } else {
+            Log.logWarning("Client " + client + " needs to be logged in first!", Command.class);
+            return error("You need to log in first!", true).toString();
         }
     }
 
@@ -188,19 +197,21 @@ public class Command {
      * @return
      */
     public static XML login(XML input, Client client) {
-        try {
-            client.setUserdata(User.getUser(input.getFirstChild("storeId").getContent()));
-        } catch (UserNotFoundException ex) {
+        if (client instanceof SocketClient) {
             try {
-                client.setUserdata(User.addNewUser(input.getFirstChild("storeId").getContent()));
-            } catch (UserCreationException ex1) {
-                Log.logError("Could note create new User " + client.getName() + ": " + ex1, Command.class);
-                return error("Could not create new User: " + ex1, true);
+                ((SocketClient) client).setUserdata(User.getUser(input.getFirstChild("storeId").getContent()));
+            } catch (UserNotFoundException ex) {
+                try {
+                    ((SocketClient) client).setUserdata(User.addNewUser(input.getFirstChild("storeId").getContent()));
+                } catch (UserCreationException ex1) {
+                    Log.logError("Could note create new User " + client.getName() + ": " + ex1, Command.class);
+                    return error("Could not create new User: " + ex1, true);
+                }
+            } catch (UserCreationException ex) {
+                Log.logError("Could not get existing User " + client.getName() + ": " + ex, Command.class);
+                return error("Could not get existing User: " + ex, true);
+                //normally unreachable
             }
-        } catch (UserCreationException ex) {
-            Log.logError("Could not get existing User " + client.getName() + ": " + ex, Command.class);
-            return error("Could not get existing User: " + ex, true);
-            //normally unreachable
         }
         XML toSend;
         try {
@@ -436,7 +447,7 @@ public class Command {
      * @param client
      */
     public static void disconnect(XML input, Client client) {
-        client.disconnect(true);
+        client.disconnect();
     }
 
 }

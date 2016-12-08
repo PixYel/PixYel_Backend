@@ -5,7 +5,7 @@
  */
 package pixyel_backend;
 
-import pixyel_backend.connection.SocketServer;
+import pixyel_backend.connection.socket.SocketServer;
 import pixyel_backend.connection.rest.RestServer;
 import pixyel_backend.userinterface.Userinterface;
 

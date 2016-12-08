@@ -1,4 +1,4 @@
-package pixyel_backend.connection;
+package pixyel_backend.connection.socket;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -17,8 +17,8 @@ public class SocketServer implements Runnable {
     private static ServerSocket SERVER;
     private static final ExecutorService CLIENTTHREADPOOL = Executors.newCachedThreadPool();
 
-    private static final HashMap<Integer, Client> CONNECTEDCLIENTS = new HashMap<>();//All online clients
-    private static final HashMap<String, Client> LOGGEDINCLIENTS = new HashMap<>();//All logged in clients
+    private static final HashMap<Integer, SocketClient> CONNECTEDCLIENTS = new HashMap<>();//All online clients
+    private static final HashMap<String, SocketClient> LOGGEDINCLIENTS = new HashMap<>();//All logged in clients
 
     /**
      * Here the server is going to be started.
@@ -34,7 +34,7 @@ public class SocketServer implements Runnable {
      * @param client
      * @param socketHashcode The Hash code of the socket as key of the map
      */
-    public static void disconnect(Client client, int socketHashcode) {
+    public static void disconnect(SocketClient client, int socketHashcode) {
         LOGGEDINCLIENTS.remove(client.getName());
         if (!CONNECTEDCLIENTS.containsKey(socketHashcode)) {
             Log.logError("Client " + client.getName() + " has not been connected through the normal connection process!!!!!!", SocketServer.class);
@@ -56,7 +56,7 @@ public class SocketServer implements Runnable {
             try {
                 socket = SERVER.accept();
                 //socket.setSoTimeout(5000);
-                Client client = new Client(socket);
+                SocketClient client = new SocketClient(socket);
                 CONNECTEDCLIENTS.put(socket.hashCode(), client);
                 CLIENTTHREADPOOL.submit(client);
                 onClientConnected(client);
@@ -70,9 +70,9 @@ public class SocketServer implements Runnable {
     /**
      * Should be called right after a client has logged in
      *
-     * @param client The new Client which has logged in
+     * @param client The new SocketClient which has logged in
      */
-    public static void removePossibleDoubleClients(Client client) {
+    public static void removePossibleDoubleClients(SocketClient client) {
         String clientName = client.getName();
         if (LOGGEDINCLIENTS.containsKey(clientName)) {
             Log.logInfo("Removing old client from " + clientName, SocketServer.class);
@@ -131,7 +131,7 @@ public class SocketServer implements Runnable {
      * accepting new clients
      */
     private static void onServerStarted() {
-        Log.logInfo("Server reachable on " + SERVER.getLocalSocketAddress(), SocketServer.class);
+        Log.logInfo("Socketserver reachable on " + SERVER.getLocalSocketAddress(), SocketServer.class);
     }
 
     /**
@@ -140,7 +140,7 @@ public class SocketServer implements Runnable {
      *
      * @param client The client which is connected
      */
-    private static void onClientConnected(Client client) {
+    private static void onClientConnected(SocketClient client) {
         Log.logInfo("Client " + client.getName() + " connected", SocketServer.class);
     }
 
@@ -149,7 +149,7 @@ public class SocketServer implements Runnable {
      *
      * @param client The client which is going to be disconnected
      */
-    private static void onClientDisconnected(Client client) {
+    private static void onClientDisconnected(SocketClient client) {
         Log.logInfo("Client " + client.getName() + " disconnected", SocketServer.class);
     }
 

@@ -5,6 +5,7 @@
  */
 package pixyel_backend.connection;
 
+import pixyel_backend.connection.socket.SocketClient;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -36,7 +37,7 @@ public class CommandTest {
     @BeforeClass
     public static void setUpClass() {
         try {
-            dummyclient = new Client(new Socket(InetAddress.getByName("sharknoon.de"), 7331));
+            dummyclient = new SocketClient(new Socket(InetAddress.getByName("sharknoon.de"), 7331));
             dummyclient.setUserdata(User.getUser(1));
         } catch (UserNotFoundException | UserCreationException | IOException ex) {
             System.err.println("Could not create dummyclient: " + ex);
@@ -55,7 +56,7 @@ public class CommandTest {
     public void tearDown() {
     }
 
-    static Client dummyclient;
+    static SocketClient dummyclient;
 
     /**
      * Test of getItemList method, of class Command.

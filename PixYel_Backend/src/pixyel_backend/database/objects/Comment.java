@@ -58,7 +58,7 @@ public class Comment {
 
     /**
      * Returns the next comment from a ResultSet
-     * 
+     *
      * IMPORTANT: ResultSet Pointer must already point at an entry, won't go to
      * next result by itself
      *
@@ -77,7 +77,7 @@ public class Comment {
             throw new CommentCreationException();
         }
     }
-  
+
     /**
      * @return the commentId
      */
@@ -114,25 +114,21 @@ public class Comment {
     }
 
     /**
-     * Insert a new comment in the Database. 
+     * Insert a new comment in the Database.
+     *
      * @param pictureId
      * @param userId
      * @param comment
-     * @throws CommentCreationException 
+     * @throws CommentCreationException
      */
     public static void addComment(int pictureId, int userId, String comment) throws CommentCreationException {
-        Connection con = MysqlConnector.getConnection();
-        PreparedStatement statement;
-        try {
-            statement = con.prepareStatement("INSERT INTO comments (" + Columns.PICTURE_ID + ", " + Columns.USER_ID + ", " + Columns.TEXT + ") VALUES(?,?,?)");
-
+        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("INSERT INTO comments (" + Columns.PICTURE_ID + ", " + Columns.USER_ID + ", " + Columns.TEXT + ") VALUES(?,?,?)")) {
             if (comment != null && comment.length() >= 2) {
                 comment = SqlUtils.escapeString(comment);
                 statement.setInt(1, pictureId);
                 statement.setInt(2, userId);
                 statement.setString(3, comment);
                 statement.executeUpdate();
-                statement.close();
             } else {
                 Log.logInfo("Failed to create comment for user \"" + userId + "\" - rootcause: Comment is NULL or to short", Comment.class);
             }
@@ -141,25 +137,19 @@ public class Comment {
             throw new CommentCreationException();
         }
     }
-    
+
     /**
      * Adds a flag to a comment (Database insert)
+     *
      * @param userId
      * @param commentId
      * @throws FlagFailedExcpetion
      */
     public static void flagComment(int userId, int commentId) throws FlagFailedExcpetion {
-        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT * FROM commentflags WHERE " + Columns.COMMENT_ID + " = ? AND  " + Columns.USER_ID + " = ?")) {
+        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("INSERT IGNORE INTO commentflags (" + Columns.COMMENT_ID + "," + Columns.USER_ID + ") VALUES (?,?)")) {
             statement.setInt(1, commentId);
             statement.setInt(2, userId);
-            ResultSet result = statement.executeQuery();
-            if (result == null || !result.isBeforeFirst()) {
-                try (PreparedStatement instertStatement = MysqlConnector.getConnection().prepareStatement("INSERT INTO commentflags (" + Columns.COMMENT_ID + "," + Columns.USER_ID + ") VALUES (?,?)")) {
-                    instertStatement.setInt(1, commentId);
-                    instertStatement.setInt(2, userId);
-                    instertStatement.executeUpdate();
-                }
-            }
+            statement.executeUpdate();
         } catch (SQLException ex) {
             Log.logWarning("Failed to flag comment " + commentId + " rootcause: - " + ex, Comment.class);
             throw new FlagFailedExcpetion();
@@ -169,31 +159,29 @@ public class Comment {
 
     /**
      * Returns a list of all comments that are linked to the given pictureId
+     *
      * @param pictureId
      * @return commentList -> all comments that match the PictureId in order to
      * their insertion date.
      */
     public static List<Comment> getCommentsForPicutre(int pictureId) {
-        Connection con = MysqlConnector.getConnection();
-        PreparedStatement sta;
         List<Comment> commentList = new LinkedList();
-        try {
-            sta = con.prepareStatement("SELECT * FROM comments WHERE " + Columns.PICTURE_ID + " LIKE ? ORDER BY " + Columns.CREATION_DATE + " ASC");
-
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM comments WHERE " + Columns.PICTURE_ID + " LIKE ? ORDER BY " + Columns.CREATION_DATE + " ASC")) {
             sta.setInt(1, pictureId);
             ResultSet resultSet = sta.executeQuery();
-
+            if (resultSet == null || resultSet.isBeforeFirst()) {
+                return commentList;
+            }
             while (resultSet.next()) {
                 Comment comment;
                 try {
-                    comment = new Comment(resultSet);
+                    commentList.add(new Comment(resultSet));
                 } catch (CommentCreationException ex) {
-                   comment = null;
+                    Log.logWarning(ex.getMessage(), Comment.class);
                 }
-                commentList.add(comment);
             }
         } catch (SQLException ex) {
-            Log.logError("Couldnt read picture Table", Comment.class);
+            Log.logError(ex.getMessage(), Comment.class);
         }
         return commentList;
 
@@ -201,16 +189,16 @@ public class Comment {
 
     /**
      * Deletes the comment out of the database
+     *
      * @param commentId
      * @throws java.lang.Exception
      */
     public static void deleteComment(int commentId) throws Exception {
-        Connection con = MysqlConnector.getConnection();
-        try (PreparedStatement sta = con.prepareStatement("DELETE FROM comments WHERE " + Columns.ID + " LIKE ?")) {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM comments WHERE " + Columns.ID + " LIKE ?")) {
             sta.setInt(1, commentId);
-            sta.executeQuery();
+            sta.executeUpdate();
         } catch (Exception ex) {
-            Log.logWarning("Couldent delete comment " + commentId + " - rootcause: " + ex, Comment.class);
+            Log.logWarning("Could not delete comment " + commentId + " - rootcause: " + ex, Comment.class);
         }
     }
 }

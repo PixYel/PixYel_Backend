@@ -73,7 +73,7 @@ public class ConsoleWindow extends Window {
         }
     }
 
-    public void addError(String errorMessage, String className) {
+    public void addError(String errorMessage, String className, Date date) {
         DateField dateField = getDate();
         Label classNameLabel = getClassNameLabel(className);
         Label errorLabel = getMessageLabel(errorMessage, "red");
@@ -81,7 +81,7 @@ public class ConsoleWindow extends Window {
         addToConsole(dateField, classNameLabel, errorLabel);
     }
 
-    public void addInfo(String infoMessage, String className) {
+    public void addInfo(String infoMessage, String className, Date date) {
         DateField dateField = getDate();
         Label classNameLabel = getClassNameLabel(className);
         Label infoLabel = getMessageLabel(infoMessage, "black");
@@ -89,7 +89,7 @@ public class ConsoleWindow extends Window {
         addToConsole(dateField, classNameLabel, infoLabel);
     }
 
-    public void addDebug(String debugMessage, String className) {
+    public void addDebug(String debugMessage, String className, Date date) {
         DateField dateField = getDate();
         Label classNameLabel = getClassNameLabel(className);
         Label debugLabel = getMessageLabel(debugMessage, "blue");
@@ -97,7 +97,7 @@ public class ConsoleWindow extends Window {
         addToConsole(dateField, classNameLabel, debugLabel);
     }
 
-    public void addWarning(String warningMessage, String className) {
+    public void addWarning(String warningMessage, String className, Date date) {
         DateField dateField = getDate();
         Label classNameLabel = getClassNameLabel(className);
         Label warningLabel = getMessageLabel(warningMessage, "yellow");

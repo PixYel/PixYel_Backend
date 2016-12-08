@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
+import pixyel_backend.connection.Utils;
 import pixyel_backend.userinterface.UIs.DesktopUI.ConsoleWindow;
 
 /**
@@ -41,7 +42,7 @@ public class Log {
                 System.out.println("         " + line);
             }
         }
-        windows.forEach((ConsoleWindow window) -> window.addInfo(logMessage, getClassName(clasS)));
+        windows.forEach((ConsoleWindow window) -> window.addInfo(logMessage, getClassName(clasS), new Date()));
         if (!(maxQueue.size() < 250)) {
             maxQueue.poll();
         }
@@ -68,7 +69,7 @@ public class Log {
                 System.out.println("         " + line);
             }
         }
-        windows.forEach((ConsoleWindow window) -> window.addError(logMessage, getClassName(clasS)));
+        windows.forEach((ConsoleWindow window) -> window.addError(logMessage, getClassName(clasS), new Date()));
         if (!(maxQueue.size() < 250)) {
             maxQueue.poll();
         }
@@ -94,7 +95,7 @@ public class Log {
                 System.out.println("         " + line);
             }
         }
-        windows.forEach((ConsoleWindow window) -> window.addWarning(logMessage, getClassName(clasS)));
+        windows.forEach((ConsoleWindow window) -> window.addWarning(logMessage, getClassName(clasS), new Date()));
         if (!(maxQueue.size() < 250)) {
             maxQueue.poll();
         }
@@ -122,7 +123,7 @@ public class Log {
                     System.out.println("         " + line);
                 }
             }
-            windows.forEach((ConsoleWindow window) -> window.addDebug(logMessage, getClassName(clasS)));
+            windows.forEach((ConsoleWindow window) -> window.addDebug(logMessage, getClassName(clasS), new Date()));
             if (!(maxQueue.size() < 250)) {
                 maxQueue.poll();
             }
@@ -187,16 +188,16 @@ public class Log {
         maxQueue.forEach((LogMessage log) -> {
             switch (log.messageType) {
                 case 0:
-                    window.addInfo(log.message, log.type);
+                    window.addInfo(log.message, log.type, log.date);
                     break;
                 case 1:
-                    window.addWarning(log.message, log.type);
+                    window.addWarning(log.message, log.type, log.date);
                     break;
                 case 2:
-                    window.addError(log.message, log.type);
+                    window.addError(log.message, log.type, log.date);
                     break;
                 case 3:
-                    window.addDebug(log.message, log.type);
+                    window.addDebug(log.message, log.type, log.date);
                     break;
             }
         });
@@ -211,10 +212,13 @@ public class Log {
 
         String type;
         
+        Date date;
+        
         public LogMessage(int messageType, String message, Class<?> type) {
             this.messageType = messageType;
             this.message = message;
             this.type = getClassName(type);
+            this.date = new Date();
         }
 
     }

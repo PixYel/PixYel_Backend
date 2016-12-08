@@ -17,12 +17,9 @@ public class DbAccessPropertiesReader {
     public static Properties getProperties() throws Exception {
 
         Properties prop = new Properties();
-        InputStream input;
-
-        // load the properties file
-        input = new FileInputStream(System.getProperty("user.dir") + "/db_access.properties");
-        prop.load(input);
-        input.close();
+        try (InputStream input = new FileInputStream(System.getProperty("user.dir") + "/db_access.properties")) {
+            prop.load(input);
+        }
 
         return prop;
     }

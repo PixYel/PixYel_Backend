@@ -47,7 +47,7 @@ public class MysqlConnector {
             throws Exception {
         try {
             return openConnection(host, database, user, passwd);
-        } catch (Exception ex) {
+        } catch (ClassNotFoundException | InstantiationException | SQLException | IllegalAccessException ex) {
             throw new Exception("Cant connect to Db \n rootcause : " + ex);
         }
     }
@@ -116,7 +116,7 @@ public class MysqlConnector {
      * @return
      * @throws DbConnectionException if can not connect to database
      */
-    public static Connection connectToDatabaseSystem() throws DbConnectionException {
+    public static Connection connectToDatabaseSystemUsing() throws DbConnectionException {
         try {
             Properties properties = DbAccessPropertiesReader.getProperties();
             String host = properties.getProperty("mysqlhost");

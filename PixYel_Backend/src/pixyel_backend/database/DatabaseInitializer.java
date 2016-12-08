@@ -132,7 +132,7 @@ public class DatabaseInitializer {
 
     private static boolean reallyInitializeDb() {
         try {
-            System.out.println("Do you really want to initialize the database? (Y/N)");
+            System.out.println("Do you really want to initialize the database? This will delete all data inside of the database (Y/N)");
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             String input = in.readLine();
             if (input.equals("Y") | input.equals("y")) {

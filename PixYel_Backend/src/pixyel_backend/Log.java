@@ -6,6 +6,7 @@
 package pixyel_backend;
 
 import com.vaadin.ui.HorizontalLayout;
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class Log {
 
     private static int maxLengthOfClassName = 0;
     private static final ArrayBlockingQueue<LogMessage> maxQueue = new ArrayBlockingQueue<>(250);
+    private static File logFile;
 
     /**
      * It is logging the logMessage as a Info

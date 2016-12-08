@@ -1,6 +1,5 @@
 package pixyel_backend.database.objects;
 
-import com.vaadin.ui.Grid;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,8 +9,6 @@ import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.Columns;
 import pixyel_backend.database.MysqlConnector;
@@ -24,7 +21,6 @@ import pixyel_backend.database.exceptions.FlagFailedExcpetion;
 import pixyel_backend.database.exceptions.PictureLoadException;
 import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 import pixyel_backend.database.exceptions.VoteFailedException;
-import static pixyel_backend.database.objects.Picture.userHasLikedPicture;
 
 public class User {
 
@@ -150,8 +146,7 @@ public class User {
             statement.executeUpdate();
 
         } catch (SQLException ex) {
-            Log.logWarning("Could not create user for storeid \"" + storeID + "\" - rootcause: " + ex, User.class
-            );
+            Log.logWarning("Could not create user for storeid \"" + storeID + "\" - rootcause: " + ex, User.class);
             throw new UserCreationException();
         }
     }
@@ -271,7 +266,6 @@ public class User {
         try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM Users WHERE " + Columns.ID + " = ?")) {
             sta.setInt(1, this.id);
             sta.executeUpdate();
-
         } catch (Exception e) {
             Log.logWarning("Could not delete user \"" + this.id + "\" - rootcause:" + e, User.class);
         }
@@ -298,13 +292,13 @@ public class User {
 
     /**
      * @param data
-     * @param cord
+     * @param coordinate
      * @return The pictureobject of the picture that was uploaded
      * @throws pixyel_backend.database.exceptions.PictureUploadExcpetion
      * @see pixyel_backend.database.objects.Picture
      */
-    public int uploadPicture(String data, Coordinate cord) throws PictureUploadExcpetion {
-        return Picture.addNewPicture(id, data, cord);
+    public int uploadPicture(String data, Coordinate coordinate) throws PictureUploadExcpetion {
+        return Picture.addNewPicture(id, data, coordinate);
     }
 
     /**
@@ -319,52 +313,23 @@ public class User {
      * Get all Picture that are inside of a given distance to the current
      * location
      *
-     * @param cord
+     * @param coordinate
      * @param searchDistance
      * @return
      */
-    public List<Picture> getPicturesByLocation(Coordinate cord, int searchDistance) {
-        List<Picture> pictureList = new LinkedList();
-        List<Coordinate> searchArea = cord.getSearchArea(searchDistance);
-        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT id FROM picturesInfo WHERE (" + Columns.LONGITUDE + " BETWEEN ? AND ?) AND (" + Columns.LATITUDE + " BETWEEN ? AND ?)")) {
-            sta.setDouble(1, searchArea.get(0).getLongitude());
-            sta.setDouble(2, searchArea.get(1).getLongitude());
-            sta.setDouble(3, searchArea.get(0).getLatitude());
-            sta.setDouble(4, searchArea.get(1).getLatitude());
-            ResultSet result = sta.executeQuery();
-
-            if (result == null || !result.isBeforeFirst()) {
-                return pictureList;
-            } else {
-                while (result.next()) {
-                    Picture pic = Picture.getPictureById(result.getInt("id"), this.id);
-                    pic.setRanking(RankingCalculation.calculateRanking(pic, cord));
-                    pictureList.add(pic);
-                }
-            }
-        } catch (SQLException ex) {
-            Log.logError(ex.toString(), User.class);
-            return pictureList;
-        } catch (PictureLoadException ex) {
-            Log.logWarning(ex.getMessage(), User.class);
-        }
-        pictureList.sort((Picture pic1, Picture pic2) -> Integer.compare(pic1.getRanking(), pic2.getRanking()));
-        if (pictureList.size() > 100) {
-            return pictureList.subList(0, 99);
-        } else {
-            return pictureList;
-        }
+    public List<Picture> getPicturesByLocation(Coordinate coordinate, int searchDistance) {
+        return Picture.getPictureByLocation(coordinate,searchDistance,this.id);
     }
 
     /**
      * returns a list of max. 100 pictures by using the top ranked pictures
      * inside a searchradius of 20km (headinformation only)
      *
-     * @param cord current location of the user who requests the Photos
+     * @param coordinate current location of the user who requests the Photos
      * @return
      */
-    public List<Picture> getPicturesByLocation(Coordinate cord) {
-        return getPicturesByLocation(cord, 20);
+    public List<Picture> getPicturesByLocation(Coordinate coordinate) {
+        return getPicturesByLocation(coordinate, 20);
     }
 
     /**
@@ -376,13 +341,11 @@ public class User {
         HashMap<Integer, Picture> pictureList = new HashMap<>();
         for (String currentPictureIdAsString : listAsString) {
             Integer currentPictureId = Integer.valueOf(currentPictureIdAsString);
-            Picture currentPicture;
             try {
-                currentPicture = Picture.getPictureById(currentPictureId, this.id);
+                pictureList.put(currentPictureId,Picture.getPictureById(currentPictureId, this.id));
             } catch (PictureLoadException ex) {
-                currentPicture = null;
+               pictureList.put(currentPictureId,null);
             }
-            pictureList.put(currentPictureId, currentPicture);
         }
         return pictureList;
     }
@@ -429,7 +392,8 @@ public class User {
 
     /**
      * Creates a List of all pictureIds that were liked by the user
-     * @return 
+     *
+     * @return
      */
     public List<Integer> allLikedPictures() {
         List<Integer> allLikedPictures = new LinkedList<>();

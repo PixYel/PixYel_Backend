@@ -10,6 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,6 +19,7 @@ import pixyel_backend.Log;
 import pixyel_backend.database.Columns;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.SqlUtils;
+import pixyel_backend.database.dataProcessing.RankingCalculation;
 import pixyel_backend.database.exceptions.FlagFailedExcpetion;
 import pixyel_backend.database.exceptions.PictureLoadException;
 import pixyel_backend.database.exceptions.PictureUploadExcpetion;
@@ -361,5 +364,46 @@ public class Picture {
             }
         }
         return pictureList;
+    }
+        /**
+     * Get all Picture that are inside of a given distance to the current
+     * location
+     *
+     * @param coordinate
+     * @param searchDistance
+     * @param userId
+     * @return
+     */
+    public static List<Picture> getPictureByLocation(Coordinate coordinate, int searchDistance, int userId) {
+                List<Picture> pictureList = new LinkedList();
+        List<Coordinate> searchArea = coordinate.getSearchArea(searchDistance);
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT id FROM picturesInfo WHERE (" + Columns.LONGITUDE + " BETWEEN ? AND ?) AND (" + Columns.LATITUDE + " BETWEEN ? AND ?)")) {
+            sta.setDouble(1, searchArea.get(0).getLongitude());
+            sta.setDouble(2, searchArea.get(1).getLongitude());
+            sta.setDouble(3, searchArea.get(0).getLatitude());
+            sta.setDouble(4, searchArea.get(1).getLatitude());
+            ResultSet result = sta.executeQuery();
+
+            if (result == null || !result.isBeforeFirst()) {
+                return pictureList;
+            } else {
+                while (result.next()) {
+                    Picture pic = Picture.getPictureById(result.getInt("id"), userId);
+                    pic.setRanking(RankingCalculation.calculateRanking(pic, coordinate));
+                    pictureList.add(pic);
+                }
+            }
+        } catch (SQLException ex) {
+            Log.logError(ex.toString(), User.class);
+            return pictureList;
+        } catch (PictureLoadException ex) {
+            Log.logWarning(ex.getMessage(), User.class);
+        }
+        pictureList.sort((Picture pic1, Picture pic2) -> Integer.compare(pic1.getRanking(), pic2.getRanking()));
+        if (pictureList.size() > 100) {
+            return pictureList.subList(0, 99);
+        } else {
+            return pictureList;
+        }
     }
 }

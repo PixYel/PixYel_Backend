@@ -44,7 +44,7 @@ public class Userinterface extends com.vaadin.ui.UI implements Runnable {
         Executors.newCachedThreadPool().submit(new Userinterface());
     }
 
-    private static VaadinJettyServer vaadinJettyServer;
+    private static JettyServer vaadinJettyServer;
 
     /**
      * Here starts the seperate Thread working
@@ -52,7 +52,7 @@ public class Userinterface extends com.vaadin.ui.UI implements Runnable {
     @Override
     public void run() {
         try {
-            vaadinJettyServer = new VaadinJettyServer(PORT, Userinterface.class);
+            vaadinJettyServer = new JettyServer(PORT, Userinterface.class);
             vaadinJettyServer.start();
             if (onStarted != null) {
                 onStarted.run();

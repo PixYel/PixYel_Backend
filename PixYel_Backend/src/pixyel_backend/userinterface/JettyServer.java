@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
 
 /**
  * <p>
@@ -32,36 +35,47 @@ import java.nio.file.Paths;
  *
  * @author alejandro@vaadin.com
  */
-public class VaadinJettyServer extends Server {
+public class JettyServer extends Server {
 
-    private static final String DEFAULT_WEBAPP_DIRECTORY = System.getProperty("user.dir")+"\\web";
+    private static final String DEFAULT_WEBAPP_DIRECTORY = System.getProperty("user.dir") + "\\web";
     private static final String DEFAULT_CONTEXT_PATH = "/";
 
-    public VaadinJettyServer(int port, Class<? extends UI> uiClass) throws IOException {
+    public JettyServer(int port, Class<? extends UI> uiClass) throws IOException {
         this(port, uiClass, DefaultUIProvider.class, DEFAULT_WEBAPP_DIRECTORY, DEFAULT_CONTEXT_PATH);
     }
 
-    public VaadinJettyServer(int port, Class<? extends UI> uiClass, Class<? extends UIProvider> uiProvider) throws IOException {
+    public JettyServer(int port, Class<? extends UI> uiClass, Class<? extends UIProvider> uiProvider) throws IOException {
         this(port, uiClass, uiProvider, DEFAULT_WEBAPP_DIRECTORY, DEFAULT_CONTEXT_PATH);
     }
 
-    public VaadinJettyServer(int port, Class<? extends UI> uiClass, String webappDirectory) throws IOException {
+    public JettyServer(int port, Class<? extends UI> uiClass, String webappDirectory) throws IOException {
         this(port, uiClass, DefaultUIProvider.class, webappDirectory, DEFAULT_CONTEXT_PATH);
     }
 
-    public VaadinJettyServer(int port, Class<? extends UI> uiClass, String webappDirectory, String contextPath) throws IOException {
+    public JettyServer(int port, Class<? extends UI> uiClass, String webappDirectory, String contextPath) throws IOException {
         this(port, uiClass, DefaultUIProvider.class, webappDirectory, contextPath);
     }
 
-    public VaadinJettyServer(int port, Class<? extends UI> uiClass, Class<? extends UIProvider> uiProvider, String webappDirectory, String contextPath) throws IOException {
+    static WebAppContext context;
+
+    public JettyServer(int port, Class<? extends UI> uiClass, Class<? extends UIProvider> uiProvider, String webappDirectory, String contextPath) throws IOException {
         super(port);
 
-        ServletHolder servlet = buildVaadinServlet(uiClass, uiProvider);
+        ServletHolder vaadinServlet = buildVaadinServlet(uiClass, uiProvider);
         createIfDoesntExists(webappDirectory);
 
-        WebAppContext context = new WebAppContext(webappDirectory, contextPath);
-        context.addServlet(servlet, "/*");
+        context = new WebAppContext(webappDirectory, contextPath);
+        context.addServlet(vaadinServlet, "/*");
         setHandler(context);
+    }
+
+    public void addEntryPoint() {
+        ResourceConfig config = new ResourceConfig();
+        config.packages("pixyeljetty");
+        ServletHolder servlet = new ServletHolder(new ServletContainer(config));
+
+        ServletContextHandler handler = new ServletContextHandler(this, "/*");
+        handler.addServlet(servlet, "/*");
     }
 
     private ServletHolder buildVaadinServlet(Class<? extends UI> uiClass, Class<? extends UIProvider> uiProvider) {

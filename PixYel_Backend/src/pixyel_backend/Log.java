@@ -39,9 +39,11 @@ public class Log {
         for (String line : lines) {
             if (first) {
                 System.out.println(toPrint + line);
+                writeToFile(toPrint + line);
                 first = false;
             } else {
                 System.out.println("         " + line);
+                writeToFile("         " + line);
             }
         }
         windows.forEach((ConsoleWindow window) -> window.addInfo(logMessage, getClassName(clasS), new Date()));
@@ -66,9 +68,11 @@ public class Log {
         for (String line : lines) {
             if (first) {
                 System.out.println(toPrint + line);
+                writeToFile(toPrint + line);
                 first = false;
             } else {
                 System.out.println("         " + line);
+                writeToFile("         " + line);
             }
         }
         windows.forEach((ConsoleWindow window) -> window.addError(logMessage, getClassName(clasS), new Date()));
@@ -92,9 +96,11 @@ public class Log {
         for (String line : lines) {
             if (first) {
                 System.out.println(toPrint + line);
+                writeToFile(toPrint + line);
                 first = false;
             } else {
                 System.out.println("         " + line);
+                writeToFile("         " + line);
             }
         }
         windows.forEach((ConsoleWindow window) -> window.addWarning(logMessage, getClassName(clasS), new Date()));
@@ -120,9 +126,11 @@ public class Log {
             for (String line : lines) {
                 if (first) {
                     System.out.println(toPrint + line);
+                    writeToFile(toPrint + line);
                     first = false;
                 } else {
                     System.out.println("         " + line);
+                    writeToFile("         " + line);
                 }
             }
             windows.forEach((ConsoleWindow window) -> window.addDebug(logMessage, getClassName(clasS), new Date()));
@@ -213,9 +221,9 @@ public class Log {
         String message;
 
         String type;
-        
+
         Date date;
-        
+
         public LogMessage(int messageType, String message, Class<?> type) {
             this.messageType = messageType;
             this.message = message;
@@ -223,5 +231,24 @@ public class Log {
             this.date = new Date();
         }
 
+    }
+
+    public static void writeToFile(String toWrite) {
+        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String fileName = "pixyel_log_" + dateFormat.format(new Date());
+
+    }
+
+    public static void getRessource(String name) {
+//        try {
+//            File dir = new File(System.getProperty("user.dir"));
+//            if (file.exists()) {
+//                return file;
+//            } else {
+//                //throw new RessourceNotFoundException("Could not find ressource: " + file.getPath().replaceAll("%20", " "));
+//            }
+//        } catch (Exception e) {
+//            //throw new RessourceNotFoundException("Could not find ressource: " + name);
+//        }
     }
 }

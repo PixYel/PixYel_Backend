@@ -20,4 +20,11 @@ public class Utils {
         return dateFormat.format(date);
     }
 
+    public static  String getDate(Date date, Date time) {
+        return getDate(new Date(
+                date.getYear(), date.getMonth(), date.getDay(),
+                time.getHours(), time.getMinutes(), time.getSeconds()
+        ));
+    }
+
 }

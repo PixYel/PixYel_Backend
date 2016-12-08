@@ -118,7 +118,7 @@ public class Command {
                 item.addChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
                 item.addChild("votedByUser").setContent(String.valueOf(picture.getVoteStatus()));
                 item.addChild("rank").setContent(String.valueOf(picture.getRanking()));
-                item.addChild("date").setContent(Utils.getDate(picture.getTimestamp()));
+                item.addChild("date").setContent(Utils.getDate(picture.getUploadDate(), picture.getUploadTime()));
             });
             Log.logInfo("Successfully sending list of ItemStats to client " + client.getName(), Command.class);
             return toSend;
@@ -145,7 +145,7 @@ public class Command {
             toSend.addChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
             toSend.addChild("votedByUser").setContent(String.valueOf(picture.getVoteStatus()));
             toSend.addChild("rank").setContent(String.valueOf(picture.getRanking()));
-            toSend.addChild("date").setContent(Utils.getDate(picture.getTimestamp()));
+            toSend.addChild("date").setContent(Utils.getDate(picture.getUploadDate(), picture.getUploadTime()));
             toSend.addChild("data").setContent(picture.getData());
             Log.logInfo("Successfully sending Item " + id + " to client " + client.getName(), Command.class);
             return toSend;
@@ -172,7 +172,7 @@ public class Command {
             toSend.addChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
             toSend.addChild("votedByUser").setContent(String.valueOf(picture.getDownvotes()));
             toSend.addChild("rank").setContent(String.valueOf(picture.getRanking()));
-            toSend.addChild("date").setContent(Utils.getDate(picture.getTimestamp()));
+            toSend.addChild("date").setContent(Utils.getDate(picture.getUploadDate(), picture.getUploadTime()));
             Log.logInfo("Successfully sending Item Stats of Item " + id + " to client " + client.getName(), Command.class);
             return toSend;
         } catch (Exception ex) {

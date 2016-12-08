@@ -32,7 +32,8 @@ public class Picture {
     private String data;
     private int ranking;
     private final Coordinate coordinate;
-    private final Date timestamp;
+    private final Date uploadDate;
+    private final Date uploadTime;
     private final int upvotes;
     private final int downvotes;
     private final int userId;
@@ -58,7 +59,8 @@ public class Picture {
             double longitude = result.getDouble(Columns.LONGITUDE);
             double latitude = result.getDouble(Columns.LATITUDE);
             this.coordinate = new Coordinate(longitude, latitude);
-            this.timestamp = result.getDate(Columns.UPLOAD_DATE);
+            this.uploadDate = result.getDate(Columns.UPLOAD_DATE);
+            this.uploadTime = result.getTime(Columns.UPLOAD_DATE);
             this.userId = result.getInt(Columns.USER_ID);
             Log.logDebug("Loaded basic pictureInformation", Picture.class);
             result = sta.executeQuery("SELECT COUNT(*)FROM picturesVotes WHERE " + Columns.PICTURE_ID + " = " + id + " AND " + Columns.STATUS + " = 1");
@@ -290,10 +292,17 @@ public class Picture {
     }
 
     /**
-     * @return the timestamp
+     * @return the uploadDate
      */
-    public Date getTimestamp() {
-        return timestamp;
+    public Date getUploadDate() {
+        return uploadDate;
+    }
+    
+    /**
+     * @return the uploadTime
+     */
+    public Date getUploadTime() {
+        return uploadTime;
     }
 
     /**

@@ -1,12 +1,13 @@
 package pixyel_backend.database;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import pixyel_backend.Log;
 import pixyel_backend.database.exceptions.DbConnectionException;
-import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.objects.WebUser;
 
 public class DatabaseInitializer {
@@ -19,14 +20,18 @@ public class DatabaseInitializer {
      * @throws Exception
      */
     public static void initProductivDatabase() throws SQLException, DbConnectionException, Exception {
-        Properties properties = DbAccessPropertiesReader.getProperties();
-        String databaseName = properties.getProperty("mysqlproductivdatabase");
-        Log.logInfo("Database-Initialization: starting database-initialization", DatabaseInitializer.class);
-        Log.logInfo("Database-Initialization: setting up Connection to the database", DatabaseInitializer.class);
-        Connection con = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
-        runInit(databaseName, con);
-        WebUser.addNewWebUser("Admin", "nimda");
-        Log.logInfo("finished database-initialization", DatabaseInitializer.class);
+        if (reallyInitializeDb()) {
+            Properties properties = DbAccessPropertiesReader.getProperties();
+            String databaseName = properties.getProperty("mysqlproductivdatabase");
+            Log.logInfo("Database-Initialization: starting database-initialization", DatabaseInitializer.class);
+            Log.logInfo("Database-Initialization: setting up Connection to the database", DatabaseInitializer.class);
+            Connection con = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
+            runInit(databaseName, con);
+            WebUser.addNewWebUser("Admin", "nimda");
+            Log.logInfo("finished database-initialization", DatabaseInitializer.class);
+        } else {
+            System.out.println("Canceled Initialisation");
+        }
     }
 
     /**
@@ -37,13 +42,17 @@ public class DatabaseInitializer {
      * @throws Exception
      */
     public static void initTestDatabase() throws SQLException, DbConnectionException, Exception {
-        Properties properties = DbAccessPropertiesReader.getProperties();
-        String databaseName = properties.getProperty("mysqltestdatabase");
-        Log.logInfo("Database-Initialization: starting testdatabase-initialization", DatabaseInitializer.class);
-        Log.logInfo("Database-Initialization: setting up Connection to the database", DatabaseInitializer.class);
-        Connection con = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
-        runInit(databaseName, con);
-        Log.logInfo("finished database-initialization", DatabaseInitializer.class);
+        if (reallyInitializeDb()) {
+            Properties properties = DbAccessPropertiesReader.getProperties();
+            String databaseName = properties.getProperty("mysqltestdatabase");
+            Log.logInfo("Database-Initialization: starting testdatabase-initialization", DatabaseInitializer.class);
+            Log.logInfo("Database-Initialization: setting up Connection to the database", DatabaseInitializer.class);
+            Connection con = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
+            runInit(databaseName, con);
+            Log.logInfo("finished database-initialization", DatabaseInitializer.class);
+        } else {
+            System.out.println("Canceled Initialisation");
+        }
     }
 
     /**
@@ -69,7 +78,7 @@ public class DatabaseInitializer {
                     + Columns.PUBLICKEY + " TEXT, "
                     + Columns.STATUS + " TINYINT(1) DEFAULT '0')"
             );
-            
+
             statements.executeUpdate("CREATE TABLE webusers ("
                     + Columns.ID + " INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
                     + Columns.NAME + " VARCHAR(30) NOT NULL UNIQUE,"
@@ -118,6 +127,25 @@ public class DatabaseInitializer {
                     + Columns.CREATION_DATE + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP) "
             );
             statements.executeUpdate("CREATE UNIQUE INDEX id ON commentflags (" + Columns.COMMENT_ID + "," + Columns.USER_ID + ")");
+        }
+    }
+
+    private static boolean reallyInitializeDb() {
+        try {
+            System.out.println("Do you really want to initialize the database? (Y/N)");
+            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+            String input = in.readLine();
+            if (input.equals("Y") | input.equals("y")) {
+                return true;
+            } else if (input.equals("N") | input.equals("n")) {
+                return false;
+            }
+            else{
+                System.out.println("Unknown input");
+                return reallyInitializeDb();
+            }
+        } catch (Exception ex) {
+            return false;
         }
     }
 }

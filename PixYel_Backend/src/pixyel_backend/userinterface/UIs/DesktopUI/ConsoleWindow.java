@@ -74,7 +74,7 @@ public class ConsoleWindow extends Window {
     }
 
     public void addError(String errorMessage, String className, Date date) {
-        DateField dateField = getDate();
+        DateField dateField = getDate(date);
         Label classNameLabel = getClassNameLabel(className);
         Label errorLabel = getMessageLabel(errorMessage, "red");
         counter++;
@@ -82,7 +82,7 @@ public class ConsoleWindow extends Window {
     }
 
     public void addInfo(String infoMessage, String className, Date date) {
-        DateField dateField = getDate();
+        DateField dateField = getDate(date);
         Label classNameLabel = getClassNameLabel(className);
         Label infoLabel = getMessageLabel(infoMessage, "black");
         counter++;
@@ -90,7 +90,7 @@ public class ConsoleWindow extends Window {
     }
 
     public void addDebug(String debugMessage, String className, Date date) {
-        DateField dateField = getDate();
+        DateField dateField = getDate(date);
         Label classNameLabel = getClassNameLabel(className);
         Label debugLabel = getMessageLabel(debugMessage, "blue");
         counter++;
@@ -98,7 +98,7 @@ public class ConsoleWindow extends Window {
     }
 
     public void addWarning(String warningMessage, String className, Date date) {
-        DateField dateField = getDate();
+        DateField dateField = getDate(date);
         Label classNameLabel = getClassNameLabel(className);
         Label warningLabel = getMessageLabel(warningMessage, "yellow");
         counter++;
@@ -121,9 +121,9 @@ public class ConsoleWindow extends Window {
         setScrollTop(999);
     }
 
-    private static DateField getDate() {
+    private static DateField getDate(Date date) {
         DateField dateField = new DateField();
-        dateField.setValue(new Date());
+        dateField.setValue(date);
         dateField.setResolution(Resolution.SECOND);
         dateField.setDateFormat("dd.MM.yyyy HH:mm:ss");
         dateField.setReadOnly(true);

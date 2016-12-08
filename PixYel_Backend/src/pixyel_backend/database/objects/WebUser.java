@@ -105,7 +105,7 @@ public class WebUser {
     private static String hash(String toHash) throws NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] salt = "whatever".getBytes();
         KeySpec spec = new PBEKeySpec(toHash.toCharArray(), salt, 65536, 512);
-        SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
         byte[] hash = f.generateSecret(spec).getEncoded();
         Base64.Encoder enc = Base64.getEncoder();
         return enc.encodeToString(hash);

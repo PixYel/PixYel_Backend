@@ -56,7 +56,7 @@ public class JettyServer extends Server {
         this(port, uiClass, DefaultUIProvider.class, webappDirectory, contextPath);
     }
 
-    static WebAppContext context;
+    public static WebAppContext context;
 
     public JettyServer(int port, Class<? extends UI> uiClass, Class<? extends UIProvider> uiProvider, String webappDirectory, String contextPath) throws IOException {
         super(port);
@@ -67,15 +67,6 @@ public class JettyServer extends Server {
         context = new WebAppContext(webappDirectory, contextPath);
         context.addServlet(vaadinServlet, "/*");
         setHandler(context);
-    }
-
-    public void addEntryPoint() {
-        ResourceConfig config = new ResourceConfig();
-        config.packages("pixyeljetty");
-        ServletHolder servlet = new ServletHolder(new ServletContainer(config));
-
-        ServletContextHandler handler = new ServletContextHandler(this, "/*");
-        handler.addServlet(servlet, "/*");
     }
 
     private ServletHolder buildVaadinServlet(Class<? extends UI> uiClass, Class<? extends UIProvider> uiProvider) {

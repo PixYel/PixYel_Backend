@@ -149,7 +149,7 @@ public class Client implements Runnable {
         lookingForInput = false; //interrupts the while(true) on the inputlistener
         listener.shutdown(); //shuts the listener thread down
         clientAliveTimer.cancel(); //Shuts the timer for the client live down
-        Connection.disconnect(this, socket.hashCode()); //Runs the onClientClosed method for futher instructions and removes this client from the loggedInClientsmap (which is used for checking of double logged in clients)
+        SocketServer.disconnect(this, socket.hashCode()); //Runs the onClientClosed method for futher instructions and removes this client from the loggedInClientsmap (which is used for checking of double logged in clients)
         try {
             socket.close();
         } catch (Exception e) {
@@ -255,7 +255,7 @@ public class Client implements Runnable {
             Log.logDebug("No User to be set", Client.class);
         }
         this.userdata = user;
-        Connection.removePossibleDoubleClients(this);
+        SocketServer.removePossibleDoubleClients(this);
     }
 
     /**

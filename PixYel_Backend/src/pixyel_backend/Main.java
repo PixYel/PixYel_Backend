@@ -5,7 +5,8 @@
  */
 package pixyel_backend;
 
-import pixyel_backend.connection.Connection;
+import pixyel_backend.connection.SocketServer;
+import pixyel_backend.connection.rest.RestServer;
 import pixyel_backend.userinterface.Userinterface;
 
 /**
@@ -23,7 +24,8 @@ public class Main {
     public static void main(String[] args) {
         Userinterface.start();
         Userinterface.onStarted(() -> {
-            Connection.start();
+            RestServer.start();
+            SocketServer.start();
         });
     }
 }

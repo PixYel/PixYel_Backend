@@ -284,7 +284,7 @@ public class Command {
             String data = input.getFirstChild("data").getContent();
             Double longt = Double.valueOf(input.getFirstChild("long").getContent());
             Double lat = Double.valueOf(input.getFirstChild("lat").getContent());
-            id = client.getUserdata().uploadPicture(data, new Coordinate(longt, lat)).getId();
+            id = client.getUserdata().uploadPicture(data, new Coordinate(longt, lat));
 
             XML toSend = XML.createNewXML("uploadSuccessful");
             toSend.addChild("id").setContent(String.valueOf(id));

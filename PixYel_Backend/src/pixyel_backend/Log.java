@@ -5,9 +5,14 @@
  */
 package pixyel_backend;
 
+import com.vaadin.ui.HorizontalLayout;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.ArrayBlockingQueue;
+import pixyel_backend.connection.Utils;
+import pixyel_backend.userinterface.UIs.DesktopUI.ConsoleWindow;
 
 /**
  *
@@ -16,6 +21,7 @@ import java.util.Date;
 public class Log {
 
     private static int maxLengthOfClassName = 0;
+    private static final ArrayBlockingQueue<LogMessage> maxQueue = new ArrayBlockingQueue<>(250);
 
     /**
      * It is logging the logMessage as a Info
@@ -27,9 +33,21 @@ public class Log {
     public static <T> void logInfo(String logMessage, Class<T> clasS) {
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "INFO:    ";
+        boolean first = true;
         for (String line : lines) {
-            System.out.println(toPrint + line);
+            if (first) {
+                System.out.println(toPrint + line);
+                first = false;
+            } else {
+                System.out.println("         " + line);
+            }
         }
+        windows.forEach((ConsoleWindow window) -> window.addInfo(logMessage, getClassName(clasS), new Date()));
+        if (!(maxQueue.size() < 250)) {
+            maxQueue.poll();
+        }
+        maxQueue.add(new LogMessage(0, logMessage, clasS));
+
     }
 
     /**
@@ -42,9 +60,20 @@ public class Log {
     public static <T> void logError(String logMessage, Class<T> clasS) {
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "ERROR:   ";
+        boolean first = true;
         for (String line : lines) {
-            System.err.println(toPrint + line);
+            if (first) {
+                System.out.println(toPrint + line);
+                first = false;
+            } else {
+                System.out.println("         " + line);
+            }
         }
+        windows.forEach((ConsoleWindow window) -> window.addError(logMessage, getClassName(clasS), new Date()));
+        if (!(maxQueue.size() < 250)) {
+            maxQueue.poll();
+        }
+        maxQueue.add(new LogMessage(2, logMessage, clasS));
     }
 
     /**
@@ -57,9 +86,20 @@ public class Log {
     public static <T> void logWarning(String logMessage, Class<T> clasS) {
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "WARNING: ";
+        boolean first = true;
         for (String line : lines) {
-            System.out.println(toPrint + line);
+            if (first) {
+                System.out.println(toPrint + line);
+                first = false;
+            } else {
+                System.out.println("         " + line);
+            }
         }
+        windows.forEach((ConsoleWindow window) -> window.addWarning(logMessage, getClassName(clasS), new Date()));
+        if (!(maxQueue.size() < 250)) {
+            maxQueue.poll();
+        }
+        maxQueue.add(new LogMessage(1, logMessage, clasS));
     }
 
     /**
@@ -74,9 +114,20 @@ public class Log {
         if (Main.DEBUG) {
             String[] lines = logMessage.split("\\r?\\n");
             String toPrint = getClassNameWithDate(clasS) + "DEBUG:   ";
+            boolean first = true;
             for (String line : lines) {
-                System.out.println(toPrint + line);
+                if (first) {
+                    System.out.println(toPrint + line);
+                    first = false;
+                } else {
+                    System.out.println("         " + line);
+                }
             }
+            windows.forEach((ConsoleWindow window) -> window.addDebug(logMessage, getClassName(clasS), new Date()));
+            if (!(maxQueue.size() < 250)) {
+                maxQueue.poll();
+            }
+            maxQueue.add(new LogMessage(3, logMessage, clasS));
         }
     }
 
@@ -89,11 +140,7 @@ public class Log {
     private static <T> String getClassNameWithDate(Class<T> clasS) {
         String result = "";
         int currentLengthOfClassName;
-        String className = clasS.getTypeName();
-        className = className.substring(className.lastIndexOf(".") + 1);
-        if (className.contains("$")) {
-            className = className.substring(0, className.lastIndexOf("$"));
-        }
+        String className = getClassName(clasS);
         if ((currentLengthOfClassName = className.length()) > maxLengthOfClassName) {
             maxLengthOfClassName = currentLengthOfClassName;
         }
@@ -115,5 +162,64 @@ public class Log {
         DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         result += " [" + dateFormat.format(new Date()) + "] ";
         return result;
+    }
+
+    public static String getClassName(Class<?> T) {
+        String className = T.getTypeName();
+        className = className.substring(className.lastIndexOf(".") + 1);
+        if (className.contains("$")) {
+            className = className.substring(0, className.lastIndexOf("$"));
+        }
+        return className;
+    }
+
+    private static ArrayList<ConsoleWindow> windows = new ArrayList<>();
+
+    public static void addConsoleWindow(ConsoleWindow window) {
+        windows.add(window);
+        addAll(window);
+    }
+
+    public static void removeConsoleWindow(ConsoleWindow window) {
+        windows.remove(window);
+    }
+
+    public static void addAll(ConsoleWindow window) {
+        maxQueue.forEach((LogMessage log) -> {
+            switch (log.messageType) {
+                case 0:
+                    window.addInfo(log.message, log.type, log.date);
+                    break;
+                case 1:
+                    window.addWarning(log.message, log.type, log.date);
+                    break;
+                case 2:
+                    window.addError(log.message, log.type, log.date);
+                    break;
+                case 3:
+                    window.addDebug(log.message, log.type, log.date);
+                    break;
+            }
+        });
+    }
+
+    public static class LogMessage {
+
+        //0 = info, 1 = warning, 2 = error, 3 = debug
+        int messageType;
+
+        String message;
+
+        String type;
+        
+        Date date;
+        
+        public LogMessage(int messageType, String message, Class<?> type) {
+            this.messageType = messageType;
+            this.message = message;
+            this.type = getClassName(type);
+            this.date = new Date();
+        }
+
     }
 }

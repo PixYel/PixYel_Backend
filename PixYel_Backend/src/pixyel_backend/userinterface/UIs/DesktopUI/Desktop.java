@@ -13,7 +13,6 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
@@ -30,10 +29,12 @@ import pixyel_backend.userinterface.ressources.Ressources;
  */
 public class Desktop {
 
-    private static AbsoluteLayout layout = new AbsoluteLayout();
-
     public static void show() {
-        //Notification.show("Showing Desktop");
+        new Desktop();
+    }
+
+    public Desktop() {
+        AbsoluteLayout layout = new AbsoluteLayout();
         closeAllWindows();
         layout.addComponent(getImage(), "top:0px; left: 0px;");
         layout.addComponent(getTaskBar(), "top: 80%; left: 0%; right: 0%, bottom: 0%");
@@ -59,29 +60,61 @@ public class Desktop {
         return image;
     }
 
-    private static Component getTaskBar() {
+    boolean consoleOpen = false;
+    boolean onlineMonitorOpen = false;
+    boolean userManagementOpen = false;
+    boolean loggedOut = false;
+
+    private Component getTaskBar() {
         GridLayout gridLayout = new GridLayout(4, 1);
         gridLayout.setSizeFull();
 
-        GridLayout appConsole = getAppButtons(Translations.get(Translations.DESKTOP_CONSOLE), "desktop_console_icon.png");
+        Runnable runConsole = () -> {
+            if (!consoleOpen) {
+                consoleOpen = true;
+                Runnable onClose = () -> consoleOpen = false;
+                ConsoleWindow.show(onClose);
+            }
+        };
+        GridLayout appConsole = getAppButtons(Translations.get(Translations.DESKTOP_CONSOLE), "desktop_console_icon.png", runConsole);
         gridLayout.addComponent(appConsole, 0, 0);
         gridLayout.setComponentAlignment(appConsole, Alignment.MIDDLE_CENTER);
 
-        GridLayout appOnlineMonitor = getAppButtons(Translations.get(Translations.DESKTOP_ONLINE_MONITOR), "desktop_console_icon.png");
+        Runnable runOnlineMonitor = () -> {
+            if (!onlineMonitorOpen) {
+                onlineMonitorOpen = true;
+                Runnable onClose = () -> onlineMonitorOpen = false;
+                OnlineMonitorWindow.show(onClose);
+            }
+        };
+        GridLayout appOnlineMonitor = getAppButtons(Translations.get(Translations.DESKTOP_ONLINE_MONITOR), "desktop_system_monitor_icon.png", runOnlineMonitor);
         gridLayout.addComponent(appOnlineMonitor, 1, 0);
         gridLayout.setComponentAlignment(appOnlineMonitor, Alignment.MIDDLE_CENTER);
 
-        GridLayout appUserManagement = getAppButtons(Translations.get(Translations.DESKTOP_USER_MANAGMENT), "desktop_console_icon.png");
+        Runnable runUserManagement = () -> {
+            if (!userManagementOpen) {
+                userManagementOpen = true;
+                Runnable onClose = () -> userManagementOpen = false;
+                UserManagementWindow.show(onClose);
+            }
+        };
+        GridLayout appUserManagement = getAppButtons(Translations.get(Translations.DESKTOP_USER_MANAGMENT), "desktop_user_management_icon.png", runUserManagement);
         gridLayout.addComponent(appUserManagement, 2, 0);
         gridLayout.setComponentAlignment(appUserManagement, Alignment.MIDDLE_CENTER);
 
-        GridLayout appLogout = getAppButtons(Translations.get(Translations.DESKTOP_LOGOUT), "desktop_console_icon.png");
+        Runnable runLogout = () -> {
+            if (!loggedOut) {
+                loggedOut = true;
+                Logout.show();
+            }
+        };
+        GridLayout appLogout = getAppButtons(Translations.get(Translations.DESKTOP_LOGOUT), "desktop_logout_icon.png", runLogout);
         gridLayout.addComponent(appLogout, 3, 0);
         gridLayout.setComponentAlignment(appLogout, Alignment.MIDDLE_CENTER);
         return gridLayout;
     }
 
-    private static GridLayout getAppButtons(String caption, String ressourceName) {
+    private GridLayout getAppButtons(String caption, String ressourceName, Runnable run) {
         Image image = new Image();
         try {
             image.setSource(new FileResource(Ressources.getRessource(ressourceName)));
@@ -89,7 +122,7 @@ public class Desktop {
             Logger.getLogger(Desktop.class.getName()).log(Level.SEVERE, null, ex);
         }
         image.addClickListener((MouseEvents.ClickEvent c) -> {
-            Notification.show("Console");
+            run.run();
         });
 
         Label label = new Label(caption);
@@ -100,6 +133,7 @@ public class Desktop {
         gridLayout.addComponent(label, 0, 1);
         gridLayout.setComponentAlignment(image, Alignment.MIDDLE_CENTER);
         gridLayout.setComponentAlignment(label, Alignment.MIDDLE_CENTER);
+        gridLayout.setSpacing(true);
         return gridLayout;
     }
 

@@ -7,6 +7,7 @@ package pixyel_backend;
 
 import pixyel_backend.connection.Connection;
 import pixyel_backend.database.DatabaseCleanUpService;
+import pixyel_backend.userinterface.Userinterface;
 
 /**
  *
@@ -15,13 +16,16 @@ import pixyel_backend.database.DatabaseCleanUpService;
 public class Main {
 
     /**
-     * Setting for the Debug mode, affects the Log and Vaadin on the Jetty server
+     * Setting for the Debug mode, affects the Log and Vaadin on the Jetty
+     * server
      */
-    public static final boolean DEBUG = true;
-    
+    public static final boolean DEBUG = false;
+
     public static void main(String[] args) {
-        DatabaseCleanUpService.start();
-        Connection.start();
-        //Userinterface.start();
+        Userinterface.start();
+        Userinterface.onStarted(() -> {
+            DatabaseCleanUpService.start();
+            Connection.start();
+        });
     }
 }

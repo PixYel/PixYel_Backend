@@ -4,9 +4,19 @@ import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.server.ServiceException;
+import com.vaadin.server.SessionDestroyEvent;
+import com.vaadin.server.SessionDestroyListener;
+import com.vaadin.server.SessionInitEvent;
+import com.vaadin.server.SessionInitListener;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.ui.UI;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import pixyel_backend.Log;
 import pixyel_backend.Main;
 import pixyel_backend.userinterface.UIs.LoginUI.Login;
 
@@ -23,6 +33,8 @@ import pixyel_backend.userinterface.UIs.LoginUI.Login;
 public class Userinterface extends com.vaadin.ui.UI implements Runnable {
 
     private final static int PORT = 8080;
+    private static Runnable onStarted;
+    private static boolean started = false;
 
     /**
      * To start the Userinterface in general as a separate Thread
@@ -32,14 +44,20 @@ public class Userinterface extends com.vaadin.ui.UI implements Runnable {
         Executors.newCachedThreadPool().submit(new Userinterface());
     }
 
+    private static VaadinJettyServer vaadinJettyServer;
+
     /**
      * Here starts the seperate Thread working
      */
     @Override
     public void run() {
         try {
-            VaadinJettyServer vaadinJettyServer = new VaadinJettyServer(8080, Userinterface.class);
+            vaadinJettyServer = new VaadinJettyServer(PORT, Userinterface.class);
             vaadinJettyServer.start();
+            if (onStarted != null) {
+                onStarted.run();
+            }
+            started = true;
         } catch (Exception ex) {
             if (ex.toString().contains("Address already in use")) {
                 System.err.println("Could not start UI, port " + PORT + " is used by another program, shutting down this UI");
@@ -58,6 +76,7 @@ public class Userinterface extends com.vaadin.ui.UI implements Runnable {
      */
     @Override
     protected void init(VaadinRequest vaadinRequest) {
+        setImmediate(true);
         Login.show();
     }
 
@@ -67,6 +86,14 @@ public class Userinterface extends com.vaadin.ui.UI implements Runnable {
     @WebServlet(urlPatterns = "/*", name = "PixYelUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = Userinterface.class, productionMode = !Main.DEBUG)
     public static class PixYelUIServlet extends VaadinServlet {
+    }
+
+    public static void onStarted(Runnable r) {
+        if (started) {
+            r.run();
+        } else {
+            onStarted = r;
+        }
     }
 
     /**

@@ -1,13 +1,17 @@
 package pixyel_backend.database.objects;
 
+import com.vaadin.ui.Grid;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.Columns;
 import pixyel_backend.database.MysqlConnector;
@@ -20,6 +24,7 @@ import pixyel_backend.database.exceptions.FlagFailedExcpetion;
 import pixyel_backend.database.exceptions.PictureLoadException;
 import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 import pixyel_backend.database.exceptions.VoteFailedException;
+import static pixyel_backend.database.objects.Picture.userHasLikedPicture;
 
 public class User {
 
@@ -298,7 +303,7 @@ public class User {
      * @throws pixyel_backend.database.exceptions.PictureUploadExcpetion
      * @see pixyel_backend.database.objects.Picture
      */
-    public Picture uploadPicture(String data, Coordinate cord) throws PictureUploadExcpetion {
+    public int uploadPicture(String data, Coordinate cord) throws PictureUploadExcpetion {
         return Picture.addNewPicture(id, data, cord);
     }
 
@@ -399,13 +404,13 @@ public class User {
     public synchronized void downvotePicture(int picId) throws VoteFailedException {
         Picture.downvotePicture(picId, this.id);
     }
-    
+
     /**
      *
      * @param picId
      * @throws VoteFailedException
      */
-    public synchronized void removeVoteFromPicture(int picId) throws VoteFailedException{
+    public synchronized void removeVoteFromPicture(int picId) throws VoteFailedException {
         Picture.removeVoteFromPicture(picId, this.id);
     }
 
@@ -420,5 +425,26 @@ public class User {
      */
     public Picture getPicture(int picId) throws PictureLoadException {
         return Picture.getPictureById(picId, this.id);
+    }
+
+    /**
+     * Creates a List of all pictureIds that were liked by the user
+     * @return 
+     */
+    public List<Integer> allLikedPictures() {
+        List<Integer> allLikedPictures = new LinkedList<>();
+        try (Statement sta = MysqlConnector.getConnection().createStatement()) {
+            ResultSet result = sta.executeQuery("SELECT " + Columns.PICTURE_ID + " FROM picturesVotes WHERE " + Columns.USER_ID + " = " + this.id);
+            if (result != null && result.isBeforeFirst()) {
+                while (result.next()) {
+                    int pictureId = result.getInt(1);
+                    allLikedPictures.add(pictureId);
+                }
+            }
+            return allLikedPictures;
+        } catch (SQLException ex) {
+            Log.logError(ex.getMessage(), User.class);
+            return allLikedPictures;
+        }
     }
 }

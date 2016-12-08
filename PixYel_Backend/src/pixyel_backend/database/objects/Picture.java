@@ -5,7 +5,6 @@
  */
 package pixyel_backend.database.objects;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -50,9 +49,7 @@ public class Picture {
      */
     public Picture(int pictureId, int userId) throws PictureLoadException {
         this.id = pictureId;
-        try {
-            //get Info
-            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM picturesInfo WHERE " + Columns.ID + " LIKE ?");
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM picturesInfo WHERE " + Columns.ID + " LIKE ?")) {
             sta.setInt(1, this.id);
             ResultSet result = sta.executeQuery();
             result.next();
@@ -96,42 +93,50 @@ public class Picture {
      *
      * @param userId
      * @param pictureData
-     * @param cord
+     * @param coordinate
      * @return
      * @throws PictureUploadExcpetion
      */
-    public static synchronized Picture addNewPicture(int userId, String pictureData, Coordinate cord) throws PictureUploadExcpetion {
-        int pictureId;
+    public static int addNewPicture(int userId, String pictureData, Coordinate coordinate) throws PictureUploadExcpetion {
         try {
-            Connection con = MysqlConnector.getConnection();
-            PreparedStatement statement;
             if (pictureData != null && pictureData.length() >= 1) {
-                statement = con.prepareStatement("INSERT INTO picturesInfo (" + Columns.LONGITUDE + ", " + Columns.LATITUDE + ", " + Columns.USER_ID + ") VALUES(?,?,?)");
-                statement.setDouble(1, cord.getLongitude());
-                statement.setDouble(2, cord.getLatitude());
-                statement.setInt(3, userId);
-                statement.executeUpdate();
-                Log.logDebug("Added Picture to Db", Picture.class);
-                ResultSet rs = statement.executeQuery("SELECT MAX(" + Columns.ID + ") as " + Columns.MAX_ID + " FROM picturesInfo");
-                //get Id as reference for the picturedata
-                rs.next();
-                pictureId = rs.getInt(Columns.MAX_ID);
+                int pictureId = addPictureInfoToDatabase(userId, coordinate);
                 pictureData = SqlUtils.escapeString(pictureData);
-                statement = con.prepareStatement("INSERT INTO picturesData (" + Columns.PICTURE_ID + ", " + Columns.DATA + ") VALUES(?,?)");
-                statement.setInt(1, pictureId);
-                statement.setString(2, pictureData);
-                statement.execute();
-                statement.close();
-                return new Picture(pictureId, userId);
+                try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("INSERT INTO picturesData (" + Columns.PICTURE_ID + ", " + Columns.DATA + ") VALUES(?,?)")) {
+                    statement.setInt(1, pictureId);
+                    statement.setString(2, pictureData);
+                    statement.execute();
+                    return pictureId;
+                }
             } else {
                 Log.logInfo("Failed to add picture for user \"" + userId + "\" - rootcause: picturedata is NULL or to empty string", Picture.class);
             }
         } catch (SQLException ex) {
             Log.logError("Could not add new picture to database - rootcause: " + ex.getMessage(), Picture.class);
-        } catch (PictureLoadException ex) {
-            Log.logWarning(ex.getMessage(), Picture.class);
         }
         throw new PictureUploadExcpetion();
+    }
+
+    /**
+     *
+     * @param userId
+     * @param coordinate
+     * @return id of the picture that was added
+     * @throws SQLException
+     */
+    private static synchronized int addPictureInfoToDatabase(int userId, Coordinate coordinate) throws SQLException {
+        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("INSERT INTO picturesInfo (" + Columns.LONGITUDE + ", " + Columns.LATITUDE + ", " + Columns.USER_ID + ") VALUES(?,?,?)")) {
+            statement.setDouble(1, coordinate.getLongitude());
+            statement.setDouble(2, coordinate.getLatitude());
+            statement.setInt(3, userId);
+            statement.executeUpdate();
+        }
+        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT MAX(" + Columns.ID + ") AS " + Columns.MAX_ID + " FROM picturesInfo")) {
+            ResultSet rs = statement.executeQuery();
+            Log.logDebug("Added Picture to database", Picture.class);
+            rs.next();
+            return rs.getInt(Columns.MAX_ID);
+        }
     }
 
     /**
@@ -142,17 +147,10 @@ public class Picture {
      * @throws FlagFailedExcpetion
      */
     public static void flagPic(int userId, int pictureId) throws FlagFailedExcpetion {
-        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.ID + " FROM  pictureflags WHERE " + Columns.PICTURE_ID + " = ? AND  " + Columns.USER_ID + " = ?")) {
-            statement.setInt(1, pictureId);
-            statement.setInt(2, userId);
-            ResultSet result = statement.executeQuery();
-            if (result == null || !result.isBeforeFirst()) {
-                try (PreparedStatement instertStatement = MysqlConnector.getConnection().prepareStatement("INSERT INTO pictureflags (" + Columns.PICTURE_ID + "," + Columns.USER_ID + ") VALUES (?,?)")) {
-                    instertStatement.setInt(1, pictureId);
-                    instertStatement.setInt(2, userId);
-                    instertStatement.executeUpdate();
-                }
-            }
+        try (PreparedStatement insertStatement = MysqlConnector.getConnection().prepareStatement("INSERT IGNORE INTO pictureflags (" + Columns.PICTURE_ID + "," + Columns.USER_ID + ") VALUES (?,?)")) {
+            insertStatement.setInt(1, pictureId);
+            insertStatement.setInt(2, userId);
+            insertStatement.executeUpdate();
         } catch (SQLException ex) {
             Log.logWarning("Failed to flag picture " + pictureId + " rootcause: - " + ex, Comment.class);
             throw new FlagFailedExcpetion();
@@ -160,15 +158,15 @@ public class Picture {
     }
 
     /**
-     * Checks how the user has liked the picture
+     * Checks if the user has liked the picture
      *
      * @param userId
      * @param pictureId
      * @return 1 if the user has upvoted the picture, -1 if the user has
-     * downvoted the picture, 0 if the user hasnt voted for the picture
+     * downvoted the picture, 0 if the user has not voted for the picture
      */
     public static int userHasLikedPicture(int userId, int pictureId) {
-        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT "+ Columns.STATUS +" FROM  picturesVotes WHERE " + Columns.PICTURE_ID + " = ? AND  " + Columns.USER_ID + " = ?")) {
+        try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.STATUS + " FROM  picturesVotes WHERE " + Columns.PICTURE_ID + " = ? AND  " + Columns.USER_ID + " = ?")) {
             statement.setInt(1, pictureId);
             statement.setInt(2, userId);
             ResultSet result = statement.executeQuery();
@@ -178,9 +176,8 @@ public class Picture {
                 result.next();
                 return result.getInt(Columns.STATUS);
             }
-
         } catch (SQLException ex) {
-            Log.logWarning(ex.getMessage(), Picture.class);
+            Log.logError(ex.getMessage(), Picture.class);
         }
         return 0;
     }
@@ -231,7 +228,7 @@ public class Picture {
             sta.setInt(6, newVoteStatus);
             sta.executeUpdate();
         } catch (SQLException ex) {
-            Log.logWarning(ex.getMessage(), Picture.class);
+            Log.logError(ex.getMessage(), Picture.class);
             throw new VoteFailedException();
         }
     }
@@ -251,11 +248,7 @@ public class Picture {
      */
     public String getData() {
         if (data == null) {
-            //get Data
-            PreparedStatement sta;
-            try {
-                sta = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.DATA + " FROM picturesData WHERE " + Columns.PICTURE_ID + " LIKE ?");
-
+            try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.DATA + " FROM picturesData WHERE " + Columns.PICTURE_ID + " LIKE ?")) {
                 sta.setInt(1, this.id);
                 ResultSet result = sta.executeQuery();
                 result.next();
@@ -275,18 +268,13 @@ public class Picture {
      * @throws PictureLoadException
      */
     public static String getDataForId(int id) throws PictureLoadException {
-        //get Data
-        PreparedStatement sta;
-        try {
-            sta = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.DATA + " FROM picturesData WHERE " + Columns.PICTURE_ID + " LIKE ?");
-
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.DATA + " FROM picturesData WHERE " + Columns.PICTURE_ID + " LIKE ?")) {
             sta.setInt(1, id);
             ResultSet result = sta.executeQuery();
             result.next();
             return result.getString(Columns.DATA);
         } catch (SQLException ex) {
-            Log.logWarning("Could not load pictureData for Id" + id + " - rootcause: " + ex, Picture.class
-            );
+            Log.logWarning("Could not load pictureData for Id" + id + " - rootcause: " + ex, Picture.class);
             throw new PictureLoadException();
         }
     }
@@ -297,7 +285,7 @@ public class Picture {
     public Date getUploadDate() {
         return uploadDate;
     }
-    
+
     /**
      * @return the uploadTime
      */
@@ -366,11 +354,11 @@ public class Picture {
             Integer currentPictureId = Integer.valueOf(currentPictureIdAsString);
             String currentPictureData;
             try {
-                currentPictureData = Picture.getDataForId(currentPictureId);
+                pictureList.put(currentPictureId,Picture.getDataForId(currentPictureId));
             } catch (PictureLoadException ex) {
-                currentPictureData = null;
+                Log.logError(ex.getMessage(), Picture.class);
+                pictureList.put(currentPictureId,null);
             }
-            pictureList.put(currentPictureId, currentPictureData);
         }
         return pictureList;
     }

@@ -28,7 +28,8 @@ public class CommentTest {
 
     private final User user = User.addNewUser("JUnit-Test-User-" + System.currentTimeMillis());
     private static String commentText = System.currentTimeMillis() + "";
-    Picture picture = user.uploadPicture("tollesBild", new Coordinate(1234, 4321));
+    int pictureId = user.uploadPicture("tollesBild", new Coordinate(1.234, 4.321));
+    Picture picture = user.getPicture(pictureId);
 
     @BeforeClass
     public static void init() {

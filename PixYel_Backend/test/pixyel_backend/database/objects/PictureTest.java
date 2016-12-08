@@ -34,7 +34,8 @@ public class PictureTest {
     public ExpectedException thrown = ExpectedException.none();
 
     public PictureTest() throws DbConnectionException, Exception {
-        testpicture = user.uploadPicture("testpic" + System.currentTimeMillis(), new Coordinate(1, 2));
+        int testpictureId = user.uploadPicture("testpic" + System.currentTimeMillis(), new Coordinate(1, 2));
+        testpicture = user.getPicture(testpictureId);
     }
 
     /**
@@ -59,7 +60,8 @@ public class PictureTest {
      */
     @Test
     public void testvotes() throws PictureUploadExcpetion, PictureLoadException, VoteFailedException {
-        Picture pic = user.uploadPicture("test", new Coordinate(0, 0));
+        int picId = user.uploadPicture("test", new Coordinate(0, 0));
+        Picture pic = user.getPicture(picId);
         assertEquals(0, pic.getVoteStatus());
         assertEquals(0, pic.getDownvotes());
         assertEquals(0, pic.getUpvotes());

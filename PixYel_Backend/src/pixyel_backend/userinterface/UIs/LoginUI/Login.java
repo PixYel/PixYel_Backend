@@ -65,8 +65,8 @@ public class Login {
         try {
             logo = new Image();
             logo.setSource(new FileResource(Ressources.getRessource("logo.png")));
-            logo.setWidth((float) (WIDTH * 0.6), Unit.PIXELS);
-            loginForm.addComponent(logo, "top:10%;left:" + ((WIDTH / 2) - (logo.getWidth() / 2)) + "px;");
+            logo.setWidth((float) (WIDTH * 0.36), Unit.PIXELS);
+            loginForm.addComponent(logo, "top:5%;left:" + ((WIDTH / 2) - (logo.getWidth() / 2)) + "px;");
         } catch (Ressources.RessourceNotFoundException e) {
             Log.logError("Could not find Logo for the loginscreen: " + e, Login.class);
         }
@@ -104,7 +104,7 @@ public class Login {
             loginForm.setHeight(HIGHT, Unit.PIXELS);
             loginWindow.center();
             loginForm.removeComponent(logo);
-            logo.setWidth((float) (WIDTH * 0.6), Unit.PIXELS);
+            logo.setWidth((float) (WIDTH * 0.36), Unit.PIXELS);
             loginForm.addComponent(logo, "top:10%;left:" + ((WIDTH / 2) - (logo.getWidth() / 2)) + "px;");
 
         }

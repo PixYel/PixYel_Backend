@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package pixyel_backend.userinterface.UIs.DesktopUI;
+package pixyel_backend.userinterface.UIs.DesktopUI.apps;
 
 import com.vaadin.server.FileResource;
 import com.vaadin.server.Page;
@@ -133,7 +133,7 @@ public class ConsoleWindow extends Window {
         setScrollTop(999);
     }
 
-    private static DateField getDate(Date date) {
+    private DateField getDate(Date date) {
         DateField dateField = new DateField();
         dateField.setValue(date);
         dateField.setResolution(Resolution.SECOND);
@@ -143,13 +143,13 @@ public class ConsoleWindow extends Window {
         return dateField;
     }
 
-    private static Label getClassNameLabel(String className) {
+    private Label getClassNameLabel(String className) {
         Label classNameLabel = new Label(className);
         classNameLabel.setStyleName(ValoTheme.LABEL_BOLD);
         return classNameLabel;
     }
 
-    private static Label getMessageLabel(String content, String color) {
+    private Label getMessageLabel(String content, String color) {
         Label message = new Label(content);
         switch (color) {
             case "red":

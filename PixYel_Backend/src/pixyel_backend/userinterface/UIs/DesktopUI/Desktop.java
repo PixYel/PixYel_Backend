@@ -5,6 +5,9 @@
  */
 package pixyel_backend.userinterface.UIs.DesktopUI;
 
+import pixyel_backend.userinterface.UIs.DesktopUI.apps.UserManagementWindow;
+import pixyel_backend.userinterface.UIs.DesktopUI.apps.OnlineMonitorWindow;
+import pixyel_backend.userinterface.UIs.DesktopUI.apps.ConsoleWindow;
 import com.vaadin.event.MouseEvents;
 import com.vaadin.server.FileResource;
 import com.vaadin.ui.AbsoluteLayout;
@@ -49,7 +52,7 @@ public class Desktop {
         windows.stream().forEach(ui::removeWindow);
     }
 
-    private static Image getImage() {
+    private Image getImage() {
         Image image = new Image();
         try {
             image.setSource(new FileResource(Ressources.getRessource("desktop_background.jpg")));

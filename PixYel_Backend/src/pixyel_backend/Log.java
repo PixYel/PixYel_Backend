@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 import pixyel_backend.connection.Utils;
-import pixyel_backend.userinterface.UIs.DesktopUI.ConsoleWindow;
+import pixyel_backend.userinterface.UIs.DesktopUI.apps.ConsoleWindow;
 
 /**
  *

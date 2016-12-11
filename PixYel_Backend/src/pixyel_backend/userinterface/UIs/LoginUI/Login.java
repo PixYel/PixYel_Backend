@@ -28,9 +28,13 @@ import pixyel_backend.userinterface.ressources.Ressources;
 public class Login {
 
     public static void show() {
+        new Login();
+    }
+
+    public Login() {
         UI.getCurrent().setResizeLazy(false);
         Page.getCurrent().addBrowserWindowResizeListener((event) -> {
-            Login.onResized();
+            onResized();
         });
 
         VerticalLayout layout = new VerticalLayout();
@@ -44,11 +48,11 @@ public class Login {
         showLoginPanel();
     }
 
-    static Window loginWindow;
-    static AbsoluteLayout loginForm;
-    static Image logo;
+    Window loginWindow;
+    AbsoluteLayout loginForm;
+    Image logo;
 
-    private static void showLoginPanel() {
+    private void showLoginPanel() {
         loginWindow = new Window();
         loginWindow.setResizeLazy(false);
 
@@ -80,7 +84,7 @@ public class Login {
         final Button btnLogin = new Button(Translations.get(Translations.LOGIN_LOGINBUTTON));
         btnLogin.setStyleName(ValoTheme.BUTTON_PRIMARY);
         btnLogin.setClickShortcut(ShortcutAction.KeyCode.ENTER);
-        btnLogin.addClickListener((listener) -> login(txtUsername.getValue(),  txtPassword.getValue()));
+        btnLogin.addClickListener((listener) -> login(txtUsername.getValue(), txtPassword.getValue()));
         btnLogin.setSizeFull();
         loginForm.addComponent(btnLogin, "top: 80%; left: 25%; right: 25%; bottom: 10%");
 
@@ -92,7 +96,7 @@ public class Login {
         UI.getCurrent().addWindow(loginWindow);
     }
 
-    public static void onResized() {
+    public void onResized() {
         if (loginWindow.isAttached()) {
             int WIDTH = (int) (0.3 * UI.getCurrent().getPage().getBrowserWindowWidth());
             int HIGHT = (int) (0.7 * UI.getCurrent().getPage().getBrowserWindowHeight());
@@ -106,7 +110,7 @@ public class Login {
         }
     }
 
-    public static Component getVideo() {
+    public Component getVideo() {
         try {
             Video introVideo = new Video();
             File introVideoFile = Ressources.getRessource("login_background.mp4");
@@ -123,7 +127,7 @@ public class Login {
         }
     }
 
-    public static void login(String username, String password) {
+    public void login(String username, String password) {
         boolean loginSuccessful = WebUser.loginWebUser(username, password);
         if (loginSuccessful) {
             Desktop.show();

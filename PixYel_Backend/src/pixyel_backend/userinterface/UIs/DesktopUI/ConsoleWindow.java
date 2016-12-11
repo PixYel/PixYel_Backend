@@ -74,6 +74,9 @@ public class ConsoleWindow extends Window {
     }
 
     public void addError(String errorMessage, String className, Date date) {
+        if (errorMessage.length() > 500) {
+            errorMessage = errorMessage.substring(0, 499) + "... line is too long for the webinterface, for more details please ask the admins";
+        }
         DateField dateField = getDate(date);
         Label classNameLabel = getClassNameLabel(className);
         Label errorLabel = getMessageLabel(errorMessage, "red");
@@ -82,6 +85,9 @@ public class ConsoleWindow extends Window {
     }
 
     public void addInfo(String infoMessage, String className, Date date) {
+        if (infoMessage.length() > 500) {
+            infoMessage = infoMessage.substring(0, 499) + "... line is too long for the webinterface, for more details please ask the admins";
+        }
         DateField dateField = getDate(date);
         Label classNameLabel = getClassNameLabel(className);
         Label infoLabel = getMessageLabel(infoMessage, "black");
@@ -90,6 +96,9 @@ public class ConsoleWindow extends Window {
     }
 
     public void addDebug(String debugMessage, String className, Date date) {
+        if (debugMessage.length() > 500) {
+            debugMessage = debugMessage.substring(0, 499) + "... line is too long for the webinterface, for more details please ask the admins";
+        }
         DateField dateField = getDate(date);
         Label classNameLabel = getClassNameLabel(className);
         Label debugLabel = getMessageLabel(debugMessage, "blue");
@@ -98,6 +107,9 @@ public class ConsoleWindow extends Window {
     }
 
     public void addWarning(String warningMessage, String className, Date date) {
+        if (warningMessage.length() > 500) {
+            warningMessage = warningMessage.substring(0, 499) + "... line is too long for the webinterface, for more details please ask the admins";
+        }
         DateField dateField = getDate(date);
         Label classNameLabel = getClassNameLabel(className);
         Label warningLabel = getMessageLabel(warningMessage, "yellow");

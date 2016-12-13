@@ -7,11 +7,16 @@ package pixyel_backend;
 
 import com.vaadin.ui.HorizontalLayout;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pixyel_backend.connection.Utils;
 import pixyel_backend.userinterface.UIs.DesktopUI.apps.ConsoleWindow;
 
@@ -233,10 +238,28 @@ public class Log {
 
     }
 
-    public static void writeToFile(String toWrite) {
+    public static void writeToFile(String toWrite){
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        String fileName = "pixyel_log_" + dateFormat.format(new Date());
+        String fileName = "pixyel_log_" + dateFormat.format(new Date()) + ".txt";
+        File dir = new File(System.getProperty("user.home") + "\\Desktop\\PixYel\\Log");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        File logFile = new File(dir.getAbsolutePath() + "\\" + fileName);
+        if(!logFile.exists()){
+            try {
+                logFile.createNewFile();
+            } catch (IOException ex) {
+                System.err.println();
+            }
+        }
+        String filePath = System.getProperty("user.home") + "\\Desktop\\PixYel\\Log\\" + fileName;
 
+        try (PrintWriter log = new PrintWriter(filePath)) {
+            log.println(toWrite);
+        } catch (FileNotFoundException ex) {
+            System.err.println();
+        }
     }
 
     public static void getRessource(String name) {

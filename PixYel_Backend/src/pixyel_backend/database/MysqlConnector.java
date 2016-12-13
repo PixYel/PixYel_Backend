@@ -16,11 +16,6 @@ public class MysqlConnector {
      * which was set up by using the properties file
      */
     private static Connection CONNECTION = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
-
-    public static void onstartup() throws SQLException{
-        CONNECTION.getNetworkTimeout();
-    }
-    
     
     /**
      * Returns the Connection pixyel_backend.database.MysqlConnector.CONNECTION

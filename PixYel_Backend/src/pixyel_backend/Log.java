@@ -256,7 +256,7 @@ public class Log {
         String filePath = System.getProperty("user.home") + "\\Desktop\\PixYel\\Log\\" + fileName;
 
         try (PrintWriter log = new PrintWriter(filePath)) {
-            log.println(toWrite);
+            log.append(toWrite+"\n");
         } catch (FileNotFoundException ex) {
             System.err.println();
         }

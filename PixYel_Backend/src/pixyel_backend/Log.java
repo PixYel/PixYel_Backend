@@ -5,22 +5,17 @@
  */
 package pixyel_backend;
 
-import com.vaadin.ui.HorizontalLayout;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import pixyel_backend.connection.Utils;
 import pixyel_backend.userinterface.UIs.DesktopUI.apps.ConsoleWindow;
 
 /**
@@ -31,7 +26,6 @@ public class Log {
 
     private static int maxLengthOfClassName = 0;
     private static final ArrayBlockingQueue<LogMessage> maxQueue = new ArrayBlockingQueue<>(250);
-    private static File logFile;
 
     /**
      * It is logging the logMessage as a Info
@@ -146,6 +140,18 @@ public class Log {
                 maxQueue.poll();
             }
             maxQueue.add(new LogMessage(3, logMessage, clasS));
+        } else {//Write the debug part to the logfile even when it is turned off
+            String[] lines = logMessage.split("\\r?\\n");
+            String toPrint = getClassNameWithDate(clasS) + "DEBUG:   ";
+            boolean first = true;
+            for (String line : lines) {
+                if (first) {
+                    writeToFile(toPrint + line);
+                    first = false;
+                } else {
+                    writeToFile("         " + line);
+                }
+            }
         }
     }
 
@@ -241,40 +247,68 @@ public class Log {
 
     }
 
+    private static boolean firstStart = true;
+    private static LocalDate lastDate = new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    private static File logFile;
+
     public static void writeToFile(String toWrite) {
+        if (firstStart) {
+            firstStart = false;
+            initLogFile();
+        }
+        checkCurrentDay();
+        if (!toWrite.endsWith("\n")) {
+            toWrite += "\n";
+        }
+        try {
+            Files.write(logFile.toPath(), toWrite.getBytes("UTF-8"), StandardOpenOption.APPEND);
+        } catch (IOException ex) {
+            System.err.println("Could not write to file: " + ex);
+        }
+    }
+
+    public static void initLogFile() {
+        lastDate = new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         String fileName = "pixyel_log_" + dateFormat.format(new Date()) + ".txt";
         File dir = new File(System.getProperty("user.home") + "\\Desktop\\PixYel\\Log");
         if (!dir.exists()) {
-            dir.mkdirs();
+            if (dir.mkdirs()) {
+                System.err.println("Could not make the parent directories for the main log text documents");
+            }
         }
-        File logFile = new File(dir.getAbsolutePath() + "\\" + fileName);
+        logFile = new File(dir.getAbsolutePath() + "\\" + fileName);
         if (!logFile.exists()) {
             try {
                 logFile.createNewFile();
             } catch (IOException ex) {
-                System.err.println();
+                System.err.println("Could not create new Logfile: " + ex);
             }
-        }
-        String filePath = System.getProperty("user.home") + "\\Desktop\\PixYel\\Log\\" + fileName;
-        toWrite += " \n";
-        try{
-            Files.write(Paths.get(filePath), toWrite.getBytes(), StandardOpenOption.APPEND);
-        } catch (IOException ex) {
-            System.err.println(ex);
         }
     }
 
-    public static void getRessource(String name) {
-//        try {
-//            File dir = new File(System.getProperty("user.dir"));
-//            if (file.exists()) {
-//                return file;
-//            } else {
-//                //throw new RessourceNotFoundException("Could not find ressource: " + file.getPath().replaceAll("%20", " "));
-//            }
-//        } catch (Exception e) {
-//            //throw new RessourceNotFoundException("Could not find ressource: " + name);
-//        }
+    private static void checkCurrentDay() {
+        int lastYear = lastDate.getYear();
+        int lastMonth = lastDate.getMonthValue();
+        int lastDay = lastDate.getDayOfMonth();
+
+        LocalDate currentDate = new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        int currentYear = currentDate.getYear();
+        int currentMonth = currentDate.getMonthValue();
+        int currentDay = currentDate.getDayOfMonth();
+
+        if (lastDay != currentDay) {
+            initLogFile();
+            return;
+        }
+        if (lastMonth != currentMonth) {
+            initLogFile();
+            return;
+        }
+        if (lastYear != currentYear) {
+            initLogFile();
+            return;
+        }
     }
+
 }

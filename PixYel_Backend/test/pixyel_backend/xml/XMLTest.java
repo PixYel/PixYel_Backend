@@ -184,6 +184,21 @@ public class XMLTest {
         assertEquals("Should have the same name", toTest.getChild("child").get(0).getName(), "child");
         toTest.removeChildren("child");
         assertFalse("Should have no children", toTest.hasChildren());
+
+        toTest.addChild("item").setContent("a");
+        toTest.addChild("item").setContent("b");
+        toTest.addChild("item").setContent("c");
+        ArrayList<XML> child = toTest.getChild("item");
+        for (XML xml : child) {
+            String content = xml.getContent();
+            if ("a".equals(content) || "b".equals(content) || "c".equals(content)) {
+                assertTrue("Should contain the child", true);
+            } else {
+                assertFalse("Child not in the line", true);
+            }
+
+        }
+        toTest.clearChildren();
     }
 
     /**
@@ -495,9 +510,9 @@ public class XMLTest {
         toTest.clearChildren();
         assertFalse("Could not recover XML", toTest.hasChildren());
     }
-    
+
     @Test
-    public void testGetChildrenByAttribute(){
+    public void testGetChildrenByAttribute() {
         XML child1, child2;
         toTest.addChild("child");
         (child1 = toTest.getFirstChild()).addAttribute("name", "lisa").addAttribute("name", "thorsten").addAttribute("name", "lisa");

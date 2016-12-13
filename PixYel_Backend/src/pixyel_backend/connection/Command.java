@@ -41,53 +41,53 @@ public class Command {
                 if (encrypted) {
                     switch (xml.getName()) {//Cuts off the "request"
                         case "getItemList":
-                            return encryptXML(getItemList(xml, client), client);
+                            return xmlToEncryptedString(getItemList(xml, client), client);
                         case "getItem":
-                            return getItem(xml, client).toString();
+                            return xmlToUnencryptedString(getItem(xml, client));
                         case "getItemStats":
-                            return encryptXML(getItemStats(xml, client), client);
+                            return xmlToEncryptedString(getItemStats(xml, client), client);
                         case "login":
-                            return encryptXML(login(xml, client), client);
+                            return xmlToEncryptedString(login(xml, client), client);
                         case "echo":
-                            return encryptXML(echo(xml, client), client);
+                            return xmlToEncryptedString(echo(xml, client), client);
                         case "vote":
-                            return encryptXML(vote(xml, client), client);
+                            return xmlToEncryptedString(vote(xml, client), client);
                         case "flagComment":
-                            return encryptXML(flagComment(xml, client), client);
+                            return xmlToEncryptedString(flagComment(xml, client), client);
                         case "flagItem":
-                            return encryptXML(flagItem(xml, client), client);
+                            return xmlToEncryptedString(flagItem(xml, client), client);
                         case "getComments":
-                            return encryptXML(getComments(xml, client), client);
+                            return xmlToEncryptedString(getComments(xml, client), client);
                         case "addComment":
-                            return encryptXML(addComment(xml, client), client);
+                            return xmlToEncryptedString(addComment(xml, client), client);
                         case "disconnect":
                             disconnect(xml, client);
                             return "";
                         default:
                             Log.logError("Client " + client.getName() + " has send a wrong command: " + xml.getName(), Command.class);
-                            return encryptXML(error(xml.getName() + " is not a valid Command", true), client);
+                            return xmlToEncryptedString(error(xml.getName() + " is not a valid Command", true), client);
                     }
                 } else {//unencrypted
                     switch (xml.getName()) {
                         case "upload":
-                            return encryptXML(upload(xml, client), client);
+                            return xmlToEncryptedString(upload(xml, client), client);
                         default:
                             Log.logError("Client " + client.getName() + " has send a wrong command: " + xml.getName(), Command.class);
-                            return encryptXML(error(xml.getName() + " is not a valid Command", true), client);
+                            return xmlToEncryptedString(error(xml.getName() + " is not a valid Command", true), client);
                     }
                 }
             } else {
                 Log.logWarning("Command from " + client.getName() + " does not start with \"request\": " + xml.getName(), Command.class);
-                return encryptXML(error("The first node has to be called \"request\"", true), client);
+                return xmlToEncryptedString(error("The first node has to be called \"request\"", true), client);
             }
         } catch (Exception e) {
             Log.logWarning("Could not execute command: " + xml.getName() + ": " + e, Command.class);
             e.printStackTrace(System.err);
-            return encryptXML(error("Could not execute command: " + e, true), client);
+            return xmlToEncryptedString(error("Could not execute command: " + e, true), client);
         }
     }
 
-    private static String encryptXML(XML xml, Client client) {
+    private static String xmlToEncryptedString(XML xml, Client client) {
         if (!xml.getName().equals("reply")) {
             xml = XML.createNewXML("reply").addChild(xml);
         }
@@ -104,6 +104,15 @@ public class Command {
             Log.logWarning("Client " + client + " needs to be logged in first!", Command.class);
             return error("You need to log in first!", true).toString();
         }
+    }
+
+    private static String xmlToUnencryptedString(XML xml) {
+        if (!xml.getName().equals("reply")) {
+            xml = XML.createNewXML("reply").addChild(xml);
+        }
+        String result = xml.toString();
+        Log.logDebug("PLAIN_TO_SEND: " + result, SocketClient.class);
+        return result;
     }
 
     /**

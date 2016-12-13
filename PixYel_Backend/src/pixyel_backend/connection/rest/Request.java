@@ -6,8 +6,8 @@
 package pixyel_backend.connection.rest;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -30,31 +30,41 @@ public class Request {
     @POST
     @Path("/request")
     @Produces(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.TEXT_PLAIN)
     public String onStringReceived(
-            @DefaultValue("EMPTY") @FormParam("xml") String receivedString,
-            @DefaultValue("") @FormParam("storeId") String storeId,
+            @DefaultValue("") String receivedString,
             @Context HttpServletRequest requestContext) {
+        if (receivedString.isEmpty()) {
+            return "";
+        }
         String ip = requestContext.getRemoteAddr();
-        RestClient client = RestServer.getOrCreateClient(storeId, ip);
+        RestClient client;
+        String clientName = ip;
 
         try {
-            if (!receivedString.startsWith("<request>")) {
+            if (!receivedString.startsWith("<request")) {
                 Log.logDebug("ENCRYPTED_RECEIVED: " + receivedString, Request.class);
                 String decrypted = Encryption.decrypt(receivedString, SERVERPRIVATEKEY);
                 Log.logDebug("PLAIN_RECEIVED: " + decrypted, Request.class);
                 XML xml = XML.openXML(decrypted);
+                String storeId = xml.getAttribute("storeId");
+                client = RestServer.getOrCreateClient(storeId, ip);
+                clientName = client.getName();
                 return Command.onCommandReceived(client, xml, true);
             } else {
                 Log.logDebug("PLAIN_RECEIVED: " + receivedString, Request.class);
                 XML xml = XML.openXML(receivedString);
+                String storeId = xml.getAttribute("storeId");
+                client = RestServer.getOrCreateClient(storeId, ip);
+                clientName = client.getName();
                 return Command.onCommandReceived(client, xml, false);
             }
         } catch (XML.XMLException ex) {
-            Log.logWarning("Client " + client.getName() + " has send an invalid String to parse as XML: " + ex, Request.class);
+            Log.logWarning("Client " + clientName + " has send an invalid String to parse as XML: " + ex, Request.class);
         } catch (Encryption.EncryptionException ex) {
-            Log.logWarning("Client " + client.getName() + " has send an invalid String to decrypt: " + ex, Request.class);
+            Log.logWarning("Client " + clientName + " has send an invalid String to decrypt: " + ex, Request.class);
         } catch (Exception ex) {
-            Log.logWarning("Client " + client.getName() + " has send an invalid String: " + ex, Request.class);
+            Log.logWarning("Client " + clientName + " has send an invalid String: " + ex, Request.class);
         }
         return "";
     }

@@ -4,19 +4,9 @@ import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.server.ServiceException;
-import com.vaadin.server.SessionDestroyEvent;
-import com.vaadin.server.SessionDestroyListener;
-import com.vaadin.server.SessionInitEvent;
-import com.vaadin.server.SessionInitListener;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
-import com.vaadin.ui.UI;
-import java.util.ArrayList;
 import java.util.concurrent.Executors;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import pixyel_backend.Log;
 import pixyel_backend.Main;
 import pixyel_backend.userinterface.UIs.LoginUI.Login;
 
@@ -32,7 +22,7 @@ import pixyel_backend.userinterface.UIs.LoginUI.Login;
 @Theme("mytheme")
 public class Userinterface extends com.vaadin.ui.UI implements Runnable {
 
-    private final static int PORT = 8080;
+    private final static int PORT = 80;
     private static Runnable onStarted;
     private static boolean started = false;
 

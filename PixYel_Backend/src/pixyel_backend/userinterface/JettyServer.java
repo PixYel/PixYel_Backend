@@ -17,9 +17,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.servlet.ServletContainer;
 
 /**
  * <p>
@@ -60,6 +57,11 @@ public class JettyServer extends Server {
 
     public JettyServer(int port, Class<? extends UI> uiClass, Class<? extends UIProvider> uiProvider, String webappDirectory, String contextPath) throws IOException {
         super(port);
+
+        //StdErrLog errLog = new StdErrLog();
+        //errLog.setLevel(StdErrLog.LEVEL_INFO);
+        //Logger.
+        //Log.setLog(errLog);
 
         ServletHolder vaadinServlet = buildVaadinServlet(uiClass, uiProvider);
         createIfDoesntExists(webappDirectory);

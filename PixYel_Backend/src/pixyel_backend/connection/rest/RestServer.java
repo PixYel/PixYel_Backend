@@ -19,6 +19,10 @@ public class RestServer implements Runnable {
     private static final int PORT = 7332;
     private static final HashMap<String, RestClient> clients = new HashMap<>();
 
+    public static void main(String[] args) {
+        RestServer.start();
+    }
+    
     public static void start() {
         Executors.newSingleThreadExecutor().submit(new RestServer());
     }

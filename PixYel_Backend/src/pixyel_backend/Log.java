@@ -10,6 +10,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -238,7 +241,7 @@ public class Log {
 
     }
 
-    public static void writeToFile(String toWrite){
+    public static void writeToFile(String toWrite) {
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         String fileName = "pixyel_log_" + dateFormat.format(new Date()) + ".txt";
         File dir = new File(System.getProperty("user.home") + "\\Desktop\\PixYel\\Log");
@@ -246,7 +249,7 @@ public class Log {
             dir.mkdirs();
         }
         File logFile = new File(dir.getAbsolutePath() + "\\" + fileName);
-        if(!logFile.exists()){
+        if (!logFile.exists()) {
             try {
                 logFile.createNewFile();
             } catch (IOException ex) {
@@ -254,11 +257,11 @@ public class Log {
             }
         }
         String filePath = System.getProperty("user.home") + "\\Desktop\\PixYel\\Log\\" + fileName;
-
-        try (PrintWriter log = new PrintWriter(filePath)) {
-            log.append(toWrite+"\n");
-        } catch (FileNotFoundException ex) {
-            System.err.println();
+        toWrite += " \n";
+        try{
+            Files.write(Paths.get(filePath), toWrite.getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException ex) {
+            System.err.println(ex);
         }
     }
 

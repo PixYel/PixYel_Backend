@@ -17,6 +17,11 @@ public class MysqlConnector {
      */
     private static Connection CONNECTION = MysqlConnector.connectToProductivDatabaseUsingPropertiesFile();
 
+    public static void onstartup() throws SQLException{
+        CONNECTION.getNetworkTimeout();
+    }
+    
+    
     /**
      * Returns the Connection pixyel_backend.database.MysqlConnector.CONNECTION
      *
@@ -64,7 +69,7 @@ public class MysqlConnector {
      */
     private static Connection openConnection(String host, String database, String user, String passwd) throws ClassNotFoundException, InstantiationException, SQLException, IllegalAccessException {
         Class.forName("com.mysql.jdbc.Driver").newInstance();
-        String connectionCommand = "jdbc:mysql://" + host + "/" + database + "?user=" + user + "&password=" + passwd + "&autoReconnect=true&useUnicode=yes";
+        String connectionCommand = "jdbc:mysql://" + host + "/" + database + "?user=" + user + "&password=" + passwd + "&autoReconnect=true&useUnicode=yes&useSSL=true";
         Connection connection = DriverManager.getConnection(connectionCommand);
         return connection;
     }

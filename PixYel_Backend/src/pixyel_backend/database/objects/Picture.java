@@ -357,15 +357,16 @@ public class Picture {
             Integer currentPictureId = Integer.valueOf(currentPictureIdAsString);
             String currentPictureData;
             try {
-                pictureList.put(currentPictureId,Picture.getDataForId(currentPictureId));
+                pictureList.put(currentPictureId, Picture.getDataForId(currentPictureId));
             } catch (PictureLoadException ex) {
                 Log.logError(ex.getMessage(), Picture.class);
-                pictureList.put(currentPictureId,null);
+                pictureList.put(currentPictureId, null);
             }
         }
         return pictureList;
     }
-        /**
+
+    /**
      * Get all Picture that are inside of a given distance to the current
      * location
      *
@@ -375,7 +376,7 @@ public class Picture {
      * @return
      */
     public static List<Picture> getPictureByLocation(Coordinate coordinate, int searchDistance, int userId) {
-                List<Picture> pictureList = new LinkedList();
+        List<Picture> pictureList = new LinkedList();
         List<Coordinate> searchArea = coordinate.getSearchArea(searchDistance);
         try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT id FROM picturesInfo WHERE (" + Columns.LONGITUDE + " BETWEEN ? AND ?) AND (" + Columns.LATITUDE + " BETWEEN ? AND ?)")) {
             sta.setDouble(1, searchArea.get(0).getLongitude());
@@ -405,5 +406,40 @@ public class Picture {
         } else {
             return pictureList;
         }
+    }
+
+    /**
+     * Returns a List which contains the newest pictures
+     *
+     * @param userId
+     * @param numberofPictures max 100
+     * @return
+     */
+    public static List<Picture> newestPictures(int numberofPictures, int userId) {
+        if (numberofPictures > 100) {
+            numberofPictures = 100;
+        } else if (numberofPictures < 0) {
+            numberofPictures = 0;
+        }
+        List<Picture> pictureList = new LinkedList();
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.ID + " FROM picturesInfo ORDER BY " + Columns.ID + " DESC LIMIT ?")) {
+            sta.setInt(1, numberofPictures);
+            ResultSet result = sta.executeQuery();
+
+            if (result == null || !result.isBeforeFirst()) {
+                return pictureList;
+            } else {
+                while (result.next()) {
+                    Picture pic = Picture.getPictureById(result.getInt("id"), userId);
+                    pictureList.add(pic);
+                }
+            }
+        } catch (SQLException ex) {
+            Log.logError(ex.toString(), User.class);
+            return pictureList;
+        } catch (PictureLoadException ex) {
+            Log.logWarning(ex.getMessage(), User.class);
+        }
+        return pictureList;
     }
 }

@@ -411,4 +411,14 @@ public class User {
             return allLikedPictures;
         }
     }
+    
+    /**
+     * Returns a List which contains the newest pictures
+     *
+     * @param numberofPictures max 100
+     * @return
+     */
+    public List<Picture> newestPictures(int numberofPictures) {
+        return Picture.newestPictures(numberofPictures, this.id);
+    }
 }

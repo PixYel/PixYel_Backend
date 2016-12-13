@@ -55,6 +55,7 @@ public class SocketServer implements Runnable {
         while (loop) {
             try {
                 socket = SERVER.accept();
+                //SERVER.
                 //socket.setSoTimeout(5000);
                 SocketClient client = new SocketClient(socket);
                 CONNECTEDCLIENTS.put(socket.hashCode(), client);
@@ -104,7 +105,7 @@ public class SocketServer implements Runnable {
     @Override
     public void run() {
         try {
-            SERVER = new ServerSocket(7331);
+            SERVER = new ServerSocket(7331, 5000);
         } catch (java.net.BindException e) {
             Log.logError("Adress already binded, is there an existing server running?: " + e.getMessage(), SocketServer.class);
             Log.logError("Shutting down this server to prevent double servers!", SocketServer.class);

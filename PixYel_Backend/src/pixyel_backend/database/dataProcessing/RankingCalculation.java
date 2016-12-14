@@ -42,7 +42,7 @@ public class RankingCalculation {
     private static int getTimeRanking(Date uploadDate) {
         Date timestamp = new Date();
         long deltaSeconds = (timestamp.getTime() - uploadDate.getTime()) / 1000;  //Time different in seconds
-        int timeRanking = (int) (-(Math.pow((deltaSeconds / 3600), 1.5) / 3600) + 30);      //f(x) = -((dS/3600)^1,1) + 50
+        int timeRanking = (int) (30-(Math.pow((deltaSeconds / 3600), 1.5) / 3600));      //f(x) = -((dS/3600)^1,1) + 50
         return timeRanking;
     }
 
@@ -63,7 +63,8 @@ public class RankingCalculation {
 
     private static int getVoteRanking(int upvotes, int downvotes) {
         int voteRanking;
-        voteRanking = (int) (50 + upvotes - Math.pow(downvotes, 1.5));
+        //voteRanking = (int) (50 + upvotes - Math.pow(downvotes, 1.5));
+        voteRanking = upvotes-downvotes;
         return voteRanking;
     }
 }

@@ -44,6 +44,8 @@ public class Command {
                             return xmlToEncryptedString(getItemList(xml, client), client);
                         case "getItemListByDate":
                             return xmlToEncryptedString(getItemListByDate(xml, client), client);
+                        case "getItemListLikedByMe":
+                            return xmlToEncryptedString(getItemListLikedByMe(xml, client), client);
                         case "getItem":
                             return xmlToUnencryptedString(getItem(xml, client));
                         case "getItemStats":
@@ -140,7 +142,7 @@ public class Command {
                 item.addChild("rank").setContent(String.valueOf(picture.getRanking()));
                 item.addChild("date").setContent(Utils.getDate(picture.getUploadDate(), picture.getUploadTime()));
             });
-            Log.logInfo("Successfully sending list of ItemStats to client " + client.getName(), Command.class);
+            Log.logInfo("Successfully sending list of ItemStats by rank and coordinate to client " + client.getName(), Command.class);
             return toSend;
         } catch (Exception e) {
             Log.logWarning("Could not send Item List to: " + client.getName(), Command.class);
@@ -150,7 +152,7 @@ public class Command {
 
     public static XML getItemListByDate(XML input, Client client) {
         List<Picture> pictures = client.getUserdata().newestPictures(10);
-                
+
         XML toSend = XML.createNewXML("setItemList");
         pictures.stream().forEach((picture) -> {
             XML item = toSend.addChild("item");
@@ -161,7 +163,24 @@ public class Command {
             item.addChild("rank").setContent(String.valueOf(picture.getRanking()));
             item.addChild("date").setContent(Utils.getDate(picture.getUploadDate(), picture.getUploadTime()));
         });
-        Log.logInfo("Successfully sending list of ItemStats to client " + client.getName(), Command.class);
+        Log.logInfo("Successfully sending list of ItemStats sorted by date to client " + client.getName(), Command.class);
+        return toSend;
+    }
+
+    public static XML getItemListLikedByMe(XML input, Client client) {
+        List<Picture> pictures = client.getUserdata().getAllLikedPictures();
+
+        XML toSend = XML.createNewXML("setItemList");
+        pictures.stream().forEach((picture) -> {
+            XML item = toSend.addChild("item");
+            item.addChild("id").setContent(String.valueOf(picture.getId()));
+            item.addChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
+            item.addChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
+            item.addChild("votedByUser").setContent(String.valueOf(picture.getVoteStatus()));
+            item.addChild("rank").setContent(String.valueOf(picture.getRanking()));
+            item.addChild("date").setContent(Utils.getDate(picture.getUploadDate(), picture.getUploadTime()));
+        });
+        Log.logInfo("Successfully sending list of ItemStats liked by the client to client " + client.getName(), Command.class);
         return toSend;
     }
 

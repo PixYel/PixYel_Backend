@@ -33,6 +33,7 @@ public class SocketClient implements Runnable, Client {
     private User userdata;
     private final ExecutorService listener;
     private final Timer clientAliveTimer;
+    private boolean clientTimeout = true;
 
     public SocketClient(Socket socket) {
         this.socket = socket;
@@ -115,11 +116,14 @@ public class SocketClient implements Runnable, Client {
      * @param expected Is the disconnect expected?
      */
     public void disconnect(boolean expected) {
+        sendToClient(XML.createNewXML("disconnected").toString());
         lookingForInput = false; //interrupts the while(true) on the inputlistener
         listener.shutdown(); //shuts the listener thread down
         clientAliveTimer.cancel(); //Shuts the timer for the client live down
         SocketServer.disconnect(this, socket.hashCode()); //Runs the onClientClosed method for futher instructions and removes this client from the loggedInClientsmap (which is used for checking of double logged in clients)
         try {
+            socket.shutdownInput();
+            socket.shutdownOutput();
             socket.close();
         } catch (Exception e) {
             Log.logError("Could not close the socket of the client " + getName(), SocketClient.class);
@@ -149,15 +153,17 @@ public class SocketClient implements Runnable, Client {
      * Starts the Timer for the SocketClient
      */
     public void startClientAliveTimer() {
-        clientAliveTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if ((lastCommandReceivedOn + (clientTimeOutInSeconds * 1000)) < System.currentTimeMillis()) {
-                    Log.logInfo("Client " + getName() + " was too long inactive! Disconnecting...", SocketClient.class);
-                    disconnect(false);
+        if (clientTimeout) {
+            clientAliveTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    if ((lastCommandReceivedOn + (clientTimeOutInSeconds * 1000)) < System.currentTimeMillis()) {
+                        Log.logInfo("Client " + getName() + " was too long inactive! Disconnecting...", SocketClient.class);
+                        disconnect(false);
+                    }
                 }
-            }
-        }, 0, clientTimeOutInSeconds * 1000);
+            }, 0, clientTimeOutInSeconds * 1000);
+        }
     }
 
     boolean lookingForInput = true;

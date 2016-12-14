@@ -9,6 +9,8 @@ import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.Columns;
 import pixyel_backend.database.MysqlConnector;
@@ -76,7 +78,7 @@ public class User {
      */
     public User(String storeID) throws UserNotFoundException, UserCreationException {
         try {
-            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM users WHERE " + Columns.STORE_ID + " LIKE ?");
+            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM users WHERE " + Columns.STORE_ID + " = ?");
             sta.setString(1, SqlUtils.escapeString(storeID));
             ResultSet result = sta.executeQuery();
 
@@ -102,12 +104,38 @@ public class User {
     }
 
     /**
-     * static methode to get a User
-     *
-     * @param id
+     * Returns all users in a LinkedList
      * @return
-     * @throws UserCreationException
+     * @throws UserCreationException 
      */
+    public static List<User> getAllUsers() throws UserCreationException{
+        try {
+            PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.ID + " FROM users");
+            ResultSet result = sta.executeQuery();
+            if (result == null || !result.isBeforeFirst()) {
+                throw new UserNotFoundException();
+            }
+            LinkedList<User> allUsers = new LinkedList();
+            while (result.next()) {
+                allUsers.add(new User(result.getInt(Columns.ID)));
+            }
+            return allUsers;
+        } catch (UserNotFoundException | UserCreationException ex) {
+            Log.logError("Could not find or create user - rootcause: " + ex.getMessage(), User.class);
+            throw new UserCreationException();
+        } catch (SQLException ex) {
+            Log.logError("Could not read userinformation from database - rootcause: " + ex.getMessage(), User.class);
+            throw new UserCreationException();
+        }
+    }
+    
+        /**
+         * static methode to get a User
+         *
+         * @param id
+         * @return
+         * @throws UserCreationException
+         */
     public static User getUser(int id) throws UserNotFoundException, UserCreationException {
         return new User(id);
     }

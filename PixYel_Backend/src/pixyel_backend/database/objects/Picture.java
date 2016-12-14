@@ -77,7 +77,6 @@ public class Picture {
             Log.logWarning("Could not load picture for Id " + pictureId + "- rootcause:" + ex, Picture.class);
             throw new PictureLoadException();
         }
-        
     }
 
     /**
@@ -577,4 +576,21 @@ public class Picture {
             return allPictures;
         }
     }
+    
+    public int countFlags(){
+        try(Statement sta = MysqlConnector.getConnection().createStatement()){
+            ResultSet result = sta.executeQuery("SELECT COUNT(*)FROM pictureflags WHERE " + Columns.PICTURE_ID + " = " + id);
+            if (result == null || !result.isBeforeFirst()) {
+                return 0;
+            } else {
+                result.next();
+                return result.getInt(1);
+            }
+        }catch(SQLException ex){
+            Log.logError(ex.getMessage(), Picture.class);
+            return 0;
+        }
+    }
+    
+    
 }

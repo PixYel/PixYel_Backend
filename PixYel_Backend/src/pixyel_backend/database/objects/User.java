@@ -398,7 +398,7 @@ public class User {
     public List<Integer> getAllLikedPicturesIds() {
         List<Integer> allLikedPictures = new LinkedList<>();
         try (Statement sta = MysqlConnector.getConnection().createStatement()) {
-            ResultSet result = sta.executeQuery("SELECT " + Columns.PICTURE_ID + " FROM picturesVotes WHERE " + Columns.USER_ID + " = " + this.id + " AND Status > 0 ");
+            ResultSet result = sta.executeQuery("SELECT " + Columns.PICTURE_ID + " FROM picturesVotes WHERE " + Columns.USER_ID + " = " + this.id + " AND " + Columns.STATUS + " > 0 ");
             if (result != null && result.isBeforeFirst()) {
                 while (result.next()) {
                     int pictureId = result.getInt(1);

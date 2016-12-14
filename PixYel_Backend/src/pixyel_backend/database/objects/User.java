@@ -105,10 +105,11 @@ public class User {
 
     /**
      * Returns all users in a LinkedList
+     *
      * @return
-     * @throws UserCreationException 
+     * @throws UserCreationException
      */
-    public static List<User> getAllUsers() throws UserCreationException{
+    public static List<User> getAllUsers() throws UserCreationException {
         try {
             PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.ID + " FROM users");
             ResultSet result = sta.executeQuery();
@@ -128,14 +129,14 @@ public class User {
             throw new UserCreationException();
         }
     }
-    
-        /**
-         * static methode to get a User
-         *
-         * @param id
-         * @return
-         * @throws UserCreationException
-         */
+
+    /**
+     * static methode to get a User
+     *
+     * @param id
+     * @return
+     * @throws UserCreationException
+     */
     public static User getUser(int id) throws UserNotFoundException, UserCreationException {
         return new User(id);
     }
@@ -335,6 +336,28 @@ public class User {
      */
     public synchronized void flagPicture(int pictureId) throws FlagFailedExcpetion {
         Picture.flagPic(id, pictureId);
+    }
+
+    /**
+     *
+     * @param id
+     * @return Boolean true if user has flagged the given picture, else false
+     * @throws java.sql.SQLException
+     */
+    public boolean hasFlaggedPicture(int id) throws SQLException {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM pictureflags WHERE " + Columns.PICTURE_ID + "=" + id)) {
+
+            sta.setInt(1, id);
+            ResultSet result = sta.executeQuery();
+            if (result == null || !result.isBeforeFirst()) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (SQLException ex) {
+            Log.logError("Could not read database table - rootcause:" + ex.getMessage(), User.class);
+            throw new SQLException();
+        }
     }
 
     /**

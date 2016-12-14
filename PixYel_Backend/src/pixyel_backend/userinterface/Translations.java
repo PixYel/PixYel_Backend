@@ -22,6 +22,10 @@ public class Translations {
 
     private static HashMap<Integer, String> german = new HashMap<>();
     public static final int LANGUAGE_GERMAN = -2;
+    
+    private static HashMap<Integer, String> french = new HashMap<>();
+
+    public static final int LANGUAGE_French = -2;
 
     //**********************************//
     //           KEYWORDS               //
@@ -83,6 +87,22 @@ public class Translations {
         german.put(SYSTEMMONITOR_NEWESTIMAGES, "Neueste Bilder");
         german.put(SYSTEMMONITOR_TOPIMAGE, "Angesagteste Bilder");
         german.put(SYSTEMMONITOR_SPECIALIMAGE, "Hole Bilder per ID");
+        
+        //French
+        french.put(LOGIN_LOGINBUTTON, "enregistrer");
+        french.put(LOGIN_USERNAME, "nom d'utilisateur");
+        french.put(LOGIN_PASSWORD, "mot de passe");
+        french.put(LOGIN_WRONGLOGIN, "nom d'utilisateur ou mot de passe incorrect");
+        french.put(DESKTOP_CONSOLE, "console");
+        french.put(DESKTOP_ONLINE_MONITOR, "surveillance du serveur");
+        french.put(DESKTOP_USER_MANAGMENT, "User Management");
+        french.put(DESKTOP_LOGOUT, "Déconnexion");
+        french.put(CONSOLE_DATE, "Date");
+        french.put(CONSOLE_CLASS, "classe");
+        french.put(CONSOLE_MESSAGE, "message");
+        french.put(SYSTEMMONITOR_NEWESTIMAGES, "Nouvelles images");
+        french.put(SYSTEMMONITOR_TOPIMAGE, "Hottest images");
+        french.put(SYSTEMMONITOR_SPECIALIMAGE, "images trou par ID");
     }
 
     public static String get(int KEYWORD) {

@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -185,6 +186,19 @@ public class Comment {
         }
         return commentList;
 
+    }
+
+    /**
+     *
+     * @param userId
+     * @param commentId
+     */
+    public static void deleteCommentFlag(int userId, int commentId) {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM commentflags WHERE " + Columns.COMMENT_ID + " = " + commentId + " AND " + Columns.USER_ID + " = " + userId)) {
+            sta.executeUpdate();
+        } catch (Exception ex) {
+            Log.logWarning("Could not delete commentflag " + commentId + " - rootcause: " + ex, Comment.class);
+        }
     }
 
     /**

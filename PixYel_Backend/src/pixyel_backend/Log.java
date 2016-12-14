@@ -280,6 +280,9 @@ public class Log {
         if (!toWrite.endsWith("\n")) {
             toWrite += "\n";
         }
+        if (logFile == null || !logFile.exists()) {
+            initLogFile();
+        }
         try {
             Files.write(logFile.toPath(), toWrite.getBytes("UTF-8"), StandardOpenOption.APPEND);
         } catch (IOException ex) {

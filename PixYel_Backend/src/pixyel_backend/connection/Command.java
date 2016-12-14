@@ -8,6 +8,7 @@ package pixyel_backend.connection;
 import pixyel_backend.connection.socket.SocketClient;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.imageio.ImageIO;
@@ -172,6 +173,7 @@ public class Command {
 
     public static XML getItemListUploadedByMe(XML input, Client client) {
         List<Picture> pictures = client.getUserdata().getOwnPictures();
+        Collections.reverse(pictures);
 
         XML toSend = XML.createNewXML("setItemList");
         pictures.stream().forEach((picture) -> {
@@ -190,6 +192,7 @@ public class Command {
 
     public static XML getItemListLikedByMe(XML input, Client client) {
         List<Picture> pictures = client.getUserdata().getAllLikedPictures();
+        Collections.reverse(pictures);
 
         XML toSend = XML.createNewXML("setItemList");
         pictures.stream().forEach((picture) -> {

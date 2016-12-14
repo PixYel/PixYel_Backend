@@ -33,7 +33,7 @@ public class SocketClient implements Runnable, Client {
     private User userdata;
     private final ExecutorService listener;
     private final Timer clientAliveTimer;
-    private boolean clientTimeout = true;
+    private boolean clientTimeout = false;
 
     public SocketClient(Socket socket) {
         this.socket = socket;
@@ -162,6 +162,8 @@ public class SocketClient implements Runnable, Client {
                     }
                 }
             }, 0, clientTimeOutInSeconds * 1000);
+        } else {
+            Log.logWarning("Socket Clienttimeout deaktiviert!", SocketClient.class);
         }
     }
 

@@ -188,17 +188,24 @@ public class Comment {
     }
 
     /**
-     * Deletes the comment out of the database
+     * Deletes the comment & related flags out of the database
      *
      * @param commentId
      * @throws java.lang.Exception
      */
     public static void deleteComment(int commentId) throws Exception {
-        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM comments WHERE " + Columns.ID + " LIKE ?")) {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM comments WHERE " + Columns.ID + " = ?")) {
             sta.setInt(1, commentId);
             sta.executeUpdate();
         } catch (Exception ex) {
             Log.logWarning("Could not delete comment " + commentId + " - rootcause: " + ex, Comment.class);
+        }
+
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM commentflags WHERE " + Columns.COMMENT_ID + " = ?")) {
+            sta.setInt(1, commentId);
+            sta.executeUpdate();
+        } catch (Exception ex) {
+            Log.logWarning("Could not delete commentflag " + commentId + " - rootcause: " + ex, Comment.class);
         }
     }
 }

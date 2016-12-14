@@ -24,6 +24,8 @@ import pixyel_backend.database.exceptions.FlagFailedExcpetion;
 import pixyel_backend.database.exceptions.PictureLoadException;
 import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 import pixyel_backend.database.exceptions.VoteFailedException;
+import static pixyel_backend.database.objects.Comment.deleteComment;
+import static pixyel_backend.database.objects.Comment.getCommentsForPicutre;
 
 /**
  * @author Da_Groove & Yannick
@@ -441,5 +443,35 @@ public class Picture {
             Log.logWarning(ex.getMessage(), User.class);
         }
         return pictureList;
+    }
+
+    /**
+     * Deletes the picture selected by Id and all related entrys
+     * (Votes,Flags,comments,data,...)
+     *
+     * @param id
+     */
+    public static void deletePicture(int id) {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM PicturesInfo WHERE " + Columns.ID + " = ?")) {
+            sta.setInt(1, id);
+            sta.executeUpdate();
+        } catch (Exception ex) {
+            Log.logWarning("Could not delete picturesInfo " + id + " - rootcause: " + ex, Comment.class);
+        }
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM picturesVotes, picturesData, pictureflags WHERE " + Columns.COMMENT_ID + " = ?")) {
+            sta.setInt(1, id);
+            sta.executeUpdate();
+        } catch (Exception ex) {
+            Log.logWarning("Could not delete from picturesVotes | picturesData | pictureflags " + id + " - rootcause: " + ex, Comment.class);
+        }
+
+        LinkedList<Comment> commentList = new LinkedList(getCommentsForPicutre(id));
+        for(Comment comment: commentList){
+            try {
+                deleteComment(comment.getCommentId());
+            } catch (Exception ex) {
+                Log.logWarning("Could not delete from Comments " + id + " - rootcause: " + ex, Comment.class);
+            }
+        }
     }
 }

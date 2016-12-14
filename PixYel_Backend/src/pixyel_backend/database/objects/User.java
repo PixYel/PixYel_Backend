@@ -342,9 +342,9 @@ public class User {
      *
      * @param id
      * @return Boolean true if user has flagged the given picture, else false
-     * @throws java.sql.SQLException
+     * @throws pixyel_backend.database.exceptions.FlagFailedExcpetion
      */
-    public boolean hasFlaggedPicture(int id) throws SQLException {
+    public boolean hasFlaggedPicture(int id) throws FlagFailedExcpetion {
         try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM pictureflags WHERE " + Columns.PICTURE_ID + "=" + id)) {
 
             sta.setInt(1, id);
@@ -356,10 +356,31 @@ public class User {
             }
         } catch (SQLException ex) {
             Log.logError("Could not read database table - rootcause:" + ex.getMessage(), User.class);
-            throw new SQLException();
+            throw new FlagFailedExcpetion();
         }
     }
 
+        /**
+     *
+     * @param id
+     * @return Boolean true if user has flagged the given comment, else false
+     * @throws pixyel_backend.database.exceptions.FlagFailedExcpetion
+     */
+    public boolean hasFlaggedComment(int id) throws FlagFailedExcpetion {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM commentflags WHERE " + Columns.COMMENT_ID + "=" + id)) {
+            sta.setInt(1, id);
+            ResultSet result = sta.executeQuery();
+            if (result == null || !result.isBeforeFirst()) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (SQLException ex) {
+            Log.logError("Could not read database table - rootcause:" + ex.getMessage(), User.class);
+            throw new FlagFailedExcpetion();
+        }
+    }
+    
     /**
      * Get all Picture that are inside of a given distance to the current
      * location

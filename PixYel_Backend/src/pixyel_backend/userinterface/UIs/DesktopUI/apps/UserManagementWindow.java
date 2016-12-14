@@ -8,6 +8,10 @@ package pixyel_backend.userinterface.UIs.DesktopUI.apps;
 import com.vaadin.server.FileResource;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import pixyel_backend.database.exceptions.UserCreationException;
+import pixyel_backend.database.objects.User;
 import pixyel_backend.userinterface.ressources.Ressources;
 
 /**
@@ -27,6 +31,12 @@ public class UserManagementWindow extends Window {
         } catch (Ressources.RessourceNotFoundException ex) {
         }
 
+        try {
+            User.getAllUsers();
+        } catch (UserCreationException ex) {
+            Logger.getLogger(UserManagementWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         UI.getCurrent().addWindow(this);
     }
 

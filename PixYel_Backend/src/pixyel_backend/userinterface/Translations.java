@@ -70,7 +70,7 @@ public class Translations {
         english.put(CONSOLE_MESSAGE, "Message");
         english.put(SYSTEMMONITOR_NEWESTIMAGES, "Newest Images");
         english.put(SYSTEMMONITOR_TOPIMAGE, "Top Images");
-        english.put(SYSTEMMONITOR_SPECIALIMAGE, "Get Images by ID");
+        english.put(SYSTEMMONITOR_SPECIALIMAGE, "Get Image by ID");
 
         //German
         german.put(LOGIN_LOGINBUTTON, "Anmelden");
@@ -86,7 +86,7 @@ public class Translations {
         german.put(CONSOLE_MESSAGE, "Nachricht");
         german.put(SYSTEMMONITOR_NEWESTIMAGES, "Neueste Bilder");
         german.put(SYSTEMMONITOR_TOPIMAGE, "Angesagteste Bilder");
-        german.put(SYSTEMMONITOR_SPECIALIMAGE, "Hole Bilder per ID");
+        german.put(SYSTEMMONITOR_SPECIALIMAGE, "Hole Bild per ID");
         
         //French
         french.put(LOGIN_LOGINBUTTON, "enregistrer");

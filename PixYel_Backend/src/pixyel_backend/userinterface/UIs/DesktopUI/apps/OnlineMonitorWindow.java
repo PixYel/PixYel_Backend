@@ -8,14 +8,14 @@ package pixyel_backend.userinterface.UIs.DesktopUI.apps;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.Page;
 import com.vaadin.server.Sizeable;
-import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
+import com.vaadin.ui.Layout;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -23,17 +23,21 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import pixyel_backend.Log;
+import pixyel_backend.database.dataProcessing.Statistics;
+import pixyel_backend.database.exceptions.FlagFailedExcpetion;
 import pixyel_backend.database.exceptions.PictureLoadException;
-import pixyel_backend.database.objects.Coordinate;
+import pixyel_backend.database.exceptions.UserCreationException;
+import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.objects.Picture;
+import pixyel_backend.database.objects.User;
 import pixyel_backend.userinterface.Translations;
+import pixyel_backend.userinterface.UIs.ConfirmationDialog;
 import pixyel_backend.userinterface.ressources.Ressources;
 
 /**
@@ -55,7 +59,7 @@ public class OnlineMonitorWindow extends Window {
         setImmediate(true);
         setContent(getLayout());
         setCaption(" " + Translations.get(Translations.DESKTOP_ONLINE_MONITOR));
-        
+
         try {
             setIcon(new FileResource(Ressources.getRessource("desktop_system_monitor_icon_small.png")));
         } catch (Ressources.RessourceNotFoundException ex) {
@@ -80,7 +84,7 @@ public class OnlineMonitorWindow extends Window {
         }
     }
 
-    public GridLayout getLayout() {
+    public Layout getLayout() {
         GridLayout gridl = new GridLayout(2, 1);
         gridl.setSpacing(true);
         gridl.setMargin(true);
@@ -88,12 +92,11 @@ public class OnlineMonitorWindow extends Window {
         VerticalLayout left = new VerticalLayout();
         left.setSpacing(true);
         left.setMargin(true);
-        
+
         VerticalLayout right = new VerticalLayout();
         right.setSpacing(true);
         right.setMargin(true);
-        Panel rightPanel = new Panel(right);
-        rightPanel.setStyleName(ValoTheme.PANEL_BORDERLESS);
+        right.setSizeUndefined();
 
         Button buttonNewest = new Button(Translations.get(Translations.SYSTEMMONITOR_NEWESTIMAGES));
         left.addComponent(buttonNewest);
@@ -102,11 +105,7 @@ public class OnlineMonitorWindow extends Window {
             right.removeAllComponents();
             List<Picture> newestPictures = Picture.newestPictures(10, 1);
             newestPictures.forEach((Picture newestPicture) -> {
-                Image image = new Image();
-                image.setSource(getImage(newestPicture));
-                right.addComponent(image);
-                Label votes = new Label("Id: " + newestPicture.getId() + " Upvotes: " + newestPicture.getUpvotes() + " Downvotes: " + newestPicture.getDownvotes());
-                right.addComponent(votes);
+                addPicture(newestPicture, right);
             });
         });
 
@@ -115,19 +114,16 @@ public class OnlineMonitorWindow extends Window {
         left.setComponentAlignment(buttonTop, Alignment.MIDDLE_LEFT);
         buttonTop.addClickListener((Button.ClickEvent ce) -> {
             right.removeAllComponents();
-            List<Picture> topPictures = Picture.getWorldwideTopPictures(0);
+            List<Picture> topPictures = Picture.getWorldwideTopPictures(1);
             topPictures.forEach((Picture topPicture) -> {
-                Image image = new Image();
-                image.setSource(getImage(topPicture));
-                right.addComponent(image);
-                Label votes = new Label("Id: " + topPicture.getId() + " Upvotes: " + topPicture.getUpvotes() + " Downvotes: " + topPicture.getDownvotes());
-                right.addComponent(votes);
+                addPicture(topPicture, right);
             });
         });
 
         HorizontalLayout textFieldAndButton = new HorizontalLayout();
         textFieldAndButton.setSpacing(true);
         TextField textFieldGet = new TextField();
+        textFieldGet.setWidth(35, Unit.PIXELS);
         textFieldAndButton.addComponent(textFieldGet);
         Button buttonGet = new Button(Translations.get(Translations.SYSTEMMONITOR_SPECIALIMAGE));
         textFieldAndButton.addComponent(buttonGet);
@@ -136,23 +132,80 @@ public class OnlineMonitorWindow extends Window {
             right.removeAllComponents();
             if (sID != null && !sID.isEmpty()) {
                 try {
-                    Picture picture = Picture.getPictureById(Integer.valueOf(sID), 0);
-                    Image image = new Image();
-                    image.setSource(getImage(picture));
-                    right.addComponent(image);
-                    Label votes = new Label("Id: " + picture.getId() + " Upvotes: " + picture.getUpvotes() + " Downvotes: " + picture.getDownvotes());
-                    right.addComponent(votes);
+                    Picture picture = Picture.getPictureById(Integer.valueOf(sID), 1);
+                    addPicture(picture, right);
                 } catch (PictureLoadException ex) {
-                    Logger.getLogger(OnlineMonitorWindow.class.getName()).log(Level.SEVERE, null, ex);
+                    Notification.show("Image not available", Notification.Type.ERROR_MESSAGE);
                 }
             }
         });
         left.addComponent(textFieldAndButton);
         left.setComponentAlignment(textFieldAndButton, Alignment.MIDDLE_LEFT);
 
+        TextField statistic;
+        Statistics.totallyBannedUsers();
+        Statistics.totallyRegisteredUsers();
+        Statistics.totallyUploadedPictures();
         gridl.addComponent(left, 0, 0);
-        gridl.addComponent(rightPanel, 1, 0);
+        gridl.addComponent(right, 1, 0);
+        //gridl.setColumnExpandRatio(0, );
         return gridl;
+    }
+
+    private void addPicture(Picture picture, VerticalLayout layout) {
+        Image image = new Image();
+        image.setSource(getImage(picture));
+        layout.addComponent(image);
+        HorizontalLayout options = new HorizontalLayout();
+        options.setSpacing(true);
+        Label votes = new Label("Id: " + picture.getId() + " Upvotes: " + picture.getUpvotes()
+                + " Downvotes: " + picture.getDownvotes() + " Flags: " + picture.countFlags());
+        votes.setStyleName(ValoTheme.LABEL_LARGE);
+        options.addComponent(votes);
+        String caption = "";
+        try {
+            if (!User.getUser(1).hasFlaggedPicture(picture.getId())) {
+                caption = "Flag Item";//TODO
+            } else {
+                caption = "Unflag Item";
+            }
+        } catch (UserNotFoundException | UserCreationException | FlagFailedExcpetion ex) {
+            Logger.getLogger(OnlineMonitorWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Button flag = new Button(caption);
+        flag.setStyleName(ValoTheme.BUTTON_PRIMARY);
+        flag.addClickListener(cev -> {
+            try {
+                if (User.getUser(1).hasFlaggedPicture(picture.getId())) {
+                    flag.setCaption("Flag Item");
+                    Picture.removeFlagForUser(picture.getId(), 1);
+                    options.removeComponent(votes);
+                    votes.setCaption("Id: " + picture.getId() + " Upvotes: " + picture.getUpvotes()
+                            + " Downvotes: " + picture.getDownvotes() + " Flags: " + picture.countFlags());
+                    votes.setStyleName(ValoTheme.LABEL_LARGE);
+                    options.addComponent(votes, 0);
+                    markAsDirtyRecursive();
+                } else {
+                    flag.setCaption("Unflag Item");
+                    Picture.flagPic(1, picture.getId());
+                    options.removeComponent(votes);
+                    votes.setCaption("Id: " + picture.getId() + " Upvotes: " + picture.getUpvotes()
+                            + " Downvotes: " + picture.getDownvotes() + " Flags: " + picture.countFlags());
+                    votes.setStyleName(ValoTheme.LABEL_LARGE);
+                    options.addComponent(votes, 0);
+                    markAsDirtyRecursive();
+                }
+            } catch (UserNotFoundException | UserCreationException | FlagFailedExcpetion ex) {
+                Log.logError("Could not flag item: " + ex, OnlineMonitorWindow.class);
+            }
+        });
+        options.addComponent(flag);//TODO
+        Button delete = new Button("DELETE");
+        delete.setStyleName(ValoTheme.BUTTON_DANGER);
+        delete.addClickListener(clev -> ConfirmationDialog.show("Really delete image?", () -> Picture.deletePicture(picture.getId()), () -> {
+        }));//TODO
+        options.addComponent(delete);
+        layout.addComponent(options);
     }
 
     public FileResource getImage(Picture picture) {

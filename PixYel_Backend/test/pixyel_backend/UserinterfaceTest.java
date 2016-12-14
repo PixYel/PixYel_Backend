@@ -16,7 +16,7 @@ import pixyel_backend.database.exceptions.UserCreationException;
 public class UserinterfaceTest {
 
     public static void main(String[] args) throws UserCreationException {
-        getCpuUtilisation();
+        
     }
 
     /**

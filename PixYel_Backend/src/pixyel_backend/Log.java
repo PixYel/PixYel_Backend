@@ -122,6 +122,9 @@ public class Log {
      */
     public static <T> void logDebug(String logMessage, Class<T> clasS) {
         if (Main.DEBUG) {
+            if (logMessage.length() > 500) {
+                logMessage = logMessage.substring(0, 499) + "... line is too long to be loggged, for more details please ask the admins";
+            }
             String[] lines = logMessage.split("\\r?\\n");
             String toPrint = getClassNameWithDate(clasS) + "DEBUG:   ";
             boolean first = true;

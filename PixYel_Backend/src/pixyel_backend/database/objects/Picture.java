@@ -437,7 +437,7 @@ public class Picture {
         } catch (PictureLoadException ex) {
             Log.logWarning(ex.getMessage(), User.class);
         }
-        pictureList.sort((Picture pic1, Picture pic2) -> Integer.compare(pic1.getRanking(), pic2.getRanking()));
+        pictureList.sort((Picture pic1, Picture pic2) -> Integer.compare(pic2.getRanking(), pic1.getRanking()));
         if (pictureList.size() > 100) {
             return pictureList.subList(0, 99);
         } else {
@@ -471,7 +471,7 @@ public class Picture {
         } catch (PictureLoadException ex) {
             Log.logWarning(ex.getMessage(), User.class);
         }
-        pictureList.sort((Picture pic1, Picture pic2) -> Integer.compare(pic1.getRanking(), pic2.getRanking()));
+        pictureList.sort((Picture pic1, Picture pic2) -> Integer.compare(pic2.getRanking(), pic1.getRanking()));
         if (pictureList.size() > 100) {
             return pictureList.subList(0, 99);
         } else {

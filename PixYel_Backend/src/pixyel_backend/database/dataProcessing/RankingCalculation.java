@@ -20,9 +20,9 @@ public class RankingCalculation {
      * @return
      */
     public static int calculateRanking(Picture picture, Coordinate userCoordinate) {
-        int timeRankingPercentage = 30;
-        int distanceRankingPercentage = 30;
-        int votesRankingPercentage = 40;
+        int timeRankingPercentage = 10;
+        int distanceRankingPercentage = 20;
+        int votesRankingPercentage = 70;
         int ranking;
         ranking = timeRankingPercentage * getTimeRanking(Utils.mergeDates(picture.getUploadDate(), picture.getUploadTime()))
                 + distanceRankingPercentage * getDistanceRanking(picture.getCoordinate(), userCoordinate)
@@ -33,7 +33,7 @@ public class RankingCalculation {
     private static int getTimeRanking(Date uploadDate) {
         Date timestamp = new Date();
         long deltaSeconds = (timestamp.getTime() - uploadDate.getTime()) / 1000;  //Time different in seconds
-        int timeRanking = (int) (-(Math.pow((deltaSeconds / 3600), 1.5) / 3600) + 50);      //f(x) = -((dS/3600)^1,1) + 50
+        int timeRanking = (int) (-(Math.pow((deltaSeconds / 3600), 1.5) / 3600) + 30);      //f(x) = -((dS/3600)^1,1) + 50
         return timeRanking;
     }
 

@@ -22,7 +22,7 @@ import pixyel_backend.userinterface.UIs.LoginUI.Login;
 @Theme("mytheme")
 public class Userinterface extends com.vaadin.ui.UI implements Runnable {
 
-    private final static int PORT = 80;
+    private final static int PORT = 8080;
     private static Runnable onStarted;
     private static boolean started = false;
 

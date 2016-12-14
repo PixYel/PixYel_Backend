@@ -10,6 +10,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import javax.imageio.ImageIO;
 import pixyel_backend.Log;
 import pixyel_backend.connection.encryption.Encryption;
 import pixyel_backend.database.exceptions.UserCreationException;
@@ -44,6 +45,8 @@ public class Command {
                             return xmlToEncryptedString(getItemList(xml, client), client);
                         case "getItemListByDate":
                             return xmlToEncryptedString(getItemListByDate(xml, client), client);
+                        case "getItemListUploadedByMe":
+                            return xmlToEncryptedString(getItemListUploadedByMe(xml, client), client);
                         case "getItemListLikedByMe":
                             return xmlToEncryptedString(getItemListLikedByMe(xml, client), client);
                         case "getItem":
@@ -165,6 +168,24 @@ public class Command {
         });
         Log.logInfo("Successfully sending list of ItemStats sorted by date to client " + client.getName(), Command.class);
         return toSend;
+    }
+
+    public static XML getItemListUploadedByMe(XML input, Client client) {
+        List<Picture> pictures = client.getUserdata().getOwnPictures();
+
+        XML toSend = XML.createNewXML("setItemList");
+        pictures.stream().forEach((picture) -> {
+            XML item = toSend.addChild("item");
+            item.addChild("id").setContent(String.valueOf(picture.getId()));
+            item.addChild("upvotes").setContent(String.valueOf(picture.getUpvotes()));
+            item.addChild("downvotes").setContent(String.valueOf(picture.getDownvotes()));
+            item.addChild("votedByUser").setContent(String.valueOf(picture.getVoteStatus()));
+            item.addChild("rank").setContent(String.valueOf(picture.getRanking()));
+            item.addChild("date").setContent(Utils.getDate(picture.getUploadDate(), picture.getUploadTime()));
+        });
+        Log.logInfo("Successfully sending list of ItemStats sorted by date to client " + client.getName(), Command.class);
+        return toSend;
+        
     }
 
     public static XML getItemListLikedByMe(XML input, Client client) {
@@ -340,6 +361,7 @@ public class Command {
         int id = 0;
         try {
             String data = input.getFirstChild("data").getContent();
+            data = Utils.compressImage(data);
             Double longt = Double.valueOf(input.getFirstChild("long").getContent());
             Double lat = Double.valueOf(input.getFirstChild("lat").getContent());
             id = client.getUserdata().uploadPicture(data, new Coordinate(longt, lat));

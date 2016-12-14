@@ -440,4 +440,8 @@ public class User {
     public List<Picture> newestPictures(int numberofPictures) {
         return Picture.newestPictures(numberofPictures, this.id);
     }
+
+    public List<Picture> getOwnPictures() {
+        return Picture.getPictureByUser(this.id, this.id);
+    }
 }

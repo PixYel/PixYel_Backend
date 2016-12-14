@@ -84,10 +84,11 @@ public class Picture {
      * out of the database based on the given id
      *
      * @param result
+     * @param userId
      * @throws PictureLoadException if there is no picture in the database for
      * the given id
      */
-    public Picture(ResultSet result) throws PictureLoadException {
+    public Picture(ResultSet result, int userId) throws PictureLoadException {
             try{
             this.id = result.getInt(Columns.ID);
             double longitude = result.getDouble(Columns.LONGITUDE);
@@ -105,7 +106,7 @@ public class Picture {
             result.next();
             this.downvotes = result.getInt(1);
             this.voteStatus = userHasLikedPicture(userId, this.id);
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
             Log.logWarning("Could not load picture for ResultSet - rootcause:" + ex, Picture.class);
             throw new PictureLoadException();
         }
@@ -521,14 +522,14 @@ public class Picture {
             }
         }
     }
-    public static List<Picture> getPictureByUser(int userId){
+    public static List<Picture> getPictureByUser(int userId, int forUser){
         List<Picture> allPictures = new LinkedList<>();
         try (Statement sta = MysqlConnector.getConnection().createStatement()) {
             ResultSet result = sta.executeQuery("SELECT * FROM picturesInfo WHERE " + Columns.USER_ID + " = " + userId);
             if (result != null && result.isBeforeFirst()) {
                 while (result.next()) {
                     try {
-                        allPictures.add(new Picture(result));
+                        allPictures.add(new Picture(result, forUser));
                     } catch (PictureLoadException ex) {
                         Log.logWarning(ex.getMessage(), User.class);
                     }

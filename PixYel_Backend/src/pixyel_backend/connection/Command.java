@@ -154,7 +154,7 @@ public class Command {
     }
 
     public static XML getItemListByDate(XML input, Client client) {
-        List<Picture> pictures = client.getUserdata().newestPictures(10);
+        List<Picture> pictures = client.getUserdata().getNewestPictures(10);
 
         XML toSend = XML.createNewXML("setItemList");
         pictures.stream().forEach((picture) -> {

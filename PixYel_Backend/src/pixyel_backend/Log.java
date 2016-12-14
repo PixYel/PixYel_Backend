@@ -35,6 +35,9 @@ public class Log {
      * @param clasS The classname of the class of the message
      */
     public static <T> void logInfo(String logMessage, Class<T> clasS) {
+        if (logMessage.length() > 500) {
+            logMessage = logMessage.substring(0, 499) + "... line is too long to be loggged, for more details please ask the admins";
+        }
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "INFO:    ";
         boolean first = true;
@@ -48,7 +51,9 @@ public class Log {
                 writeToFile("         " + line);
             }
         }
-        windows.forEach((ConsoleWindow window) -> window.addInfo(logMessage, getClassName(clasS), new Date()));
+        for (ConsoleWindow window : windows) {
+            window.addInfo(logMessage, getClassName(clasS), new Date());
+        }
         if (!(maxQueue.size() < 250)) {
             maxQueue.poll();
         }
@@ -64,6 +69,9 @@ public class Log {
      * @param clasS The classname of the class of the message
      */
     public static <T> void logError(String logMessage, Class<T> clasS) {
+        if (logMessage.length() > 500) {
+            logMessage = logMessage.substring(0, 499) + "... line is too long to be loggged, for more details please ask the admins";
+        }
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "ERROR:   ";
         boolean first = true;
@@ -77,7 +85,9 @@ public class Log {
                 writeToFile("         " + line);
             }
         }
-        windows.forEach((ConsoleWindow window) -> window.addError(logMessage, getClassName(clasS), new Date()));
+        for (ConsoleWindow window : windows) {
+            window.addError(logMessage, getClassName(clasS), new Date());
+        }
         if (!(maxQueue.size() < 250)) {
             maxQueue.poll();
         }
@@ -92,6 +102,9 @@ public class Log {
      * @param clasS The classname of the class of the message
      */
     public static <T> void logWarning(String logMessage, Class<T> clasS) {
+        if (logMessage.length() > 500) {
+            logMessage = logMessage.substring(0, 499) + "... line is too long to be loggged, for more details please ask the admins";
+        }
         String[] lines = logMessage.split("\\r?\\n");
         String toPrint = getClassNameWithDate(clasS) + "WARNING: ";
         boolean first = true;
@@ -105,7 +118,9 @@ public class Log {
                 writeToFile("         " + line);
             }
         }
-        windows.forEach((ConsoleWindow window) -> window.addWarning(logMessage, getClassName(clasS), new Date()));
+        for (ConsoleWindow window : windows) {
+            window.addWarning(logMessage, getClassName(clasS), new Date());
+        }
         if (!(maxQueue.size() < 250)) {
             maxQueue.poll();
         }
@@ -121,6 +136,9 @@ public class Log {
      * @param clasS The classname of the class of the message
      */
     public static <T> void logDebug(String logMessage, Class<T> clasS) {
+        if (logMessage.length() > 500) {
+            logMessage = logMessage.substring(0, 499) + "... line is too long to be loggged, for more details please ask the admins";
+        }
         if (Main.DEBUG) {
             String[] lines = logMessage.split("\\r?\\n");
             String toPrint = getClassNameWithDate(clasS) + "DEBUG:   ";
@@ -135,7 +153,9 @@ public class Log {
                     writeToFile("         " + line);
                 }
             }
-            windows.forEach((ConsoleWindow window) -> window.addDebug(logMessage, getClassName(clasS), new Date()));
+            for (ConsoleWindow window : windows) {
+                window.addDebug(logMessage, getClassName(clasS), new Date());
+            }
             if (!(maxQueue.size() < 250)) {
                 maxQueue.poll();
             }
@@ -259,6 +279,9 @@ public class Log {
         checkCurrentDay();
         if (!toWrite.endsWith("\n")) {
             toWrite += "\n";
+        }
+        if (logFile == null || !logFile.exists()) {
+            initLogFile();
         }
         try {
             Files.write(logFile.toPath(), toWrite.getBytes("UTF-8"), StandardOpenOption.APPEND);

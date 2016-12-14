@@ -557,6 +557,12 @@ public class Picture {
         }
     }
 
+    /**
+     * Returns all pictures that were uploaded by a specific user
+     * @param userId
+     * @param forUser
+     * @return 
+     */
     public static List<Picture> getPictureByUser(int userId, int forUser) {
         List<Picture> allPictures = new LinkedList<>();
         try (Statement sta = MysqlConnector.getConnection().createStatement()) {
@@ -577,6 +583,10 @@ public class Picture {
         }
     }
     
+    /**
+     * counts how often a picture was flaged
+     * @return 
+     */
     public int countFlags(){
         try(Statement sta = MysqlConnector.getConnection().createStatement()){
             ResultSet result = sta.executeQuery("SELECT COUNT(*)FROM pictureflags WHERE " + Columns.PICTURE_ID + " = " + id);

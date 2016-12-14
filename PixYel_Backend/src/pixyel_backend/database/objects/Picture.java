@@ -25,14 +25,12 @@ import pixyel_backend.database.exceptions.FlagFailedExcpetion;
 import pixyel_backend.database.exceptions.PictureLoadException;
 import pixyel_backend.database.exceptions.PictureUploadExcpetion;
 import pixyel_backend.database.exceptions.VoteFailedException;
-import static pixyel_backend.database.objects.Comment.deleteComment;
-import static pixyel_backend.database.objects.Comment.getCommentsForPicutre;
 
 /**
  * @author Da_Groove & Yannick
  */
 public class Picture {
-    
+
     private final int id;
     private String data;
     private int ranking;
@@ -110,7 +108,7 @@ public class Picture {
             Log.logWarning("Could not load picture for ResultSet - rootcause:" + ex, Picture.class);
             throw new PictureLoadException();
         }
-        
+
     }
 
     /**
@@ -420,7 +418,7 @@ public class Picture {
             sta.setDouble(3, searchArea.get(0).getLatitude());
             sta.setDouble(4, searchArea.get(1).getLatitude());
             ResultSet result = sta.executeQuery();
-            
+
             if (result == null || !result.isBeforeFirst()) {
                 return pictureList;
             } else {
@@ -454,7 +452,7 @@ public class Picture {
         List<Picture> pictureList = new LinkedList();
         try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT id FROM picturesInfo")) {
             ResultSet result = sta.executeQuery();
-            
+
             if (result == null || !result.isBeforeFirst()) {
                 return pictureList;
             } else {
@@ -495,7 +493,7 @@ public class Picture {
         try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.ID + " FROM picturesInfo ORDER BY " + Columns.ID + " DESC LIMIT ?")) {
             sta.setInt(1, numberofPictures);
             ResultSet result = sta.executeQuery();
-            
+
             if (result == null || !result.isBeforeFirst()) {
                 return pictureList;
             } else {
@@ -532,21 +530,21 @@ public class Picture {
         } catch (Exception ex) {
             Log.logWarning("Could not delete from picturesVotes " + id + " - rootcause: " + ex, Comment.class);
         }
-        
+
         try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM pictureflags WHERE " + Columns.PICTURE_ID + " = ?")) {
             sta.setInt(1, id);
             sta.executeUpdate();
         } catch (Exception ex) {
             Log.logWarning("Could not delete from pictureflags " + id + " - rootcause: " + ex, Comment.class);
         }
-        
+
         try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM picturesData WHERE " + Columns.PICTURE_ID + " = ?")) {
             sta.setInt(1, id);
             sta.executeUpdate();
         } catch (Exception ex) {
             Log.logWarning("Could not delete from picturesData " + id + " - rootcause: " + ex, Comment.class);
         }
-        
+
         LinkedList<Comment> commentList = new LinkedList(Comment.getCommentsForPicutre(id));
         for (Comment comment : commentList) {
             try {
@@ -559,9 +557,10 @@ public class Picture {
 
     /**
      * Returns all pictures that were uploaded by a specific user
+     *
      * @param userId
      * @param forUser
-     * @return 
+     * @return
      */
     public static List<Picture> getPictureByUser(int userId, int forUser) {
         List<Picture> allPictures = new LinkedList<>();
@@ -582,13 +581,14 @@ public class Picture {
             return allPictures;
         }
     }
-    
+
     /**
      * counts how often a picture was flaged
-     * @return 
+     *
+     * @return
      */
-    public int countFlags(){
-        try(Statement sta = MysqlConnector.getConnection().createStatement()){
+    public int countFlags() {
+        try (Statement sta = MysqlConnector.getConnection().createStatement()) {
             ResultSet result = sta.executeQuery("SELECT COUNT(*)FROM pictureflags WHERE " + Columns.PICTURE_ID + " = " + id);
             if (result == null || !result.isBeforeFirst()) {
                 return 0;
@@ -596,11 +596,22 @@ public class Picture {
                 result.next();
                 return result.getInt(1);
             }
-        }catch(SQLException ex){
+        } catch (SQLException ex) {
             Log.logError(ex.getMessage(), Picture.class);
             return 0;
         }
     }
-    
-    
+
+    /**
+     * Removes the flag of a picture for a given user
+     * @param pictureId
+     * @param userId 
+     */
+    public static void removeFlagForUser(int pictureId, int userId) {
+        try (Statement sta = MysqlConnector.getConnection().createStatement()) {
+            sta.executeUpdate("DELETE FROM pictureflags WHERE " + Columns.PICTURE_ID + " = " + pictureId + " AND " + Columns.USER_ID + " = " + userId);
+        } catch (SQLException ex) {
+            Log.logError(ex.getMessage(), Picture.class);
+        }
+    }
 }

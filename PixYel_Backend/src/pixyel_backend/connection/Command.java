@@ -11,7 +11,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import javax.imageio.ImageIO;
 import pixyel_backend.Log;
 import pixyel_backend.connection.encryption.Encryption;
 import pixyel_backend.database.exceptions.UserCreationException;

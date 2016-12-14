@@ -5,7 +5,9 @@
  */
 package pixyel_backend.connection;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,28 +31,49 @@ public class Utils {
 
     public static String compressImage(String asBase64) {
         try {
-            byte[] byteArrayImage = java.util.Base64.getDecoder().decode(asBase64);
-            InputStream in = new ByteArrayInputStream(byteArrayImage);
-            BufferedImage image = ImageIO.read(in);
-            int imageWidth = image.getWidth();
-            int imageHeight = image.getHeight();
-            if (imageWidth > MAXWIDTH) {
-                int newWidth = (int) ((MAXWIDTH / (double) imageWidth) * (double) imageWidth);
-                int newHeight = (int) ((MAXWIDTH / (double) imageWidth) * (double) imageHeight);
-                BufferedImage resizedImage = new BufferedImage(newWidth, newHeight, image.getType());
-                Graphics2D g = resizedImage.createGraphics();
-                g.drawImage(image, 0, 0, newWidth, newHeight, null);
-                g.dispose();
-                ByteArrayOutputStream bao = new ByteArrayOutputStream();
-                ImageIO.write(image, "jpg", bao);
-                return java.util.Base64.getEncoder().encodeToString(bao.toByteArray());
-            } else {
-                return asBase64;
-            }
+            byte[] imageByteArray = java.util.Base64.getDecoder().decode(asBase64);
+
+            BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(imageByteArray));
+            int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : originalImage.getType();
+
+            BufferedImage resizeImage = resizeImage(originalImage, type);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(resizeImage, "jpg", baos);
+            baos.flush();
+            imageByteArray = baos.toByteArray();
+            baos.close();
+
+            return java.util.Base64.getEncoder().encodeToString(imageByteArray);
         } catch (IOException ex) {
             Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
         }
         return asBase64;
+    }
+
+    private static BufferedImage resizeImage(BufferedImage originalImage, int type) {
+        int originalWidth = originalImage.getWidth();
+        if ((originalWidth + 25) <= MAXWIDTH) {
+            return originalImage;
+        }
+        int originalHeight = originalImage.getHeight();
+        int resizedWidth = (int) (((double) MAXWIDTH / (double) originalWidth) * (double) originalWidth);
+        int resizedHeight = (int) (((double) MAXWIDTH / (double) originalWidth) * (double) originalHeight);
+
+        BufferedImage resizedImage = new BufferedImage(resizedWidth, resizedHeight, type);
+        Graphics2D g = resizedImage.createGraphics();
+        g.drawImage(originalImage, 0, 0, resizedWidth, resizedHeight, null);
+        g.dispose();
+        g.setComposite(AlphaComposite.Src);
+
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING,
+                RenderingHints.VALUE_RENDER_QUALITY);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+
+        return resizedImage;
     }
 
     public static String getDate(Date date) {

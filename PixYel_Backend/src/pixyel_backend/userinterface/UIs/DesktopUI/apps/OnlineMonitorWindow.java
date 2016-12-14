@@ -9,6 +9,7 @@ import com.vaadin.server.FileResource;
 import com.vaadin.server.Page;
 import com.vaadin.server.Sizeable;
 import com.vaadin.server.StreamResource;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
@@ -27,6 +28,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import pixyel_backend.Log;
+import pixyel_backend.database.exceptions.PictureLoadException;
+import pixyel_backend.database.objects.Coordinate;
 import pixyel_backend.database.objects.Picture;
 import pixyel_backend.userinterface.Translations;
 import pixyel_backend.userinterface.ressources.Ressources;
@@ -77,12 +80,14 @@ public class OnlineMonitorWindow extends Window {
 
     public GridLayout getLayout() {
         GridLayout gridl = new GridLayout(2, 1);
+        gridl.setSpacing(true);
 
         VerticalLayout left = new VerticalLayout();
         VerticalLayout right = new VerticalLayout();
 
-        Button buttonNewest = new Button("NEW");
+        Button buttonNewest = new Button(Translations.get(Translations.SYSTEMMONITOR_NEWESTIMAGES));
         left.addComponent(buttonNewest);
+        left.setComponentAlignment(buttonNewest, Alignment.MIDDLE_CENTER);
         buttonNewest.addClickListener((Button.ClickEvent ce) -> {
             right.removeAllComponents();
             List<Picture> newestPictures = Picture.newestPictures(10, 1);
@@ -95,19 +100,41 @@ public class OnlineMonitorWindow extends Window {
             });
         });
 
-        Button buttonTop = new Button("TODOTOP");
+        Button buttonTop = new Button(Translations.get(Translations.SYSTEMMONITOR_TOPIMAGE));
         left.addComponent(buttonTop);
+        left.setComponentAlignment(buttonTop, Alignment.MIDDLE_CENTER);
         buttonTop.addClickListener((Button.ClickEvent ce) -> {
-
+            right.removeAllComponents();
+            List<Picture> topPictures = Picture.getWorldwideTopPictures(0);
+            topPictures.forEach((Picture topPicture) -> {
+                Image image = new Image();
+                image.setSource(getImage(topPicture));
+                right.addComponent(image);
+                Label votes = new Label("Id: " + topPicture.getId() + " Upvotes: " + topPicture.getUpvotes() + " Downvotes: " + topPicture.getDownvotes());
+                right.addComponent(votes);
+            });
         });
 
         HorizontalLayout textFieldAndButton = new HorizontalLayout();
+        //textFieldAndButton.setSpacing(true);
         TextField textFieldGet = new TextField();
         textFieldAndButton.addComponent(textFieldGet);
-        Button buttonGet = new Button("TODOGET");
+        Button buttonGet = new Button(Translations.get(Translations.SYSTEMMONITOR_SPECIALIMAGE));
         textFieldAndButton.addComponent(buttonGet);
         buttonGet.addClickListener((Button.ClickEvent ce) -> {
-
+            String sID = textFieldGet.getValue();
+            if (sID != null && !sID.isEmpty()) {
+                try {
+                    Picture picture = Picture.getPictureById(Integer.valueOf(sID), 0);
+                    Image image = new Image();
+                    image.setSource(getImage(picture));
+                    right.addComponent(image);
+                    Label votes = new Label("Id: " + picture.getId() + " Upvotes: " + picture.getUpvotes() + " Downvotes: " + picture.getDownvotes());
+                    right.addComponent(votes);
+                } catch (PictureLoadException ex) {
+                    Logger.getLogger(OnlineMonitorWindow.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         });
 
         gridl.addComponent(left, 0, 0);

@@ -29,6 +29,15 @@ public class RankingCalculation {
                 + votesRankingPercentage * getVoteRanking(picture.getUpvotes(), picture.getDownvotes());
         return ranking;
     }
+    
+    public static int calculateWorldwideRanking(Picture picture){
+        int timeRankingPercentage = 20;
+        int votesRankingPercentage = 80;
+        int ranking;
+        ranking = timeRankingPercentage * getTimeRanking(Utils.mergeDates(picture.getUploadDate(), picture.getUploadTime()))
+                + votesRankingPercentage * getVoteRanking(picture.getUpvotes(), picture.getDownvotes());
+        return ranking;
+    }
 
     private static int getTimeRanking(Date uploadDate) {
         Date timestamp = new Date();

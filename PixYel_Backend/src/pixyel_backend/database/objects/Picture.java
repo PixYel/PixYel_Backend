@@ -32,7 +32,7 @@ import static pixyel_backend.database.objects.Comment.getCommentsForPicutre;
  * @author Da_Groove & Yannick
  */
 public class Picture {
-
+    
     private final int id;
     private String data;
     private int ranking;
@@ -77,8 +77,9 @@ public class Picture {
             Log.logWarning("Could not load picture for Id " + pictureId + "- rootcause:" + ex, Picture.class);
             throw new PictureLoadException();
         }
-
+        
     }
+
     /**
      * Create an picture-object by reading out all information of the picture
      * out of the database based on the given id
@@ -89,7 +90,7 @@ public class Picture {
      * the given id
      */
     public Picture(ResultSet result, int userId) throws PictureLoadException {
-            try{
+        try {
             this.id = result.getInt(Columns.ID);
             double longitude = result.getDouble(Columns.LONGITUDE);
             double latitude = result.getDouble(Columns.LATITUDE);
@@ -110,7 +111,7 @@ public class Picture {
             Log.logWarning("Could not load picture for ResultSet - rootcause:" + ex, Picture.class);
             throw new PictureLoadException();
         }
-
+        
     }
 
     /**
@@ -407,7 +408,7 @@ public class Picture {
      * location
      *
      * @param coordinate
-     * @param searchDistance
+     * @param searchDistance in km
      * @param userId
      * @return
      */
@@ -420,13 +421,47 @@ public class Picture {
             sta.setDouble(3, searchArea.get(0).getLatitude());
             sta.setDouble(4, searchArea.get(1).getLatitude());
             ResultSet result = sta.executeQuery();
-
+            
             if (result == null || !result.isBeforeFirst()) {
                 return pictureList;
             } else {
                 while (result.next()) {
                     Picture pic = Picture.getPictureById(result.getInt("id"), userId);
                     pic.setRanking(RankingCalculation.calculateRanking(pic, coordinate));
+                    pictureList.add(pic);
+                }
+            }
+        } catch (SQLException ex) {
+            Log.logError(ex.toString(), User.class);
+            return pictureList;
+        } catch (PictureLoadException ex) {
+            Log.logWarning(ex.getMessage(), User.class);
+        }
+        pictureList.sort((Picture pic1, Picture pic2) -> Integer.compare(pic1.getRanking(), pic2.getRanking()));
+        if (pictureList.size() > 100) {
+            return pictureList.subList(0, 99);
+        } else {
+            return pictureList;
+        }
+    }
+
+    /**
+     * Get the worldwide top pictures
+     *
+     * @param userId
+     * @return
+     */
+    public static List<Picture> getWorldwideTopPictures(int userId) {
+        List<Picture> pictureList = new LinkedList();
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT id FROM picturesInfo")) {
+            ResultSet result = sta.executeQuery();
+            
+            if (result == null || !result.isBeforeFirst()) {
+                return pictureList;
+            } else {
+                while (result.next()) {
+                    Picture pic = Picture.getPictureById(result.getInt("id"), userId);
+                    pic.setRanking(RankingCalculation.calculateWorldwideRanking(pic));
                     pictureList.add(pic);
                 }
             }
@@ -461,7 +496,7 @@ public class Picture {
         try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.ID + " FROM picturesInfo ORDER BY " + Columns.ID + " DESC LIMIT ?")) {
             sta.setInt(1, numberofPictures);
             ResultSet result = sta.executeQuery();
-
+            
             if (result == null || !result.isBeforeFirst()) {
                 return pictureList;
             } else {
@@ -514,7 +549,7 @@ public class Picture {
         }
         
         LinkedList<Comment> commentList = new LinkedList(Comment.getCommentsForPicutre(id));
-        for(Comment comment: commentList){
+        for (Comment comment : commentList) {
             try {
                 Comment.deleteComment(comment.getCommentId());
             } catch (Exception ex) {
@@ -522,7 +557,8 @@ public class Picture {
             }
         }
     }
-    public static List<Picture> getPictureByUser(int userId, int forUser){
+
+    public static List<Picture> getPictureByUser(int userId, int forUser) {
         List<Picture> allPictures = new LinkedList<>();
         try (Statement sta = MysqlConnector.getConnection().createStatement()) {
             ResultSet result = sta.executeQuery("SELECT * FROM picturesInfo WHERE " + Columns.USER_ID + " = " + userId);

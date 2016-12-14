@@ -57,7 +57,7 @@ public class SocketClient implements Runnable, Client {
             }
             raus.println(toSend);
             raus.flush();
-            Log.logDebug("Successfullly send unencrypted XML", SocketClient.class);
+            Log.logDebug("Successfullly send XML", SocketClient.class);
         } catch (IOException e) {
             if (e.toString().contains("Socket is closed")) {
                 Log.logWarning("Could not send String beacuase the socket is closed, closing the connection to " + getName() + " now: " + e, SocketClient.class);

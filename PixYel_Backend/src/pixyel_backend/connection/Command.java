@@ -95,7 +95,7 @@ public class Command {
         if (!xml.getName().equals("reply")) {
             xml = XML.createNewXML("reply").addChild(xml);
         }
-        Log.logDebug("PLAIN_TO_SEND: " + xml, SocketClient.class);
+        Log.logDebug("PLAIN_TO_SEND: " + xml, Command.class);
 
         if (client.getUserdata() != null && client.getUserdata().getPublicKey() != null) {
             try {
@@ -115,7 +115,7 @@ public class Command {
             xml = XML.createNewXML("reply").addChild(xml);
         }
         String result = xml.toString();
-        Log.logDebug("PLAIN_TO_SEND: " + result, SocketClient.class);
+        Log.logDebug("PLAIN_TO_SEND: " + result, Command.class);
         return result;
     }
 
@@ -496,8 +496,7 @@ public class Command {
     public static void disconnect(XML input, Client client) {
         if (client instanceof SocketClient) {
             SocketClient sClient = (SocketClient) client;
-            String toSend = xmlToEncryptedString(XML.createNewXML("disconnected"), sClient);
-            sClient.sendToClient(toSend);
+            sClient.sendToClient(xmlToEncryptedString(XML.createNewXML("disconnected"), sClient));
             sClient.disconnect();
         }
     }

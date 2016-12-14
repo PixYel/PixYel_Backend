@@ -8,6 +8,7 @@ package pixyel_backend.database.objects;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -74,6 +75,38 @@ public class Picture {
             this.voteStatus = userHasLikedPicture(userId, pictureId);
         } catch (Exception ex) {
             Log.logWarning("Could not load picture for Id " + pictureId + "- rootcause:" + ex, Picture.class);
+            throw new PictureLoadException();
+        }
+
+    }
+    /**
+     * Create an picture-object by reading out all information of the picture
+     * out of the database based on the given id
+     *
+     * @param result
+     * @throws PictureLoadException if there is no picture in the database for
+     * the given id
+     */
+    public Picture(ResultSet result) throws PictureLoadException {
+            try{
+            this.id = result.getInt(Columns.ID);
+            double longitude = result.getDouble(Columns.LONGITUDE);
+            double latitude = result.getDouble(Columns.LATITUDE);
+            this.coordinate = new Coordinate(longitude, latitude);
+            this.uploadDate = result.getDate(Columns.UPLOAD_DATE);
+            this.uploadTime = result.getTime(Columns.UPLOAD_DATE);
+            this.userId = result.getInt(Columns.USER_ID);
+            Log.logDebug("Loaded basic pictureInformation", Picture.class);
+            Statement sta = MysqlConnector.getConnection().createStatement();
+            result = sta.executeQuery("SELECT COUNT(*)FROM picturesVotes WHERE " + Columns.PICTURE_ID + " = " + id + " AND " + Columns.STATUS + " = 1");
+            result.next();
+            this.upvotes = result.getInt(1);
+            result = sta.executeQuery("SELECT COUNT(*)FROM picturesVotes WHERE " + Columns.PICTURE_ID + " = " + id + " AND " + Columns.STATUS + " = -1");
+            result.next();
+            this.downvotes = result.getInt(1);
+            this.voteStatus = userHasLikedPicture(userId, this.id);
+        } catch (Exception ex) {
+            Log.logWarning("Could not load picture for ResultSet - rootcause:" + ex, Picture.class);
             throw new PictureLoadException();
         }
 
@@ -458,20 +491,53 @@ public class Picture {
         } catch (Exception ex) {
             Log.logWarning("Could not delete picturesInfo " + id + " - rootcause: " + ex, Comment.class);
         }
-        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM picturesVotes, picturesData, pictureflags WHERE " + Columns.COMMENT_ID + " = ?")) {
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM picturesVotes WHERE " + Columns.PICTURE_ID + " = ?")) {
             sta.setInt(1, id);
             sta.executeUpdate();
         } catch (Exception ex) {
-            Log.logWarning("Could not delete from picturesVotes | picturesData | pictureflags " + id + " - rootcause: " + ex, Comment.class);
+            Log.logWarning("Could not delete from picturesVotes " + id + " - rootcause: " + ex, Comment.class);
         }
-
-        LinkedList<Comment> commentList = new LinkedList(getCommentsForPicutre(id));
+        
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM pictureflags WHERE " + Columns.PICTURE_ID + " = ?")) {
+            sta.setInt(1, id);
+            sta.executeUpdate();
+        } catch (Exception ex) {
+            Log.logWarning("Could not delete from pictureflags " + id + " - rootcause: " + ex, Comment.class);
+        }
+        
+        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("DELETE FROM picturesData WHERE " + Columns.PICTURE_ID + " = ?")) {
+            sta.setInt(1, id);
+            sta.executeUpdate();
+        } catch (Exception ex) {
+            Log.logWarning("Could not delete from picturesData " + id + " - rootcause: " + ex, Comment.class);
+        }
+        
+        LinkedList<Comment> commentList = new LinkedList(Comment.getCommentsForPicutre(id));
         for(Comment comment: commentList){
             try {
-                deleteComment(comment.getCommentId());
+                Comment.deleteComment(comment.getCommentId());
             } catch (Exception ex) {
                 Log.logWarning("Could not delete from Comments " + id + " - rootcause: " + ex, Comment.class);
             }
+        }
+    }
+    public static List<Picture> getPictureByUser(int userId){
+        List<Picture> allPictures = new LinkedList<>();
+        try (Statement sta = MysqlConnector.getConnection().createStatement()) {
+            ResultSet result = sta.executeQuery("SELECT * FROM picturesInfo WHERE " + Columns.USER_ID + " = " + userId);
+            if (result != null && result.isBeforeFirst()) {
+                while (result.next()) {
+                    try {
+                        allPictures.add(new Picture(result));
+                    } catch (PictureLoadException ex) {
+                        Log.logWarning(ex.getMessage(), User.class);
+                    }
+                }
+            }
+            return allPictures;
+        } catch (SQLException ex) {
+            Log.logError(ex.getMessage(), User.class);
+            return allPictures;
         }
     }
 }

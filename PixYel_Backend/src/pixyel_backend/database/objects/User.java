@@ -318,7 +318,7 @@ public class User {
      * @return
      */
     public List<Picture> getPicturesByLocation(Coordinate coordinate, int searchDistance) {
-        return Picture.getPictureByLocation(coordinate,searchDistance,this.id);
+        return Picture.getPictureByLocation(coordinate, searchDistance, this.id);
     }
 
     /**
@@ -342,9 +342,9 @@ public class User {
         for (String currentPictureIdAsString : listAsString) {
             Integer currentPictureId = Integer.valueOf(currentPictureIdAsString);
             try {
-                pictureList.put(currentPictureId,Picture.getPictureById(currentPictureId, this.id));
+                pictureList.put(currentPictureId, Picture.getPictureById(currentPictureId, this.id));
             } catch (PictureLoadException ex) {
-               pictureList.put(currentPictureId,null);
+                pictureList.put(currentPictureId, null);
             }
         }
         return pictureList;
@@ -395,7 +395,7 @@ public class User {
      *
      * @return
      */
-    public List<Integer> allLikedPictures() {
+    public List<Integer> getAllLikedPicturesIds() {
         List<Integer> allLikedPictures = new LinkedList<>();
         try (Statement sta = MysqlConnector.getConnection().createStatement()) {
             ResultSet result = sta.executeQuery("SELECT " + Columns.PICTURE_ID + " FROM picturesVotes WHERE " + Columns.USER_ID + " = " + this.id);
@@ -411,7 +411,26 @@ public class User {
             return allLikedPictures;
         }
     }
-    
+
+    /**
+     * Creates a List of all picture that were liked by the user
+     *
+     * @return
+     */
+    public List<Picture> getAllLikedPictures() {
+        List<Picture> allLikedPictures;
+        allLikedPictures = new LinkedList<>();
+        List<Integer> allLikedPicturesIds = getAllLikedPicturesIds();
+        allLikedPicturesIds.stream().forEach((currentsPictureId) -> {
+            try {
+                allLikedPictures.add(getPicture(currentsPictureId));
+            } catch (Exception e) {
+                Log.logWarning(e.getMessage(), User.class);
+            }
+        });
+        return allLikedPictures;
+    }
+
     /**
      * Returns a List which contains the newest pictures
      *

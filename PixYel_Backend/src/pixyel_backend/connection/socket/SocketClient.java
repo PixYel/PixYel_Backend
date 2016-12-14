@@ -50,7 +50,7 @@ public class SocketClient implements Runnable, Client {
 
     PrintWriter raus;
 
-    private void sendToClient(String toSend) {
+    public void sendToClient(String toSend) {
         try {
             if (raus == null) {
                 raus = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
@@ -116,7 +116,6 @@ public class SocketClient implements Runnable, Client {
      * @param expected Is the disconnect expected?
      */
     public void disconnect(boolean expected) {
-        sendToClient(XML.createNewXML("disconnected").toString());
         lookingForInput = false; //interrupts the while(true) on the inputlistener
         listener.shutdown(); //shuts the listener thread down
         clientAliveTimer.cancel(); //Shuts the timer for the client live down

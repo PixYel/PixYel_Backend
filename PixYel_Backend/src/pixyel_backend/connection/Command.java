@@ -494,7 +494,12 @@ public class Command {
      * @param client
      */
     public static void disconnect(XML input, Client client) {
-        client.disconnect();
+        if (client instanceof SocketClient) {
+            SocketClient sClient = (SocketClient) client;
+            String toSend = xmlToEncryptedString(XML.createNewXML("disconnected"), sClient);
+            sClient.sendToClient(toSend);
+            sClient.disconnect();
+        }
     }
 
 }

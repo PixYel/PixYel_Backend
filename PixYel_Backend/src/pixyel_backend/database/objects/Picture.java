@@ -614,4 +614,16 @@ public class Picture {
             Log.logError(ex.getMessage(), Picture.class);
         }
     }
+    
+    /**
+     * Removes all flags of a picture
+     * @param pictureId 
+     */
+    public static void removeAllFlagOfPicture(int pictureId) {
+        try (Statement sta = MysqlConnector.getConnection().createStatement()) {
+            sta.executeUpdate("DELETE FROM pictureflags WHERE " + Columns.PICTURE_ID + " = " + pictureId);
+        } catch (SQLException ex) {
+            Log.logError(ex.getMessage(), Picture.class);
+        }
+    }
 }

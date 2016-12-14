@@ -125,6 +125,7 @@ public class OnlineMonitorWindow extends Window {
         textFieldAndButton.addComponent(buttonGet);
         buttonGet.addClickListener((Button.ClickEvent ce) -> {
             String sID = textFieldGet.getValue();
+            right.removeAllComponents();
             if (sID != null && !sID.isEmpty()) {
                 try {
                     Picture picture = Picture.getPictureById(Integer.valueOf(sID), 0);

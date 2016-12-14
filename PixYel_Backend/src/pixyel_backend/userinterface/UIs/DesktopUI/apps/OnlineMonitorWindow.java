@@ -83,11 +83,13 @@ public class OnlineMonitorWindow extends Window {
         gridl.setSpacing(true);
 
         VerticalLayout left = new VerticalLayout();
+        left.setSpacing(true);
         VerticalLayout right = new VerticalLayout();
+        right.setSpacing(true);
 
         Button buttonNewest = new Button(Translations.get(Translations.SYSTEMMONITOR_NEWESTIMAGES));
         left.addComponent(buttonNewest);
-        left.setComponentAlignment(buttonNewest, Alignment.MIDDLE_CENTER);
+        left.setComponentAlignment(buttonNewest, Alignment.MIDDLE_LEFT);
         buttonNewest.addClickListener((Button.ClickEvent ce) -> {
             right.removeAllComponents();
             List<Picture> newestPictures = Picture.newestPictures(10, 1);
@@ -102,7 +104,7 @@ public class OnlineMonitorWindow extends Window {
 
         Button buttonTop = new Button(Translations.get(Translations.SYSTEMMONITOR_TOPIMAGE));
         left.addComponent(buttonTop);
-        left.setComponentAlignment(buttonTop, Alignment.MIDDLE_CENTER);
+        left.setComponentAlignment(buttonTop, Alignment.MIDDLE_LEFT);
         buttonTop.addClickListener((Button.ClickEvent ce) -> {
             right.removeAllComponents();
             List<Picture> topPictures = Picture.getWorldwideTopPictures(0);
@@ -136,6 +138,8 @@ public class OnlineMonitorWindow extends Window {
                 }
             }
         });
+        left.addComponent(textFieldAndButton);
+        left.setComponentAlignment(textFieldAndButton, Alignment.MIDDLE_LEFT);
 
         gridl.addComponent(left, 0, 0);
         gridl.addComponent(right, 1, 0);

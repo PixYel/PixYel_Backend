@@ -134,7 +134,8 @@ public class Command {
             Double longt = Double.valueOf(location.getFirstChild("long").getContent());
             Double lat = Double.valueOf(location.getFirstChild("lat").getContent());
             List<Picture> pictures = client.getUserdata().getPicturesByLocation(new Coordinate(longt, lat));
-
+            Collections.reverse(pictures);
+            
             XML toSend = XML.createNewXML("setItemList");
             pictures.stream().forEach((picture) -> {
                 XML item = toSend.addChild("item");

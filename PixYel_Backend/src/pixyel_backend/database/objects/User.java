@@ -437,7 +437,7 @@ public class User {
      * @param numberofPictures max 100
      * @return
      */
-    public List<Picture> newestPictures(int numberofPictures) {
+    public List<Picture> getNewestPictures(int numberofPictures) {
         return Picture.newestPictures(numberofPictures, this.id);
     }
 

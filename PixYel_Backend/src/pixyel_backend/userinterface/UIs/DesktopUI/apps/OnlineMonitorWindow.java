@@ -15,10 +15,12 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -53,7 +55,7 @@ public class OnlineMonitorWindow extends Window {
         setImmediate(true);
         setContent(getLayout());
         setCaption(" " + Translations.get(Translations.DESKTOP_ONLINE_MONITOR));
-
+        
         try {
             setIcon(new FileResource(Ressources.getRessource("desktop_system_monitor_icon_small.png")));
         } catch (Ressources.RessourceNotFoundException ex) {
@@ -81,11 +83,17 @@ public class OnlineMonitorWindow extends Window {
     public GridLayout getLayout() {
         GridLayout gridl = new GridLayout(2, 1);
         gridl.setSpacing(true);
+        gridl.setMargin(true);
 
         VerticalLayout left = new VerticalLayout();
         left.setSpacing(true);
+        left.setMargin(true);
+        
         VerticalLayout right = new VerticalLayout();
         right.setSpacing(true);
+        right.setMargin(true);
+        Panel rightPanel = new Panel(right);
+        rightPanel.setStyleName(ValoTheme.PANEL_BORDERLESS);
 
         Button buttonNewest = new Button(Translations.get(Translations.SYSTEMMONITOR_NEWESTIMAGES));
         left.addComponent(buttonNewest);
@@ -118,7 +126,7 @@ public class OnlineMonitorWindow extends Window {
         });
 
         HorizontalLayout textFieldAndButton = new HorizontalLayout();
-        //textFieldAndButton.setSpacing(true);
+        textFieldAndButton.setSpacing(true);
         TextField textFieldGet = new TextField();
         textFieldAndButton.addComponent(textFieldGet);
         Button buttonGet = new Button(Translations.get(Translations.SYSTEMMONITOR_SPECIALIMAGE));
@@ -143,7 +151,7 @@ public class OnlineMonitorWindow extends Window {
         left.setComponentAlignment(textFieldAndButton, Alignment.MIDDLE_LEFT);
 
         gridl.addComponent(left, 0, 0);
-        gridl.addComponent(right, 1, 0);
+        gridl.addComponent(rightPanel, 1, 0);
         return gridl;
     }
 

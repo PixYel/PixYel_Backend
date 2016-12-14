@@ -90,7 +90,7 @@ public class OnlineMonitorWindow extends Window {
                 Image image = new Image();
                 image.setSource(getImage(newestPicture));
                 right.addComponent(image);
-                Label votes = new Label("Upvotes: " + newestPicture.getUpvotes() + " Downvotes: " + newestPicture.getDownvotes());
+                Label votes = new Label("Id: " + newestPicture.getId() + " Upvotes: " + newestPicture.getUpvotes() + " Downvotes: " + newestPicture.getDownvotes());
                 right.addComponent(votes);
             });
         });

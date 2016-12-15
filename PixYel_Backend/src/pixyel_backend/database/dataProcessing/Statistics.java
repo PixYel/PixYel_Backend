@@ -22,10 +22,10 @@ import pixyel_backend.database.MysqlConnector;
 public class Statistics {
 
     /**
-     *
+     * 
      * @return the amount of registered user
      */
-    public static int totallyRegisteredUsers() {
+    public static int countRegisteredUsers() {
         try (Statement sta = MysqlConnector.getConnection().createStatement(); ResultSet result = sta.executeQuery("SELECT COUNT(*) AS NumberOfUser FROM users;")) {
             result.next();
             return result.getInt(1);
@@ -39,7 +39,7 @@ public class Statistics {
      *
      * @return the amount of banned users
      */
-    public static int totallyBannedUsers() {
+    public static int countBannedUsers() {
         try (Statement sta = MysqlConnector.getConnection().createStatement(); ResultSet result = sta.executeQuery("SELECT COUNT(*) AS NumberOfUser FROM users WHERE " + Columns.STATUS + " < 0;")) {
             result.next();
             return result.getInt(1);
@@ -53,7 +53,7 @@ public class Statistics {
      *
      * @return the amount of all pictures that were posted
      */
-    public static int totallyUploadedPictures() {
+    public static int countUploadedPictures() {
         try (Statement sta = MysqlConnector.getConnection().createStatement(); ResultSet result = sta.executeQuery("SELECT COUNT(*) AS NumberOfPictures FROM picturesInfo;")) {
             result.next();
             return result.getInt(1);
@@ -68,8 +68,8 @@ public class Statistics {
      *
      * @return
      */
-    public int UserRegistrationInTheLastDay() {
-        return UserRegistrationInTheLastTime(1);
+    public int UserRegistrationsDuringTheLastDay() {
+        return UserRegistrationsDuringTheLastTime(1);
     }
 
     /**
@@ -77,8 +77,8 @@ public class Statistics {
      *
      * @return
      */
-    public int UserRegistrationInTheLast7Days() {
-        return UserRegistrationInTheLastTime(7);
+    public int UserRegistrationsDuringTheLast7Days() {
+        return UserRegistrationsDuringTheLastTime(7);
     }
 
     /**
@@ -86,8 +86,8 @@ public class Statistics {
      *
      * @return
      */
-    public int UserRegistrationInTheLast30Days() {
-        return UserRegistrationInTheLastTime(30);
+    public int UserRegistrationsDuringTheLast30Days() {
+        return UserRegistrationsDuringTheLastTime(30);
     }
 
     /**
@@ -96,7 +96,7 @@ public class Statistics {
      * @param days
      * @return
      */
-    private int UserRegistrationInTheLastTime(int days) {
+    private int UserRegistrationsDuringTheLastTime(int days) {
         Instant instant = Instant.now().minus(days, ChronoUnit.DAYS);
         Timestamp currentTimestamp = Timestamp.from(instant);
         try (Statement sta = MysqlConnector.getConnection().createStatement(); ResultSet result = sta.executeQuery("SELECT COUNT(*) AS NumberOfPictures FROM users WHERE " + Columns.REGISTRATION_DATE + " > " + currentTimestamp)) {
@@ -113,8 +113,8 @@ public class Statistics {
      *
      * @return
      */
-    public int PictureUploadsInTheLastDay() {
-        return PictureUploadsInTheLastTime(1);
+    public int PictureUploadsDuringTheLastDay() {
+        return PictureUploadsDuringTheLastTime(1);
     }
 
     /**
@@ -122,8 +122,8 @@ public class Statistics {
      *
      * @return
      */
-    public int PictureUploadsInTheLast7Days() {
-        return PictureUploadsInTheLastTime(7);
+    public int PictureUploadsDuringTheLast7Days() {
+        return PictureUploadsDuringTheLastTime(7);
     }
 
     /**
@@ -131,8 +131,8 @@ public class Statistics {
      *
      * @return
      */
-    public int PictureUploadsInTheLast30Days() {
-        return PictureUploadsInTheLastTime(30);
+    public int PictureUploadsDuringTheLast30Days() {
+        return PictureUploadsDuringTheLastTime(30);
     }
 
     /**
@@ -141,7 +141,7 @@ public class Statistics {
      * @param days
      * @return
      */
-    private int PictureUploadsInTheLastTime(int days) {
+    private int PictureUploadsDuringTheLastTime(int days) {
         Instant instant = Instant.now().minus(days, ChronoUnit.DAYS);
         Timestamp currentTimestamp = Timestamp.from(instant);
         try (Statement sta = MysqlConnector.getConnection().createStatement(); ResultSet result = sta.executeQuery("SELECT COUNT(*) AS NumberOfPictures FROM picturesInfo WHERE " + Columns.UPLOAD_DATE + " > " + currentTimestamp)) {

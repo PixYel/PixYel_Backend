@@ -143,9 +143,9 @@ public class OnlineMonitorWindow extends Window {
         left.setComponentAlignment(textFieldAndButton, Alignment.MIDDLE_LEFT);
 
         TextField statistic;
-        Statistics.totallyBannedUsers();
-        Statistics.totallyRegisteredUsers();
-        Statistics.totallyUploadedPictures();
+        Statistics.countBannedUsers();
+        Statistics.countRegisteredUsers();
+        Statistics.countUploadedPictures();
         gridl.addComponent(left, 0, 0);
         gridl.addComponent(right, 1, 0);
         //gridl.setColumnExpandRatio(0, );

@@ -345,9 +345,8 @@ public class User {
      * @throws pixyel_backend.database.exceptions.FlagFailedExcpetion
      */
     public boolean hasFlaggedPicture(int id) throws FlagFailedExcpetion {
-        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM pictureflags WHERE " + Columns.PICTURE_ID + "= ?")) {
-            sta.setInt(1, id);
-            ResultSet result = sta.executeQuery();
+        try (Statement sta = MysqlConnector.getConnection().createStatement()) {
+            ResultSet result = sta.executeQuery("SELECT * FROM pictureflags WHERE " + Columns.PICTURE_ID + "=" + id + " AND " + Columns.USER_ID + " = " + this.id);
             if (result == null || !result.isBeforeFirst()) {
                 return false;
             } else {
@@ -366,9 +365,8 @@ public class User {
      * @throws pixyel_backend.database.exceptions.FlagFailedExcpetion
      */
     public boolean hasFlaggedComment(int id) throws FlagFailedExcpetion {
-        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM commentflags WHERE " + Columns.COMMENT_ID + "=?")) {
-            sta.setInt(1, id);
-            ResultSet result = sta.executeQuery();
+        try (Statement sta = MysqlConnector.getConnection().createStatement()) {
+            ResultSet result = sta.executeQuery("SELECT * FROM commentflags WHERE " + Columns.COMMENT_ID + " = " + id + " AND " + Columns.USER_ID + " = " + this.id);
             if (result == null || !result.isBeforeFirst()) {
                 return false;
             } else {

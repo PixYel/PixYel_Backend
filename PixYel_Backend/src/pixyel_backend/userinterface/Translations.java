@@ -24,8 +24,7 @@ public class Translations {
     public static final int LANGUAGE_GERMAN = -2;
     
     private static HashMap<Integer, String> french = new HashMap<>();
-
-    public static final int LANGUAGE_French = -2;
+    public static final int LANGUAGE_French = -3;
 
     //**********************************//
     //           KEYWORDS               //

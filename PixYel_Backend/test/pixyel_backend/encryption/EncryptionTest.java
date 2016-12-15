@@ -22,6 +22,7 @@ public ExpectedException thrown = ExpectedException.none();
 
     /**
      * Tests the Encryption.
+     * @throws pixyel_backend.connection.encryption.Encryption.EncryptionException
      */
     @Test
     public void testGeneratedEncryptions() throws Encryption.EncryptionException {

@@ -8,7 +8,6 @@ package pixyel_backend.database.objects;
 import java.sql.Timestamp;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;

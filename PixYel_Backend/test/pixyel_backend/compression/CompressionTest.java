@@ -17,6 +17,7 @@ public class CompressionTest {
 
     /**
      * Test of decompress method, of class Compression.
+     * @throws pixyel_backend.connection.compression.Compression.CompressionException
      */
     @Test
     public void testCompression() throws Compression.CompressionException {

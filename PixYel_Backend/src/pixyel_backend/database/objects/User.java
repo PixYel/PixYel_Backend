@@ -9,15 +9,12 @@ import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import pixyel_backend.Log;
 import pixyel_backend.database.Columns;
 import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.SqlUtils;
-import pixyel_backend.database.dataProcessing.RankingCalculation;
 import pixyel_backend.database.exceptions.CommentCreationException;
 import pixyel_backend.database.exceptions.FlagFailedExcpetion;
 import pixyel_backend.database.exceptions.PictureLoadException;
@@ -161,14 +158,15 @@ public class User {
      * creation fails
      */
     public static User addNewUser(String storeID) throws UserCreationException {
-        addUserToDb(storeID);
+        insertUser(storeID);
         return new User(storeID);
     }
 
     /**
      * Adds a user to a Database
+     * @param storeID 
      */
-    private static void addUserToDb(String storeID) throws UserCreationException {
+    private static void insertUser(String storeID) throws UserCreationException {
         try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("INSERT INTO users(" + Columns.STORE_ID + ")VALUES (?)")) {
             storeID = SqlUtils.escapeString(storeID);
             statement.setString(1, storeID);

@@ -4,6 +4,7 @@ import pixyel_backend.database.exceptions.FlagFailedExcpetion;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -165,14 +166,12 @@ public class Comment {
      */
     public static List<Comment> getCommentsForPicutre(int pictureId) {
         List<Comment> commentList = new LinkedList();
-        try (PreparedStatement sta = MysqlConnector.getConnection().prepareStatement("SELECT * FROM comments WHERE " + Columns.PICTURE_ID + " LIKE ? ORDER BY " + Columns.CREATION_DATE + " ASC")) {
-            sta.setInt(1, pictureId);
-            ResultSet resultSet = sta.executeQuery();
-            if (resultSet == null || resultSet.isBeforeFirst()) {
+        try (Statement sta = MysqlConnector.getConnection().createStatement()) {
+            ResultSet resultSet = sta.executeQuery("SELECT * FROM comments WHERE " + Columns.PICTURE_ID + " = " + pictureId);
+            if (resultSet == null) {
                 return commentList;
             }
             while (resultSet.next()) {
-                Comment comment;
                 try {
                     commentList.add(new Comment(resultSet));
                 } catch (CommentCreationException ex) {
@@ -183,7 +182,6 @@ public class Comment {
             Log.logError(ex.getMessage(), Comment.class);
         }
         return commentList;
-
     }
 
     /**

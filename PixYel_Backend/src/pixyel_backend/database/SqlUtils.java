@@ -4,6 +4,11 @@ import java.util.List;
 
 public class SqlUtils {
 
+    /**
+     * Escapes a String 
+     * @param str
+     * @return 
+     */
     public static String escapeString(String str) {
         if (str == null) {
             return null;
@@ -29,6 +34,11 @@ public class SqlUtils {
         }
     }
 
+    /**
+     * Create a "," separated StringList
+     * @param input
+     * @return 
+     */
     public static String listToSqlINString(List input) {
         StringBuilder output = new StringBuilder();
         final String highcomma = "'";

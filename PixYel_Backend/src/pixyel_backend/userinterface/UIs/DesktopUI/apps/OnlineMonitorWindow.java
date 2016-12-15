@@ -84,6 +84,10 @@ public class OnlineMonitorWindow extends Window {
         }
     }
 
+    private int state = 0;//0 = nothing, 1 = newest, 2 = top, 3 = specialImage
+    private int specialImage;
+    VerticalLayout right = new VerticalLayout();
+
     public Layout getLayout() {
         GridLayout gridl = new GridLayout(2, 1);
         gridl.setSpacing(true);
@@ -93,7 +97,6 @@ public class OnlineMonitorWindow extends Window {
         left.setSpacing(true);
         left.setMargin(true);
 
-        VerticalLayout right = new VerticalLayout();
         right.setSpacing(true);
         right.setMargin(true);
         right.setSizeUndefined();
@@ -102,6 +105,7 @@ public class OnlineMonitorWindow extends Window {
         left.addComponent(buttonNewest);
         left.setComponentAlignment(buttonNewest, Alignment.MIDDLE_LEFT);
         buttonNewest.addClickListener((Button.ClickEvent ce) -> {
+            state = 1;
             right.removeAllComponents();
             List<Picture> newestPictures = Picture.newestPictures(10, 1);
             newestPictures.forEach((Picture newestPicture) -> {
@@ -113,6 +117,7 @@ public class OnlineMonitorWindow extends Window {
         left.addComponent(buttonTop);
         left.setComponentAlignment(buttonTop, Alignment.MIDDLE_LEFT);
         buttonTop.addClickListener((Button.ClickEvent ce) -> {
+            state = 2;
             right.removeAllComponents();
             List<Picture> topPictures = Picture.getWorldwideTopPictures(1);
             topPictures.forEach((Picture topPicture) -> {
@@ -131,7 +136,9 @@ public class OnlineMonitorWindow extends Window {
             String sID = textFieldGet.getValue();
             right.removeAllComponents();
             if (sID != null && !sID.isEmpty()) {
+                state = 3;
                 try {
+                    specialImage = Integer.valueOf(sID);
                     Picture picture = Picture.getPictureById(Integer.valueOf(sID), 1);
                     addPicture(picture, right);
                 } catch (PictureLoadException ex) {
@@ -202,8 +209,32 @@ public class OnlineMonitorWindow extends Window {
         options.addComponent(flag);//TODO
         Button delete = new Button("DELETE");
         delete.setStyleName(ValoTheme.BUTTON_DANGER);
-        delete.addClickListener(clev -> ConfirmationDialog.show("Really delete image?", () -> Picture.deletePicture(picture.getId()), () -> {
-        }));//TODO
+        delete.addClickListener(clev
+                -> ConfirmationDialog.show("Really delete image?",
+                        () -> {
+                            Picture.deletePicture(picture.getId());
+                            switch (state) {
+                                case 1:
+                                    right.removeAllComponents();
+                                    List<Picture> newestPictures = Picture.newestPictures(10, 1);
+                                    newestPictures.forEach((Picture newestPicture) -> {
+                                        addPicture(newestPicture, right);
+                                    });
+                                    break;
+                                case 2:
+                                    right.removeAllComponents();
+                                    List<Picture> topPictures = Picture.getWorldwideTopPictures(1);
+                                    topPictures.forEach((Picture topPicture) -> {
+                                        addPicture(topPicture, right);
+                                    });
+                                    break;
+                                case 3:
+                                    right.removeAllComponents();
+                                    break;
+                            }
+                        },
+                        () -> {
+                        }));//TODO
         options.addComponent(delete);
         layout.addComponent(options);
     }

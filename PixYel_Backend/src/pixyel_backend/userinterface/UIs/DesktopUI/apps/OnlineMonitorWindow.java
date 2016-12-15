@@ -186,21 +186,21 @@ public class OnlineMonitorWindow extends Window {
                 if (User.getUser(1).hasFlaggedPicture(picture.getId())) {
                     flag.setCaption("Flag Item");
                     Picture.removeFlagForUser(picture.getId(), 1);
-                    options.removeComponent(votes);
-                    votes.setCaption("Id: " + picture.getId() + " Upvotes: " + picture.getUpvotes()
+                    //options.removeComponent(votes);
+                    votes.setValue("Id: " + picture.getId() + " Upvotes: " + picture.getUpvotes()
                             + " Downvotes: " + picture.getDownvotes() + " Flags: " + picture.countFlags());
-                    votes.setStyleName(ValoTheme.LABEL_LARGE);
-                    options.addComponent(votes, 0);
-                    markAsDirtyRecursive();
+                    //votes.setStyleName(ValoTheme.LABEL_LARGE);
+                    //options.addComponent(votes, 0);
+                    //markAsDirtyRecursive();
                 } else {
                     flag.setCaption("Unflag Item");
                     Picture.flagPicture(1, picture.getId());
-                    options.removeComponent(votes);
-                    votes.setCaption("Id: " + picture.getId() + " Upvotes: " + picture.getUpvotes()
+                    //options.removeComponent(votes);
+                    votes.setValue("Id: " + picture.getId() + " Upvotes: " + picture.getUpvotes()
                             + " Downvotes: " + picture.getDownvotes() + " Flags: " + picture.countFlags());
-                    votes.setStyleName(ValoTheme.LABEL_LARGE);
-                    options.addComponent(votes, 0);
-                    markAsDirtyRecursive();
+                    //votes.setStyleName(ValoTheme.LABEL_LARGE);
+                    //options.addComponent(votes, 0);
+                    //markAsDirtyRecursive();
                 }
             } catch (UserNotFoundException | UserCreationException | FlagFailedExcpetion ex) {
                 Log.logError("Could not flag item: " + ex, OnlineMonitorWindow.class);

@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import pixyel_backend.database.MysqlConnector;
 import pixyel_backend.database.exceptions.UserCreationException;
 import pixyel_backend.database.exceptions.UserNotFoundException;
 import pixyel_backend.database.objects.User;
@@ -36,6 +37,7 @@ public class CommandTest {
 
     @BeforeClass
     public static void setUpClass() {
+        MysqlConnector.useTestDB();
         try {
             dummyclient = new SocketClient(new Socket(InetAddress.getByName("sharknoon.de"), 7331));
             dummyclient.setUserdata(User.getUser(1));
@@ -181,32 +183,7 @@ public class CommandTest {
         }
     }
 
-    /**
-     * Test of upload method, of class Command.
-     */
-    @Test
-    public void testUpload() {
-        XML toTest;
-        String input = "<request>\n"
-                + "  <upload>\n"
-                + "      <data>123</data>\n"
-                + "      <long>123</long>\n"
-                + "      <lat>123</lat>\n"
-                + "  </upload>\n"
-                + "</request>";
-        try {
-            toTest = Command.upload(XML.openXML(input.replaceAll("\\n", "").replaceAll(" ", "")).getFirstChild(), dummyclient);
-
-            assertEquals("uploadSuccessful", toTest.getName());
-            assertEquals(2, toTest.getChildren().size());
-            List<String> list = toTest.getChildren().stream().map(xml -> xml.getName()).collect(Collectors.toList());
-
-            Assert.assertTrue(list.containsAll(Arrays.asList("id", "success")));
-        } catch (XML.XMLException ex) {
-            Assert.fail("Coulnt read test xml");
-        }
-    }
-
+    
     /**
      * Test of flagComment method, of class Command.
      */

@@ -13,10 +13,10 @@ import pixyel_backend.database.objects.Picture;
 public class RankingCalculation {
 
     /**
-     * Used to calculate the Ranking of a picture.
+     * Used to calculate the ranking of a picture.
      *
      * @param picture
-     * @param userCoordinate
+     * @param userCoordinate curent position of the user as coordinate
      * @return
      */
     public static int calculateRanking(Picture picture, Coordinate userCoordinate) {
@@ -30,6 +30,11 @@ public class RankingCalculation {
         return ranking;
     }
     
+    /**
+     * Calculates a wordwide ranking which is independ from the current location
+     * @param picture
+     * @return 
+     */
     public static int calculateWorldwideRanking(Picture picture){
         int timeRankingPercentage = 20;
         int votesRankingPercentage = 80;
@@ -39,6 +44,11 @@ public class RankingCalculation {
         return ranking;
     }
 
+    /**
+     * Calculates a ranking value based on the age of a picture
+     * @param uploadDate
+     * @return 
+     */
     private static int getTimeRanking(Date uploadDate) {
         Date timestamp = new Date();
         long deltaSeconds = (timestamp.getTime() - uploadDate.getTime()) / 1000;  //Time different in seconds
@@ -46,6 +56,12 @@ public class RankingCalculation {
         return timeRanking;
     }
 
+    /**
+     * Calculates a ranking value based on the distance between picture and user
+     * @param coordinate
+     * @param userCoordinate
+     * @return 
+     */
     private static int getDistanceRanking(Coordinate coordinate, Coordinate userCoordinate) {
         int distanceRanking = 0;
         long distance = coordinate.getDistance(userCoordinate);
@@ -61,10 +77,15 @@ public class RankingCalculation {
         return distanceRanking;
     }
 
+    /**
+     *  Calculates a ranking value based on the votes which were made for the current picture
+     * @param upvotes
+     * @param downvotes
+     * @return 
+     */
     private static int getVoteRanking(int upvotes, int downvotes) {
         int voteRanking;
-        //voteRanking = (int) (50 + upvotes - Math.pow(downvotes, 1.5));
-        voteRanking = upvotes-downvotes;
+        voteRanking = (int) (upvotes - Math.pow(downvotes, 1.5));
         return voteRanking;
     }
 }

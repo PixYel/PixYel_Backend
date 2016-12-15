@@ -316,7 +316,7 @@ public class User {
      * @see pixyel_backend.database.objects.Comment
      */
     public void addNewComment(String text, int refersToPicuture) throws CommentCreationException {
-        Comment.addComment(refersToPicuture, id, text);
+        Comment.insertNewComment(refersToPicuture, id, text);
     }
 
     /**
@@ -327,7 +327,7 @@ public class User {
      * @see pixyel_backend.database.objects.Picture
      */
     public int uploadPicture(String data, Coordinate coordinate) throws PictureUploadExcpetion {
-        return Picture.addNewPicture(id, data, coordinate);
+        return Picture.insertPicture(id, data, coordinate);
     }
 
     /**
@@ -335,7 +335,7 @@ public class User {
      * @throws FlagFailedExcpetion
      */
     public synchronized void flagPicture(int pictureId) throws FlagFailedExcpetion {
-        Picture.flagPic(id, pictureId);
+        Picture.flagPicture(id, pictureId);
     }
 
     /**

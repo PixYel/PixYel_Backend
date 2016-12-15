@@ -194,7 +194,7 @@ public class OnlineMonitorWindow extends Window {
                     markAsDirtyRecursive();
                 } else {
                     flag.setCaption("Unflag Item");
-                    Picture.flagPic(1, picture.getId());
+                    Picture.flagPicture(1, picture.getId());
                     options.removeComponent(votes);
                     votes.setCaption("Id: " + picture.getId() + " Upvotes: " + picture.getUpvotes()
                             + " Downvotes: " + picture.getDownvotes() + " Flags: " + picture.countFlags());

@@ -70,7 +70,7 @@ public class Picture {
             result = sta.executeQuery("SELECT COUNT(*)FROM picturesVotes WHERE " + Columns.PICTURE_ID + " = " + id + " AND " + Columns.STATUS + " = -1");
             result.next();
             this.downvotes = result.getInt(1);
-            this.voteStatus = userHasLikedPicture(userId, pictureId);
+            this.voteStatus = userHasVotedPicture(userId, pictureId);
         } catch (Exception ex) {
             Log.logWarning("Could not load picture for Id " + pictureId + "- rootcause:" + ex, Picture.class);
             throw new PictureLoadException();
@@ -103,7 +103,7 @@ public class Picture {
             result = sta.executeQuery("SELECT COUNT(*)FROM picturesVotes WHERE " + Columns.PICTURE_ID + " = " + id + " AND " + Columns.STATUS + " = -1");
             result.next();
             this.downvotes = result.getInt(1);
-            this.voteStatus = userHasLikedPicture(userId, this.id);
+            this.voteStatus = userHasVotedPicture(userId, this.id);
         } catch (SQLException ex) {
             Log.logWarning("Could not load picture for ResultSet - rootcause:" + ex, Picture.class);
             throw new PictureLoadException();
@@ -134,10 +134,10 @@ public class Picture {
      * @return
      * @throws PictureUploadExcpetion
      */
-    public static int addNewPicture(int userId, String pictureData, Coordinate coordinate) throws PictureUploadExcpetion {
+    public static int insertPicture(int userId, String pictureData, Coordinate coordinate) throws PictureUploadExcpetion {
         try {
             if (pictureData != null && pictureData.length() >= 1) {
-                int pictureId = addPictureInfoToDatabase(userId, coordinate);
+                int pictureId = insertPictureInfo(userId, coordinate);
                 pictureData = SqlUtils.escapeString(pictureData);
                 try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("INSERT INTO picturesData (" + Columns.PICTURE_ID + ", " + Columns.DATA + ") VALUES(?,?)")) {
                     statement.setInt(1, pictureId);
@@ -161,7 +161,7 @@ public class Picture {
      * @return id of the picture that was added
      * @throws SQLException
      */
-    private static synchronized int addPictureInfoToDatabase(int userId, Coordinate coordinate) throws SQLException {
+    private static synchronized int insertPictureInfo(int userId, Coordinate coordinate) throws SQLException {
         try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("INSERT INTO picturesInfo (" + Columns.LONGITUDE + ", " + Columns.LATITUDE + ", " + Columns.USER_ID + ") VALUES(?,?,?)")) {
             statement.setDouble(1, coordinate.getLongitude());
             statement.setDouble(2, coordinate.getLatitude());
@@ -177,13 +177,13 @@ public class Picture {
     }
 
     /**
-     * Adds a flag
+     * Adds a flag to a picture
      *
      * @param userId
      * @param pictureId
      * @throws FlagFailedExcpetion
      */
-    public static void flagPic(int userId, int pictureId) throws FlagFailedExcpetion {
+    public static void flagPicture(int userId, int pictureId) throws FlagFailedExcpetion {
         try (PreparedStatement insertStatement = MysqlConnector.getConnection().prepareStatement("INSERT IGNORE INTO pictureflags (" + Columns.PICTURE_ID + "," + Columns.USER_ID + ") VALUES (?,?)")) {
             insertStatement.setInt(1, pictureId);
             insertStatement.setInt(2, userId);
@@ -202,7 +202,7 @@ public class Picture {
      * @return 1 if the user has upvoted the picture, -1 if the user has
      * downvoted the picture, 0 if the user has not voted for the picture
      */
-    public static int userHasLikedPicture(int userId, int pictureId) {
+    public static int userHasVotedPicture(int userId, int pictureId) {
         try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("SELECT " + Columns.STATUS + " FROM  picturesVotes WHERE " + Columns.PICTURE_ID + " = ? AND  " + Columns.USER_ID + " = ?")) {
             statement.setInt(1, pictureId);
             statement.setInt(2, userId);
@@ -249,7 +249,7 @@ public class Picture {
     }
 
     /**
-     * Chances the vote status in the db to a new value
+     * Chances the vote status in the database to a new value
      *
      * @param pictureId
      * @param userId
@@ -268,13 +268,6 @@ public class Picture {
             Log.logError(ex.getMessage(), Picture.class);
             throw new VoteFailedException();
         }
-    }
-
-    /**
-     * @return the id
-     */
-    public int getId() {
-        return id;
     }
 
     /**
@@ -314,69 +307,6 @@ public class Picture {
             Log.logWarning("Could not load pictureData for Id" + id + " - rootcause: " + ex, Picture.class);
             throw new PictureLoadException();
         }
-    }
-
-    /**
-     * @return the uploadDate
-     */
-    public Date getUploadDate() {
-        return uploadDate;
-    }
-
-    /**
-     * @return the uploadTime
-     */
-    public Date getUploadTime() {
-        return uploadTime;
-    }
-
-    /**
-     * @return the upvotes
-     */
-    public int getUpvotes() {
-        return upvotes;
-    }
-
-    /**
-     * @return the downvotes
-     */
-    public int getDownvotes() {
-        return downvotes;
-    }
-
-    /**
-     * @return the userId
-     */
-    public int getUserId() {
-        return userId;
-    }
-
-    /**
-     * @return the ranking
-     */
-    public int getRanking() {
-        return ranking;
-    }
-
-    /**
-     * @param ranking the ranking to set
-     */
-    public void setRanking(int ranking) {
-        this.ranking = ranking;
-    }
-
-    /**
-     * @return the coordinate
-     */
-    public Coordinate getCoordinate() {
-        return coordinate;
-    }
-
-    /**
-     * @return the voteStatus
-     */
-    public int getVoteStatus() {
-        return voteStatus;
     }
 
     /**
@@ -546,13 +476,13 @@ public class Picture {
         }
 
         LinkedList<Comment> commentList = new LinkedList(Comment.getCommentsForPicutre(id));
-        for (Comment comment : commentList) {
+        commentList.stream().forEach((comment) -> {
             try {
                 Comment.deleteComment(comment.getCommentId());
             } catch (Exception ex) {
                 Log.logWarning("Could not delete from Comments " + id + " - rootcause: " + ex, Comment.class);
             }
-        }
+        });
     }
 
     /**
@@ -604,8 +534,9 @@ public class Picture {
 
     /**
      * Removes the flag of a picture for a given user
+     *
      * @param pictureId
-     * @param userId 
+     * @param userId
      */
     public static void removeFlagForUser(int pictureId, int userId) {
         try (Statement sta = MysqlConnector.getConnection().createStatement()) {
@@ -614,10 +545,11 @@ public class Picture {
             Log.logError(ex.getMessage(), Picture.class);
         }
     }
-    
+
     /**
      * Removes all flags of a picture
-     * @param pictureId 
+     *
+     * @param pictureId
      */
     public static void removeAllFlagOfPicture(int pictureId) {
         try (Statement sta = MysqlConnector.getConnection().createStatement()) {
@@ -626,4 +558,75 @@ public class Picture {
             Log.logError(ex.getMessage(), Picture.class);
         }
     }
+
+    /**
+     * @return the uploadDate
+     */
+    public Date getUploadDate() {
+        return uploadDate;
+    }
+
+    /**
+     * @return the uploadTime
+     */
+    public Date getUploadTime() {
+        return uploadTime;
+    }
+
+    /**
+     * @return the upvotes
+     */
+    public int getUpvotes() {
+        return upvotes;
+    }
+
+    /**
+     * @return the downvotes
+     */
+    public int getDownvotes() {
+        return downvotes;
+    }
+
+    /**
+     * @return the userId
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * @return the ranking
+     */
+    public int getRanking() {
+        return ranking;
+    }
+
+    /**
+     * @param ranking the ranking to set
+     */
+    public void setRanking(int ranking) {
+        this.ranking = ranking;
+    }
+
+    /**
+     * @return the coordinate
+     */
+    public Coordinate getCoordinate() {
+        return coordinate;
+    }
+
+    /**
+     * @return the voteStatus
+     */
+    public int getVoteStatus() {
+        return voteStatus;
+    }
+
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
+
 }

@@ -1,11 +1,9 @@
 package pixyel_backend.database.objects;
 
 import pixyel_backend.database.exceptions.FlagFailedExcpetion;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -115,14 +113,14 @@ public class Comment {
     }
 
     /**
-     * Insert a new comment in the Database.
+     * Insert a new comment into the database.
      *
      * @param pictureId
      * @param userId
      * @param comment
      * @throws CommentCreationException
      */
-    public static void addComment(int pictureId, int userId, String comment) throws CommentCreationException {
+    public static void insertNewComment(int pictureId, int userId, String comment) throws CommentCreationException {
         try (PreparedStatement statement = MysqlConnector.getConnection().prepareStatement("INSERT INTO comments (" + Columns.PICTURE_ID + ", " + Columns.USER_ID + ", " + Columns.TEXT + ") VALUES(?,?,?)")) {
             if (comment != null && comment.length() >= 2) {
                 comment = SqlUtils.escapeString(comment);
@@ -189,7 +187,7 @@ public class Comment {
     }
 
     /**
-     *
+     *  Removes the flag of a comment for a given user
      * @param userId
      * @param commentId
      */

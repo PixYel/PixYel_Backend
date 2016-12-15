@@ -13,6 +13,8 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -62,6 +64,13 @@ public class UserManagementWindow extends Window {
 
         try {
             List<User> allUsers = User.getAllUsers();
+            allUsers.sort((User o1, User o2) -> {
+                if (o1.getID() > o2.getID()) {
+                    return o2.getID();
+                } else {
+                    return o1.getID();
+                }
+            });
 
             for (User user : allUsers) {
                 Date regDate = new Date(user.getRegistrationDate().getTime());

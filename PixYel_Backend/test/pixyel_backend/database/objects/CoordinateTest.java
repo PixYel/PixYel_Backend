@@ -13,6 +13,9 @@ public class CoordinateTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
+    /**
+     * Test if the distancecalculation algorithm works within given specifications
+     */
     @Test
     public void testdistanceCalc() {
 

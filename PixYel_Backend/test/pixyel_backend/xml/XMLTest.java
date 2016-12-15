@@ -6,7 +6,6 @@
 package pixyel_backend.xml;
 
 import java.util.ArrayList;
-import pixyel_backend.xml.XML;
 import java.util.LinkedHashMap;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -189,15 +188,13 @@ public class XMLTest {
         toTest.addChild("item").setContent("b");
         toTest.addChild("item").setContent("c");
         ArrayList<XML> child = toTest.getChild("item");
-        for (XML xml : child) {
-            String content = xml.getContent();
+        child.stream().map((xml) -> xml.getContent()).forEach((content) -> {
             if ("a".equals(content) || "b".equals(content) || "c".equals(content)) {
                 assertTrue("Should contain the child", true);
             } else {
                 assertFalse("Child not in the line", true);
             }
-
-        }
+        });
         toTest.clearChildren();
     }
 

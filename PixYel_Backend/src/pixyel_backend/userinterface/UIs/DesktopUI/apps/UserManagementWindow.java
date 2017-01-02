@@ -64,9 +64,11 @@ public class UserManagementWindow extends Window {
             List<User> allUsers = User.getAllUsers();
             allUsers.sort((User o1, User o2) -> {
                 if (o1.getID() > o2.getID()) {
-                    return o2.getID();
-                } else {
-                    return o1.getID();
+                    return 1;
+                } else if(o1.getID() < o2.getID()){
+                    return -1;
+                } else{
+                    return 0;
                 }
             });
 

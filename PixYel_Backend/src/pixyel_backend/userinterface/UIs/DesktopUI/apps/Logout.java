@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package pixyel_backend.userinterface.UIs.DesktopUI;
+package pixyel_backend.userinterface.UIs.DesktopUI.apps;
 
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;

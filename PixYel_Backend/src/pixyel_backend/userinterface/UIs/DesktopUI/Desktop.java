@@ -5,6 +5,7 @@
  */
 package pixyel_backend.userinterface.UIs.DesktopUI;
 
+import pixyel_backend.userinterface.UIs.DesktopUI.apps.Logout;
 import pixyel_backend.userinterface.UIs.DesktopUI.apps.UserManagementWindow;
 import pixyel_backend.userinterface.UIs.DesktopUI.apps.OnlineMonitorWindow;
 import pixyel_backend.userinterface.UIs.DesktopUI.apps.ConsoleWindow;

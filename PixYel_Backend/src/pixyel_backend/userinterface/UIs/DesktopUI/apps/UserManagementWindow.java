@@ -5,7 +5,6 @@
  */
 package pixyel_backend.userinterface.UIs.DesktopUI.apps;
 
-import com.vaadin.data.Item;
 import com.vaadin.server.FileResource;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.Layout;
@@ -13,8 +12,6 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -58,6 +55,7 @@ public class UserManagementWindow extends Window {
 
         // Define two columns for the built-in container
         table.addContainerProperty("ID", Integer.class, null);
+        table.addContainerProperty("StoreID", String.class, null);
         table.addContainerProperty("Uploaded Pictures", Integer.class, null);
         table.addContainerProperty("Registration Date", DateField.class, null);
         table.addContainerProperty("Banned", Boolean.class, null);
@@ -78,6 +76,7 @@ public class UserManagementWindow extends Window {
                 // Add a few other rows using shorthand addItem()
                 table.addItem(new Object[]{
                     user.getID(),
+                    user.getStoreID(),
                     user.getOwnPictures().size(),
                     new DateField("", regDate),
                     user.isBanned()}, allUsers.indexOf(user));

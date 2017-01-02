@@ -72,7 +72,7 @@ public class Command {
                             return "";
                         default:
                             Log.logError("Client " + client.getName() + " has send a wrong command: " + xml.getName(), Command.class);
-                            return xmlToEncryptedString(error(xml.getName() + " is not a valid Command", true), client);
+                            return xmlToEncryptedString(error(xml.getName() + " is not a valid Command, uploads need to be unencrypted!", true), client);
                     }
                 } else {//unencrypted
                     switch (xml.getName()) {
@@ -134,7 +134,7 @@ public class Command {
             Double longt = Double.valueOf(location.getFirstChild("long").getContent());
             Double lat = Double.valueOf(location.getFirstChild("lat").getContent());
             List<Picture> pictures = client.getUserdata().getPicturesByLocation(new Coordinate(longt, lat));
-            
+
             XML toSend = XML.createNewXML("setItemList");
             pictures.stream().forEach((picture) -> {
                 XML item = toSend.addChild("item");
@@ -186,7 +186,7 @@ public class Command {
         });
         Log.logInfo("Successfully sending list of ItemStats sorted by date to client " + client.getName(), Command.class);
         return toSend;
-        
+
     }
 
     public static XML getItemListLikedByMe(XML input, Client client) {
@@ -229,7 +229,7 @@ public class Command {
             Log.logInfo("Successfully sending Item " + id + " to client " + client.getName(), Command.class);
             return toSend;
         } catch (Exception ex) {
-            Log.logWarning("Could not load Item by " + client.getName(), Command.class);
+            Log.logWarning("Could not load Item by " + client.getName() + ": " + ex, Command.class);
             return error("Could not send Item: " + ex, true);
         }
     }
